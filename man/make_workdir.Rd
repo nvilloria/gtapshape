@@ -2,7 +2,7 @@
 % Please edit documentation in R/make_workdir.R
 \name{make_workdir}
 \alias{make_workdir}
-\title{Setup gtapshape}
+\title{Create worning directories}
 \usage{
 make_workdir(workdir_dir = getwd())
 }

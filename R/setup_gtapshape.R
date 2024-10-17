@@ -1,5 +1,6 @@
+#' Setup gtapshape
+#'@export
 setup_gtapshape<- function() {
-
     packageStartupMessage("\n\nWelcome to gtapshape!\n")
 
     if (!dir.exists('raw_data')){

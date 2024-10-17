@@ -1,4 +1,4 @@
-#' Setup gtapshape
+#' Create worning directories
 #'
 #' This function creates directories in the user-specified locations.
 #'
