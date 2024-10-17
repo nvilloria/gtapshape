@@ -1,0 +1,139 @@
+
+!-------------------------------------------------------------------!
+!                     TABLO Input file for the                      !
+!                    GTAP-BIOMES LULC Dataset                          !
+!                                                                   !                                            
+!                          by Micah Cameron-Harp                    !
+!-------------------------------------------------------------------!
+
+!  Revised June 29th, 2024                                           !
+
+! Text between exclamation marks is a comment.                      !
+! Text between hashes (#) is labelling information.                 !
+
+!-------------------------------------------------------------------!
+!     Set default values                                            !
+!-------------------------------------------------------------------!
+
+VARIABLE (DEFAULT = LEVELS) ;
+EQUATION (DEFAULT = LEVELS) ;
+COEFFICIENT (DEFAULT = PARAMETER) ;
+FORMULA (DEFAULT = INITIAL) ;
+
+!============================================================================!
+!   Declaration of input and output files, sets and set mapping              !    
+!============================================================================!
+!        Input files  (see in folder)                                    !     
+FILE !gtaplulc       # Final GTAP land use and cover data #;!
+     !sets           # Contains all sets and mapping data for # ;!
+     !basedata       # Standard GTAP v.10 data #;!
+     gtapsets       # Standard GTAP v.10 sets #;
+     biomesets      # Sets defined by user for GTAP-BIOMES #;
+     !forestdata   DGTM raw data: timberland area,  
+                          forest carbon stock and forestry rents ;!
+
+FILE (TEXT) lulc_lcov # input data on land cover for the model # ;
+FILE (TEXT) lulc_qcrop # input data on crop production for the model # ;
+FILE (TEXT) lulc_vcrop # input data on value of crop production for the model # ;
+FILE (TEXT) lulc_acrop # input data on crop harvested area for the model # ;
+FILE (TEXT) lulc_qlstk # input data on livestock production for the model # ;
+FILE (TEXT) lulc_vlstk # input data on value of livestock production for the model # ;
+
+!        Output files (see out folder)                                      !
+FILE 
+     (NEW) gtaplulcbio        ! gtap land use land cover data: full data ! ;
+     (NEW) gtaplulcset        ! gtap land use land cover data: set data ! ;
+     (NEW) checks             ! checks for reporting purposes ! ;
+
+!        Sets                                                               !
+SET 
+    REG    # GTAP regions # 
+           read elements from file biomesets header "REG";
+    BIO    # BIOMES #
+           read elements from file biomesets header "BIO";
+    LCOV   # GTAP 7 Land Cover Types #
+           read elements from file gtapsets header "LCOV";
+    CRP9   # GTAP 9 Crop Aggregates #
+           read elements from file gtapsets header "GCP9";
+
+! Sets specific to final land use data base                            ! 
+!      (to make the set names consistent to the previous versions)     !
+
+set FORST_GTAP # GTAP crops # (frs);
+
+subset FORST_GTAP is subset of CRP9;
+
+set CROP_GTAP    = CRP9 - FORST_GTAP;   
+
+Set LVS3 # Ruminant animals # (ctl, rmk, wol);
+
+!-------------------------------------------------------------------!
+!     Parameters                                                    !
+!-------------------------------------------------------------------!
+COEFFICIENT
+  (all,r,REG)(all,a,BIO)(all,l,LCOV) 
+        LCOVER(r,a,l)  # Land Cover (1000 hectares): land cover types #;
+  (all,r,REG)(all,a,BIO)(all,c,CROP_GTAP) 
+        QCROP(r,a,c)  # Production (1000 metric tonnes): 8 crop sectors #;
+  (all,r,REG)(all,a,BIO)(all,c,CROP_GTAP) 
+        VCROP(r,a,c) # Value of production (1000 USD): 8 crop sectors #;
+  (all,r,REG)(all,a,BIO)(all,c,CROP_GTAP) 
+        HARV(r,a,c) # Harvested Area (1000 hectares): 8 crop sectors #;
+  (all,r,REG)(all,a,BIO)(all,b,LVS3) 
+        QLIVE(r,a,b) # Livestock Production (1000 heads): 3 livestock sectors #;
+  (all,r,REG)(all,a,BIO)(all,b,LVS3) 
+        VLIVE(r,a,b) # Value of livestock production (1000 USD): 3 livestock sectors #;
+![[! Added to get 9 crops !]]!
+  (all,r,REG)(all,a,BIO)(all,c,CRP9) 
+        QCROP9(r,a,c)  # Production (1000 metric tonnes): 9 crop sectors #;
+  (all,r,REG)(all,a,BIO)(all,c,CRP9) 
+        VCROP9(r,a,c) # Value of production (1000 USD): 9 crop sectors #;
+  (all,r,REG)(all,a,BIO)(all,c,CRP9) 
+        HARV9(r,a,c) # Harvested Area (1000 hectares): 9 crop sectors #;
+
+
+!-------------------------------------------------------------------!
+!      Reads from the txt files containing data for 2004            !
+!-------------------------------------------------------------------!
+
+Read
+ LCOVER from file lulc_lcov ;
+ QCROP from file lulc_qcrop;
+ VCROP from file lulc_vcrop;
+ HARV from file lulc_acrop;
+ QLIVE from file lulc_qlstk;
+ VLIVE from file lulc_vlstk;
+
+Formula
+(all,r,REG)(all,a,BIO)(all,c,CRP9) 
+    QCROP9(r,a,c) = 0;
+(all,r,REG)(all,a,BIO)(all,c,CRP9) 
+    VCROP9(r,a,c) = 0;
+(all,r,REG)(all,a,BIO)(all,c,CRP9) 
+    HARV9(r,a,c) = 0;
+
+Formula
+(all,r,REG)(all,a,BIO)(all,c,CROP_GTAP) 
+    QCROP9(r,a,c) = QCROP(r,a,c);
+(all,r,REG)(all,a,BIO)(all,c,CROP_GTAP) 
+    VCROP9(r,a,c) = VCROP(r,a,c);
+(all,r,REG)(all,a,BIO)(all,c,CROP_GTAP) 
+    HARV9(r,a,c) = HARV(r,a,c);
+
+!-------------------------------------------------------------------!
+!      Output                                                       !
+!-------------------------------------------------------------------!
+
+Write 
+    LCOVER to file gtaplulcbio HEADER "LAND" ;
+    QCROP to file gtaplulcbio HEADER "QPD8" ;
+    VCROP to file gtaplulcbio HEADER "VPD8" ;
+    HARV to file gtaplulcbio HEADER "HA8" ;
+    QCROP9 to file gtaplulcbio HEADER "QPD9" ;
+    VCROP9 to file gtaplulcbio HEADER "VPD9" ;
+    HARV9 to file gtaplulcbio HEADER "HA9" ;
+    QLIVE to file gtaplulcbio HEADER "QLV3" ;
+    VLIVE to file gtaplulcbio HEADER "VLV3" ;
+
+!--------------end of TABLO Input file------------------------------!
+

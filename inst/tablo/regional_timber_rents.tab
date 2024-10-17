@@ -1,0 +1,179 @@
+!============================================================================!
+!    Make a national level version of the forestdata.har file                !
+!              encoded by M. V. Cameron-Harp                                 !
+!============================================================================!
+!============================================================================!
+!   Declaration of input and output files, sets and set mapping              !    
+!============================================================================!
+!        Input files  (see in folder)                                        !     
+FILE regbiosets           # Contains REG and BIO sets # ;
+     gtapsets       # Standard GTAP v.10 sets #;
+     forestdata   ! DGTM raw data: timberland area,  
+                          forest carbon stock and forestry rents !;
+
+!        Output files (see out folder)                                      !
+FILE 
+     (NEW) nat_forestdata    ! national level version of forestdata.har !;
+     (NEW) mvch_forestdata   ! see if I can ouptut forestdata.har !; 
+     (NEW) mvch_forestsets   ! see if I can output the sets !; 
+
+!        Sets                                                               !
+SET CNTRY   # All countries (226 countries) # 
+           read elements from file forestdata header "CTRY";
+    AEZ    # GTAP 18 AEZ categories #
+           read elements from file forestdata header "AZ18";    
+    REG    # GTAP regions # 
+           read elements from file regbiosets header "REG";
+
+
+!             Forestry-specific sets and mapping                             !
+set TSPEC # Tree species: coniferous, broadleaf, mixed #
+    read elements from file forestdata header "TSPC";
+
+set TVINT # Tree vintages: Ages 10 to 100 by 10 years # 
+    read elements from file forestdata header "TVIN";
+
+set TMGMT # Management types: M1 to M14 # 
+    read elements from file forestdata header "MGMT";
+
+Mapping MPCNTRYREG from CNTRY to REG;
+    read (by_elements) MPCNTRYREG from file gtapsets header "MPR2";
+
+
+set CATG_DGTM # DGTM data categories: 1. timberland area, 2. forest CO2 stock # 
+    read elements from file forestdata header "KTBS"; 
+
+WRITE (ALLSETS) to FILE mvch_forestsets ;
+
+!============================================================================!
+!   Step 5. Calculate land rents for accessible forest areas                 !     
+!============================================================================!
+
+Coefficient
+     (all,t,TSPEC)(all,a,TVINT)(all,b,AEZ)
+     (all,m,TMGMT)(all,d,CNTRY)                                TAREA(t,a,b,m,d)  
+      # Timberland area, unit: hectare #;
+     (all,t,TSPEC)(all,a,TVINT)(all,b,AEZ)     
+     (all,m,TMGMT)(all,d,CNTRY)                               TCSTOCK(t,a,b,m,d) 
+      # Carbon stock in tree, unit: million ton carbon #;
+     (all,m,TMGMT)(all,c,CNTRY)                                      TRENT(m,c)
+      # Timberland marginal land rent, unit: 2000 US$ per ha per year #;
+
+Read  TAREA    from file forestdata header "TMHA";
+      TCSTOCK  from file forestdata header "CBST";
+      TRENT    from file forestdata header "TMRN";
+
+Coefficient
+     (all,k,CATG_DGTM)(all,t,TSPEC)(all,a,TVINT)
+     (all,b,AEZ)(all,m,TMGMT)(all,d,CNTRY)                   TDGTM(k,t,a,b,m,d) 
+     # DGTM data items: 1. timberland area, 1000ha, 2. CO2 stock, m. ton #;
+     !Combines the DGTM timberland area data and forest carbon stock data into
+      one header. Also converts carbon stock to CO2 stock data (44/12) and area 
+      data into 1 ha to 1000 ha !
+     (all,t,TSPEC)(all,a,TVINT)
+     (all,b,AEZ)(all,m,TMGMT)(all,r,REG)                   TRENTTOT(t,a,b,m,r) 
+      # Total timberland rents (m 2000 USD)#; 
+
+Formula 
+(all,t,TSPEC)(all,a,TVINT)(all,b,AEZ)(all,m,TMGMT)(all,d,CNTRY)                    
+    TDGTM("TimberHA",t,a,b,m,d) = TAREA(t,a,b,m,d)/1000;
+
+(all,t,TSPEC)(all,a,TVINT)(all,b,AEZ)(all,m,TMGMT)(all,d,CNTRY)                     
+    TDGTM("CO2Stok",t,a,b,m,d) = TCSTOCK(t,a,b,m,d)*(44/12);
+
+(all,t,TSPEC)(all,a,TVINT)(all,b,AEZ)(all,m,TMGMT)(all,r,REG)                             
+    TRENTTOT(t,a,b,m,r)  
+      = sum{d,CNTRY: MPCNTRYREG(d) = r, TRENT(m,d)*TDGTM("TimberHA",t,a,b,m,d)/1000000};
+
+![[! Country specific treatments for forestry total land rents due to missing 
+     area data, rent data or negative land rents                          !]]!
+
+(all,t,TSPEC)(all,a,TVINT)(all,b,AEZ)(all,m,TMGMT)
+    TRENTTOT(t,a,b,m,"xoc") = TRENTTOT(t,a,b,m,"nzl");
+(all,t,TSPEC)(all,a,TVINT)(all,b,AEZ)(all,m,TMGMT)
+    TRENTTOT(t,a,b,m,"xna") = TRENTTOT(t,a,b,m,"mex");
+(all,t,TSPEC)(all,a,TVINT)(all,b,AEZ)(all,m,TMGMT)
+    TRENTTOT(t,a,b,m,"cyp") = TRENTTOT(t,a,b,m,"alb");
+(all,t,TSPEC)(all,a,TVINT)(all,b,AEZ)(all,m,TMGMT)
+    TRENTTOT(t,a,b,m,"mlt") = TRENTTOT(t,a,b,m,"alb");
+(all,t,TSPEC)(all,a,TVINT)(all,b,AEZ)(all,m,TMGMT)
+    TRENTTOT(t,a,b,m,"hkg") = TRENTTOT(t,a,b,m,"phl");
+(all,t,TSPEC)(all,a,TVINT)(all,b,AEZ)(all,m,TMGMT)
+    TRENTTOT(t,a,b,m,"twn") = TRENTTOT(t,a,b,m,"phl");
+(all,t,TSPEC)(all,a,TVINT)(all,b,AEZ)(all,m,TMGMT)
+    TRENTTOT(t,a,b,m,"mus") = TRENTTOT(t,a,b,m,"MDG");
+(all,t,TSPEC)(all,a,TVINT)(all,b,AEZ)(all,m,TMGMT)
+    TRENTTOT(t,a,b,m,"can") = TRENT(m,"deu")*TAREA(t,a,b,m,"can")/1000000;
+(all,t,TSPEC)(all,a,TVINT)(all,b,AEZ)(all,m,TMGMT)
+    TRENTTOT(t,a,b,m,"lux") = TRENT(m,"bel")*TAREA(t,a,b,m,"bel")/1000000;
+(all,t,TSPEC)(all,a,TVINT)(all,b,AEZ)(all,m,TMGMT)
+    TRENTTOT(t,a,b,m,"bhr") = TRENTTOT(t,a,b,m,"OMN");
+(all,t,TSPEC)(all,a,TVINT)(all,b,AEZ)(all,m,TMGMT)
+    TRENTTOT(t,a,b,m,"qat") = TRENTTOT(t,a,b,m,"OMN");
+(all,t,TSPEC)(all,a,TVINT)(all,b,AEZ)(all,m,TMGMT)
+    TRENTTOT(t,a,b,m,"xtw") = TRENTTOT(t,a,b,m,"MDG");
+
+Coefficient (all,b,AEZ)(all,r,REG)
+ AG_TMLN_RNTL(b,r) # Aggregated timber land rental #;
+Formula (all,b,AEZ)(all,r,REG)
+ AG_TMLN_RNTL(b,r) = sum{t,TSPEC,Sum{a,TVINT,Sum{m,TMGMT,TRENTTOT(t,a,b,m,r)}}};
+
+![[! Added by MVCH !]]!
+
+Coefficient (all,r,REG)
+    R_TMLN_RNTL(r) #Regional level aggregated timber land rental #;
+Formula (all,r,REG)
+    R_TMLN_RNTL(r) = Sum{b,AEZ,AG_TMLN_RNTL(b,r)};
+
+!============================================================================!
+!   Step 6. Output                                                           !     
+!============================================================================!
+!     Write to each of the output files  !
+
+! Start by writing original data !
+WRITE 
+    (all,b,AEZ)(all,r,REG)                                   AG_TMLN_RNTL(b,r) 
+        to file mvch_forestdata header "ATMB" 
+        longname "Aggregated timber land rental";
+    (all,t,TSPEC)(all,a,TVINT)(all,b,AEZ)
+    (all,m,TMGMT)(all,d,CNTRY)                                TAREA(t,a,b,m,d) 
+        to file mvch_forestdata header "TMHA" 
+        longname "Timberland area, unit: hectare ";
+    (all,t,TSPEC)(all,a,TVINT)(all,b,AEZ)     
+    (all,m,TMGMT)(all,d,CNTRY)                               TCSTOCK(t,a,b,m,d)
+        to file mvch_forestdata header "CBST" 
+        longname "Carbon stock"; 
+
+![[!
+WRITE 
+    (SET) REG TO FILE mvch_forestsets HEADER "REG" 
+        longname "GTAP v.9 Regions";
+    (SET) AEZ TO FILE mvch_forestsets HEADER "AEZ" 
+        longname "Agro-ecological Zones (AEZs)";
+    (SET) TSPEC TO FILE mvch_forestsets HEADER "TSPC"
+        longname "Tree species";
+    (SET) TVINT TO FILE mvch_forestsets HEADER "TVIN"
+        longname "Tree vintages"; 
+    (SET) TMGMT TO FILE mvch_forestsets HEADER "MGMT"
+        longname "Management types";
+!]]!
+
+
+Write 
+      (all,r,REG)                                               R_TMLN_RNTL(r) 
+            to file nat_forestdata header "RTMB" 
+            longname "Regionally aggregated timber land rents";
+
+![[! Coefficient
+     (all,t,TSPEC)(all,a,TVINT)
+     (all,m,TMGMT)(all,d,CNTRY)                                N_TAREA(t,a,m,d)  
+      # National level timberland area, unit: 1000 hectare #;
+Formula (all,t,TSPEC)(all,a,TVINT)(all,m,TMGMT)(all,d,CNTRY) 
+      N_TAREA(t,a,m,d) = Sum{b,AEZ,TAREA(t,a,b,m,d)}/1000;
+
+Coefficient
+     (all,t,TSPEC)(all,a,TVINT)    
+     (all,m,TMGMT)(all,d,CNTRY)                               N_TCSTOCK(t,a,m,d) 
+      # National level CO2 stock in tree, unit: million ton carbon #;
+Formula (all,t,TSPEC)(all,a,TVINT)(all,m,TMGMT)(all,d,CNTRY) 
+      N_TCSTOCK(t,a,m,d) = Sum{b,AEZ,TCSTOCK(t,a,b,m,d)}*(44/12); !]]!

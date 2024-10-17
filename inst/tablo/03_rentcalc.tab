@@ -1,0 +1,1522 @@
+!============================================================================!
+!    Sharing out of land rent data from standard GTAP database               !
+!    using weights constructed from GTAP Land Use and Cover data             ! 
+!              encoded by U. Baldos                                          !
+!          streamlined by E. Corong (03-2020)                                !
+!============================================================================!
+!============================================================================!
+!   Declaration of input and output files, sets and set mapping              !    
+!============================================================================!
+!        Input files  (see in folder)                                    !     
+FILE gtaplulc       # Final GTAP land use and cover data #;
+     basesets       # Contains all sets and mapping data for # ;
+     basedata       # Standard GTAP v.10 data #;
+     gtapsets       # LULC sets (biomes, land covers) #;
+     r_forestdata   # MVCH regionally aggregated forestry rents #;
+     
+
+!        Output files (see out folder)                                      !
+FILE 
+![[! ! EC: combine gtapaez and gtaplulcaez output files into one !
+ (NEW) gtapaez            ! gtap land use land cover data: partial data ! ; !]]!
+     (NEW) gtaplulcaez        ! gtap land use land cover data: full data ! ;
+     (NEW) gtaplulcset        ! gtap land use land cover data: set data ! ;
+     (NEW) checks             ! checks for reporting purposes ! ;
+!     (For_Updates) basedataaez ! ! updates for new basedate ;!
+
+!        Sets                                                               !
+![[! Edited by MVCH: Already aggregated data to choice of regions (160)
+SET CNTRY   # All countries (226 countries) # 
+           read elements from file gtapsets header "CTRY"; !]]!
+SET
+    CRP9   # GTAP 9 Crop Aggregates #
+           read elements from file gtapsets header "CRP9";
+    AEZ    # BIOME categories specified by user #
+           read elements from file gtapsets header "BIO";    
+    LCOV   # GTAP 7 Land Cover Types #
+           read elements from file gtapsets header "LCOV";
+    REG    # GTAP regions # 
+           read elements from file gtapsets header "REG";
+    ENDW_COMM # Endowment Commodities in Std. GTAP database #
+           read elements from file basesets header "H6  ";
+    TRAD_COMM # Tradable Commodities in Std. GTAP database #
+           read elements from file basesets header "H2  ";
+    CGDS_COMM # Capital Good Commodities in Std. GTAP database #
+           read elements from file basesets header "H9  ";
+    PROD_COMM # Produced Commodities in Std. GTAP database # 
+           = TRAD_COMM + CGDS_COMM;
+
+Set LAND_COVER #Land covers of interest#
+(Forestry, Unmngland, Cropland, Pastureland);
+
+Mapping (onto) LTYPE from LCOV to LAND_COVER;
+Formula LTYPE("Forest")       = "FORESTRY";
+        LTYPE("SavnGrasslnd") = "UNMNGLAND";
+        LTYPE("Shrubland")    = "UNMNGLAND";
+        LTYPE("Cropland")     = "CROPLAND";
+        LTYPE("Pastureland")  = "PASTURELAND";
+        LTYPE("Builtupland")  = "UNMNGLAND";
+        LTYPE("Otherland")    = "UNMNGLAND";  
+
+!        Special Sets and Subsets                                           !
+!             Endowments                                                    !
+set    LAND     # Land Endowments #       (Land);
+subset LAND is subset of ENDW_COMM;
+
+set NL_ENDW  # Non-Land Endowments # = ENDW_COMM - LAND;
+    AEZ_ENDW # AEZ Land Endowments + Other Endowments # = AEZ union NL_ENDW;
+! Added by EC:  June 2020   !    
+    ENDWS_COMM   # Sluggish factors # read elements from file basesets header "ENDS"; 
+Subset 
+    LAND       is subset of ENDWS_COMM;
+    ENDWS_COMM is subset of ENDW_COMM;
+set  
+    NATR    # natural resources # = ENDWS_COMM - LAND;
+    KAP     # Capital # (Capital);
+Subset 
+    KAP is subset of ENDW_COMM;
+    KAP is subset of NL_ENDW;
+! Modified by EC:  June 2020 !
+![[! KAPLAB   # Capital, Labour #    (Capital, UnSkLab, SkLab);             !]]!
+Set
+    KAPLAB   # Capital, Labour #  = ENDW_COMM - ENDWS_COMM;
+    KAPLAND  # Capital, Land #         (Capital, Land);
+
+![[! Modified by EC:  June 2020 (All endowments instead off aggregates)     !]]! 
+!     OTH_ENDW # Labour, Natural Resoc #   (UnSkLab, SkLab, NatRes); !
+    OTH_ENDW # Labour, Natural Resoc # = NL_ENDW - KAP;
+
+!             Products                                                     !
+    LIVSTK_GTAP  # GTAP Livestock raising sectors # (ctl, oap, rmk, wol);
+    NONRUMINANTS # Livestock: Non-Ruminants # (oap);
+    
+subset NONRUMINANTS is subset of LIVSTK_GTAP;
+
+set RUMINANTS = LIVSTK_GTAP-NONRUMINANTS;
+set AG_GTAP      # GTAP agri. products # = CRP9 union LIVSTK_GTAP;
+    AUGMN_AG     # GTAP agri. products: less non-ruminants # 
+                 = AG_GTAP - NONRUMINANTS;
+    
+subset CRP9 is subset of PROD_COMM;
+subset LIVSTK_GTAP is subset of TRAD_COMM;
+subset AG_GTAP is subset of TRAD_COMM;
+subset KAPLAB is subset of NL_ENDW;
+subset KAPLAND is subset of ENDW_COMM;
+
+![[! Edited by Micah Cameron-Harp. No longer needed as forestry aggregation
+        is done by separate tab file. 
+!             Forestry-specific sets and mapping                             !
+set TSPEC # Tree species: coniferous, broadleaf, mixed #
+    read elements from file forestdata header "TSPC";
+
+set TVINT # Tree vintages: Ages 10 to 100 by 10 years # 
+    read elements from file forestdata header "TVIN";
+
+set TMGMT # Management types: M1 to M14 # 
+    read elements from file forestdata header "MGMT";
+
+Mapping MPCNTRYREG from CNTRY to REG;
+    read (by_elements) MPCNTRYREG from file gtapsets header "MPCR";
+
+set CATG_DGTM # DGTM data categories: 1. timberland area, 2. forest CO2 stock # 
+    read elements from file forestdata header "KTBS";
+!]]!
+
+! Modified by EC:  June 2020 !
+![[! set NATRSC # Natural Resource # (NatRes);                              !]]!
+set NATRSC # Natural Resource # (NatlRes);
+subset NATRSC is subset of ENDW_COMM;
+set FORST_GTAP # GTAP crops # (frs);
+subset FORST_GTAP is subset of TRAD_COMM;
+subset FORST_GTAP is subset of CRP9;
+set NFORST = PROD_COMM - FORST_GTAP;
+
+! Sets specific to final land use data base                            ! 
+!      (to make the set names consistent to the previous versions)     !
+
+set AGFRS_GTAP   = AG_GTAP;
+set CROP_GTAP    = CRP9 - FORST_GTAP;   
+set LCOVER_TYPE  = LCOV; 
+!============================================================================!
+!   Step 1. Read in AEZ level crop production value data, land cover and     !
+!           national production data from standard GTAP data base then       !  
+!           identify countries with mismatch data                            !
+!============================================================================!
+
+Coefficient !    AEZ crop production data                                    !
+(all,i,REG)(all,z,AEZ)(all,j,CRP9)                       
+    VPROD9(i,z,j) # crop production values at AEZ level (in 1000 USD) #;
+(all,i,REG)(all,z,AEZ)(all,j,CRP9)                       
+    QPROD9(i,z,j) # crop production quantities at AEZ level (metric tonnes) #;
+(all,i,REG)(all,z,AEZ)(all,j,CRP9)                        
+    HARV9(i,z,j)  # harvested area at AEZ level (in 1000 ha.) #;
+(all,i,REG)(all,z,AEZ)(all,j,LCOV)                       
+    LCOVER(i,z,j) # SAGE land cover types #;
+
+Coefficient!    Standard GTAP data                                            !
+(all,e,ENDW_COMM)(all,i,REG)                                
+    EVOA_tmp(e,i)   # Endowments - Output at Agents' Prices #;
+(all,e,ENDW_COMM)(all,p,PROD_COMM)(all,i,REG)              
+    VFM_tmp(e,p,i)  # Endowments - Firms' Purchases at Market Prices #;
+(all,e,ENDW_COMM)(all,p,PROD_COMM)(all,i,REG)             
+    EVFA_tmp(e,p,i) # Endowments - Firms' Purchases at Agents' Prices #;
+
+Read 
+     VPROD9     from file gtaplulc header "VPD9";
+     QPROD9     from file gtaplulc header "QPD9";
+     HARV9      from file gtaplulc header "HA9";
+     LCOVER     from file gtaplulc header "LAND";
+     EVOA_tmp   from file basedata header "EVOA";
+     EVFA_tmp   from file basedata header "EVFA";
+     VFM_tmp    from file basedata header "VFM ";
+
+! Modified by EC: change index of REG from i to r !
+!    Checks to identify countries and crops with missing crop production
+     and cropland data !
+Coefficient  
+(all,r,REG)(all,j,CRP9)                                 
+    chk1a(r,j) # region and crops with missing AEZ level crop production value data # ; 
+(all,r,REG)(all,j,CRP9)                                 
+    chk1b(r,j) # region and crops with EVOA > 0 but missing AEZ data level # ; 
+(all,r,REG)(all,j,CRP9)                                 
+    chk1c(r,j) # region and crops with EVFA > 0 but missing AEZ data level # ;
+(all,r,REG)(all,j,CRP9)                                 
+    chk1d(r,j) # region and crops with VFM > 0 but missing AEZ data level # ;
+(all,r,REG)(all,j,CRP9)                                  
+    chk1e(r,j) # regions and crops failing the previous checks # ;
+
+Formula
+(all,r,REG)(all,j,CRP9)                                 
+    chk1a(r,j) = IF[ sum{z, AEZ, VPROD9(r,z,j)} eq 0, 1 ]; 
+    
+(all,r,REG)(all,j,CRP9)                                 
+    chk1b(r,j) = IF[ chk1a(r,j) = 1 AND EVOA_tmp("land",r) NE 0, 1]; 
+    
+(all,r,REG)(all,j,CRP9)                                 
+    chk1c(r,j) = IF[ chk1a(r,j) = 1 AND EVFA_tmp("land",j,r) NE 0, 1]; 
+    
+(all,r,REG)(all,j,CRP9)                                 
+    chk1d(r,j) = IF[ chk1a(r,j) = 1 AND VFM_tmp("land",j,r) NE 0, 1 ]; 
+    
+(all,r,REG)(all,j,CRP9)                                 
+    chk1e(r,j) = IF[chk1a(r,j) = 1 OR chk1b(r,j) = 1 OR chk1c(r,j) = 1, 1]; 
+
+Write 
+      chk1a to file checks header "ch1a" longname
+      "regions & crops with missing AEZ level";
+      chk1b to file checks header "ch1b" longname
+      "regions & crops with EVOA[land] > 0 but missing AEZ data level";
+      chk1c to file checks header "ch1c" longname
+      "regions & crops with EVFA[land] > 0 but missing AEZ data level";
+      chk1d to file checks header "ch1d" longname 
+      "regions & crops with VFM[land] > 0 but missing AEZ data level";
+      chk1e to file checks header "ch1e" longname
+      " regions and crops failing the previous checks " ;
+
+!============================================================================!
+!   Step 2. Make data corrections in the standard GTAP Data                  !  
+!           such that all land payments for the missing observations are     !
+!           reallocated to capital payments                                  !   
+!============================================================================!
+
+! Added by EC: Calculate initial tax rates before making any changes !
+zerodivide default 0.0;
+! Calculate initial income tax rates (Tor)!
+Coefficient 
+(all,e,ENDW_COMM)(all,r,REG) TOr(e,r) # Output tax rates #;
+(all,e,ENDW_COMM)(all,r,REG) INITOr(e,r) # Initial Output tax rates #;
+Formula 
+(all,e,ENDW_COMM)(all,r,REG)    
+   TOr(e,r) = IF[EVOA_tmp(e,r)>0, 
+                 100*[EVOA_tmp(e,r)/sum(j,PROD_COMM, VFM_tmp(e,j,r))-1] ];
+(all,e,ENDW_COMM)(all,r,REG) 
+   INITOr(e,r) = TOr(e,r);
+
+! Calculate initial endowment tax rates (TFr)!
+Coefficient 
+(all,i,ENDW_COMM)(all,j,PROD_COMM)(all,r,REG)
+   TFr(i,j,r) # Firms' tax rates  #;
+(all,e,ENDW_COMM)(all,j,PROD_COMM)(all,r,REG) 
+   INITFr(e,j,r) # Initial factor tax rates #;
+Formula 
+(all,i,ENDW_COMM)(all,j,PROD_COMM)(all,r,REG)
+   TFr(i,j,r) = IF[EVFA_tmp(i,j,r)>0, 
+                   100*[EVFA_tmp(i,j,r)/VFM_tmp(i,j,r)-1] ]; 
+(all,e,ENDW_COMM)(all,j,PROD_COMM)(all,r,REG) 
+   INITFr(e,j,r)= TFr(e,j,r); 
+
+Write 
+ TOr to file CHECKS header "TOr0" longname "initial TO";
+ TFr to file CHECKS header "TFr0" longname "initial TF";
+! Added by EC: End !
+
+Coefficient
+!    New headers for the corrected data                                      !
+     (all,e,ENDW_COMM)(all,i,REG)                                EVOA(e,i)
+     # Endowments - Output at Agents' Prices #;
+     (all,e,ENDW_COMM)(all,p,PROD_COMM)(all,i,REG)               VFM(e,p,i)
+     # Endowments - Firms' Purchases at Market Prices #;
+     (all,e,ENDW_COMM)(all,p,PROD_COMM)(all,i,REG)               EVFA(e,p,i)
+     # Endowments - Firms' Purchases at Agents' Prices #;
+
+!    Correct data for countries with land payment/purchase data in the 
+     standard GTAP database but no crop production data and land cover       !
+
+! Modified by EC: see EC changes after inactive code !
+![[!
+Formula 
+     (all,e,ENDW_COMM)(all,i,REG)                        EVOA(e,i) 
+     = EVOA_tmp(e,i); 
+     (all,i,REG)                                         EVOA("capital",i) 
+     = EVOA_tmp("capital",i)  
+          + IF(sum(j, CRP9, chk1e(i,j)) >= 1, EVOA_tmp("land",i));
+     (all,i,REG)                                          EVOA("land",i) 
+     = EVOA_tmp("land",i)  
+          - IF(sum(j, CRP9, chk1e(i,j)) >= 1, EVOA_tmp("land",i));
+
+     (all,e,ENDW_COMM)(all,p,PROD_COMM)(all,i,REG)        EVFA(e,p,i) 
+     = EVFA_tmp(e,p,i);
+     (all,j,CRP9)(all,i,REG)                              EVFA("capital",j,i) 
+     = EVFA_tmp("capital",j,i) 
+          + IF(chk1e(i,j) eq 1,  EVFA_tmp("land",j,i)); 
+     (all,j,CRP9)(all,i,REG)                              EVFA("land",j,i) 
+     = EVFA_tmp("land",j,i)    
+          - IF(chk1e(i,j) eq 1,  EVFA_tmp("land",j,i));
+
+     (all,e,ENDW_COMM)(all,p,PROD_COMM)(all,i,REG)       VFM(e,p,i) 
+     = VFM_tmp(e,p,i);
+    (all,j,CRP9)(all,i,REG)                              VFM("capital",j,i) 
+     = VFM_tmp("capital",j,i)
+            + IF(chk1e(i,j) eq 1,  VFM_tmp("land",j,i));
+        (all,j,CRP9)(all,i,REG)                          VFM("land",j,i) 
+     = VFM_tmp("land",j,i) 
+            - IF(chk1e(i,j) eq 1,  VFM_tmp("land",j,i));
+!]]!
+
+![[!
+
+![[! Changed (ELC May 2, 2023)  but turned off (ELC Nov 16, 2023)           !]]!
+!------------------------------------------------------------------------------- 
+ EC changes: Previously in v10, some crops have production but are not using 
+             land at all, so revised this in v11 
+             Changes made: 
+             (1) start with EVFA and VFM: do not allocate capital to land
+             (2) Calculate the value share of non-land using crop sector
+                 from total land in the standard database
+             (3) Shift some AEZ land to non-land using crop sectors based on
+                 calculated share in (2) 
+             (4) Use average AEZ share of all land using crops and apply to 
+                non-land using secto
+             (5) then proceed as before 
+-------------------------------------------------------------------------------!
+
+Set CROPS = CRP9 - "frs";
+Subset CROPS is subset of PROD_COMM;
+! (2) Calculate the value share of non-land using crop sector
+                 from total land in the standard database !
+Coefficient (all,r,REG)(all,j,CROPS)                                 
+    LANDSHR(r,j) # Land share of non-land using crop sector in standard DB #; 
+Formula (all,r,REG)(all,j,CROPS)                                 
+    LANDSHR(r,j) = VFM_tmp("land",j,r) /sum{jj,CRP9, VFM_tmp("land",jj,r)}; 
+Write LANDSHR to file CHECKS header "LSH0";
+
+! (3a) VPROD9: Shift some AEZ land to non-land using crop sectors based on
+      calculated share in (2) !
+Coefficient (all,r,REG)(all,z,AEZ)
+    VPROD9_AEZT(r,z) # Total land by AEZ type #;  
+Formula (all,r,REG)(all,z,AEZ)
+    VPROD9_AEZT(r,z) = sum{j,CROPS, VPROD9(r,z,j)};  
+
+Coefficient (all,r,REG)(all,z,AEZ)(all,j,CROPS)
+    VPROD9_SHIFT(r,z,j) # AEZ Land value allocation #;  
+Formula (all,r,REG)(all,z,AEZ)(all,j,CROPS)
+    VPROD9_SHIFT(r,z,j) = IF[chk1e(r,j)=1, LANDSHR(r,j) * VPROD9_AEZT(r,z)];
+
+Coefficient (all,r,REG)(all,z,AEZ)
+    VPROD9_SHTOT(r,z) # AEZ Land value allocated to all non-land using crops sectors #;  
+Formula (all,r,REG)(all,z,AEZ)
+    VPROD9_SHTOT(r,z) = sum{j,CROPS, VPROD9_SHIFT(r,z,j)};
+
+Formula (all,r,REG)(all,z,AEZ)(all,j,CROPS)
+    VPROD9_SHIFT(r,z,j) = IF[chk1e(r,j)=1, LANDSHR(r,j) * VPROD9_AEZT(r,z)]
+                        + IF[chk1e(r,j)=0, VPROD9(r,z,j) - [[VPROD9(r,z,j)/VPROD9_AEZT(r,z)] * VPROD9_SHTOT(r,z)]];  
+
+! (3b) QPROD9: Shift some AEZ land to non-land using crop sectors based on
+      calculated share in (2) !
+Coefficient (all,r,REG)(all,z,AEZ)
+    QPROD9_AEZT(r,z) # Total land by AEZ type #;  
+Formula (all,r,REG)(all,z,AEZ)
+    QPROD9_AEZT(r,z) = sum{j,CROPS, QPROD9(r,z,j)};  
+
+Coefficient (all,r,REG)(all,z,AEZ)(all,j,CROPS)
+    QPROD9_SHIFT(r,z,j) # AEZ Land value allocation #;  
+Formula (all,r,REG)(all,z,AEZ)(all,j,CROPS)
+    QPROD9_SHIFT(r,z,j) = IF[chk1e(r,j)=1, LANDSHR(r,j) * QPROD9_AEZT(r,z)];
+
+Coefficient (all,r,REG)(all,z,AEZ)
+    QPROD9_SHTOT(r,z) # AEZ production  allocated to all non-land using crops sectors #;  
+Formula (all,r,REG)(all,z,AEZ)
+    QPROD9_SHTOT(r,z) = sum{j,CROPS, QPROD9_SHIFT(r,z,j)};
+
+Formula (all,r,REG)(all,z,AEZ)(all,j,CROPS)
+    QPROD9_SHIFT(r,z,j) = IF[chk1e(r,j)=1, LANDSHR(r,j) * QPROD9_AEZT(r,z)]
+                        + IF[chk1e(r,j)=0, QPROD9(r,z,j) - [[QPROD9(r,z,j)/QPROD9_AEZT(r,z)] * QPROD9_SHTOT(r,z)]];  
+
+
+! (3c) HARV9: Shift some AEZ land to non-land using crop sectors based on
+      calculated share in (2) !
+Coefficient (all,r,REG)(all,z,AEZ)
+    HARV9_AEZT(r,z) # Total land by AEZ type #;  
+Formula (all,r,REG)(all,z,AEZ)
+    HARV9_AEZT(r,z) = sum{j,CROPS, HARV9(r,z,j)};  
+
+Coefficient (all,r,REG)(all,z,AEZ)(all,j,CROPS)
+    HARV9_SHIFT(r,z,j) # AEZ Land value allocation #;  
+Formula (all,r,REG)(all,z,AEZ)(all,j,CROPS)
+    HARV9_SHIFT(r,z,j) = IF[chk1e(r,j)=1, LANDSHR(r,j) * HARV9_AEZT(r,z)];
+
+Coefficient (all,r,REG)(all,z,AEZ)
+    HARV9_SHTOT(r,z) # AEZ production  allocated to all non-land using crops sectors #;  
+Formula (all,r,REG)(all,z,AEZ)
+    HARV9_SHTOT(r,z) = sum{j,CROPS, HARV9_SHIFT(r,z,j)};
+
+Formula (all,r,REG)(all,z,AEZ)(all,j,CROPS)
+    HARV9_SHIFT(r,z,j) = IF[chk1e(r,j)=1, LANDSHR(r,j) * HARV9_AEZT(r,z)]
+                        + IF[chk1e(r,j)=0, HARV9(r,z,j) - [[HARV9(r,z,j)/HARV9_AEZT(r,z)] * HARV9_SHTOT(r,z)]];  
+
+! Update previous data !
+Formula (all,r,REG)(all,z,AEZ)(all,j,CROPS)
+    VPROD9(r,z,j) = VPROD9_SHIFT(r,z,j);
+Formula (all,r,REG)(all,z,AEZ)(all,j,CROPS)
+    QPROD9(r,z,j) = QPROD9_SHIFT(r,z,j);
+Formula (all,r,REG)(all,z,AEZ)(all,j,CROPS)
+    HARV9(r,z,j) = HARV9_SHIFT(r,z,j);
+
+! Check again: After the above changes, only a few countries/regions remain 
+              (hkg,xna,hti,mlt,qat,com,mus,xtw)  !
+Formula
+(all,r,REG)(all,j,CRP9)                                 
+    chk1a(r,j) = IF[ sum{z, AEZ, VPROD9(r,z,j)} eq 0, 1 ]; 
+    
+(all,r,REG)(all,j,CRP9)                                 
+    chk1b(r,j) = IF[ chk1a(r,j) = 1 AND EVOA_tmp("land",r) NE 0, 1]; 
+    
+(all,r,REG)(all,j,CRP9)                                 
+    chk1c(r,j) = IF[ chk1a(r,j) = 1 AND EVFA_tmp("land",j,r) NE 0, 1]; 
+    
+(all,r,REG)(all,j,CRP9)                                 
+    chk1d(r,j) = IF[ chk1a(r,j) = 1 AND VFM_tmp("land",j,r) NE 0, 1 ]; 
+    
+(all,r,REG)(all,j,CRP9)                                 
+    chk1e(r,j) = IF[chk1a(r,j) = 1 OR chk1b(r,j) = 1 OR chk1c(r,j) = 1, 1]; 
+
+Write 
+      chk1a to file checks header "ck1a" longname
+      "regions & crops with missing AEZ level";
+      chk1b to file checks header "ck1b" longname
+      "regions & crops with EVOA[land] > 0 but missing AEZ data level";
+      chk1c to file checks header "ck1c" longname
+      "regions & crops with EVFA[land] > 0 but missing AEZ data level";
+      chk1d to file checks header "ck1d" longname 
+      "regions & crops with VFM[land] > 0 but missing AEZ data level";
+      chk1e to file checks header "ck1e" longname
+      " regions and crops failing the previous checks " ;
+
+![[! End of Changes (ELC May 2, 2023) turned off (ELC Nov 16, 2023)         !]]!
+!]]!
+!------------------------------------------------------------------------------- 
+ EC changes: Previously, if there are discrepancies, shifting EVOA land flows 
+             to capital cause large changes in EVOA flows.
+               
+             Changes made: 
+             - start with EVFA and VFM: allocate land flows to capital for each 
+               sector with data discrepancy.
+             - then back out EVOA -- search #EVOA 
+-------------------------------------------------------------------------------!
+Formula ! Adjust EVFA !
+(all,e,ENDW_COMM)(all,p,PROD_COMM)(all,r,REG)        
+    EVFA(e,p,r)     = EVFA_tmp(e,p,r);
+(all,j,CRP9)(all,r,REG)                              
+    EVFA("capital",j,r) = EVFA_tmp("capital",j,r) 
+                        + IF[chk1e(r,j) eq 1,  EVFA_tmp("land",j,r)] ; 
+(all,j,CRP9)(all,r,REG)                              
+    EVFA("land",j,r) = EVFA_tmp("land",j,r)    
+                     - IF[chk1e(r,j) eq 1,  EVFA_tmp("land",j,r)];
+
+Formula ! Adjust VFM !
+(all,e,ENDW_COMM)(all,p,PROD_COMM)(all,r,REG)       
+    VFM(e,p,r) = VFM_tmp(e,p,r);
+(all,j,CRP9)(all,r,REG)                              
+    VFM("capital",j,r) = VFM_tmp("capital",j,r)
+                       + IF[chk1e(r,j) eq 1,  VFM_tmp("land",j,r)];
+Formula    
+(all,j,CRP9)(all,r,REG)                          
+    VFM("land",j,r) = VFM_tmp("land",j,r) 
+                    - IF[chk1e(r,j) eq 1,  VFM_tmp("land",j,r)];
+!]]!
+
+
+! Commented formulae give the same answers as the preceding 2 formulae !
+! 
+(all,j,PROD_COMM)(all,r,REG)       
+    VFM("capital",j,r) = EVFA("capital",j,r)/[1+TFr("capital",j,r)/100];
+(all,j,PROD_COMM)(all,r,REG)       
+    VFM("land",j,r) = EVFA("land",j,r)/[1+TFr("land",j,r)/100];
+!
+
+! Check tax rates !
+Coefficient (all,e,ENDW_COMM)(all,j,PROD_COMM)(all,r,REG)
+   CHKTFr(e,j,r) # diff in TF rates before and after adjustment #;  
+Formula
+(all,e,ENDW_COMM)(all,j,PROD_COMM)(all,r,REG)
+   CHKTFr(e,j,r) = TFr(e,j,r);  
+Formula (all,e,ENDW_COMM)(all,j,PROD_COMM)(all,r,REG)
+   TFr(e,j,r) =  IF[EVFA(e,j,r)>0, 100*[EVFA(e,j,r)/VFM(e,j,r)-1]
+                   ]; 
+(all,e,ENDW_COMM)(all,j,PROD_COMM)(all,r,REG)
+   CHKTFr(e,j,r) = CHKTFr(e,j,r) - TFr(e,j,r);  
+Write 
+ TFr    to file CHECKS header "TFr1" longname "TF after land to cap allocation";
+ CHKTFr to file CHECKS header "CTF1";
+
+Coefficient
+(all,e,ENDW_COMM)(all,p,PROD_COMM)(all,r,REG) EVFA_ADJ(e,p,r) # EVFA adj difference #;        
+(all,e,ENDW_COMM)(all,p,PROD_COMM)(all,r,REG) VFM_ADJ(e,p,r)  # VFM adj difference#;
+Formula
+(all,e,ENDW_COMM)(all,p,PROD_COMM)(all,r,REG) 
+    EVFA_ADJ(e,p,r) = EVFA(e,p,r) - EVFA_tmp(e,p,r);        
+(all,e,ENDW_COMM)(all,p,PROD_COMM)(all,r,REG) 
+    VFM_ADJ(e,p,r) = VFM(e,p,r) - VFM_tmp(e,p,r);        
+Write
+ EVFA_ADJ to file CHECKS header "VFAA";
+ VFM_ADJ  to file CHECKS header "VFMA";
+ EVFA to file CHECKS header "VFA0";
+ VFM  to file CHECKS header "VFM0";
+
+! EC: Adjust EVOA -- such that initial tax rates are maintained !
+Formula 
+(all,e,ENDW_COMM)(all,r,REG)                        
+    EVOA(e,r) = EVOA_tmp(e,r); 
+
+Coefficient
+(all,e,ENDW_COMM)(all,r,REG) ENDWCOST(e,r) # total cost by endowment (adjusted VFM)#;        
+(all,e,ENDW_COMM)(all,r,REG) EVOA_ADJ(e,r) # VOA adj difference#;        
+Formula 
+(all,e,ENDW_COMM)(all,r,REG) ENDWCOST(e,r) = sum{j,PROD_COMM, VFM(e,j,r)};        
+Write 
+ ENDWCOST to file checks header "ENDC"; 
+Formula !#EVOA!
+(all,r,REG)                        
+    EVOA("land",r)    =  ENDWCOST("land",r) * [1+TOr("land",r)/100] ;
+(all,r,REG)                        
+    EVOA("capital",r) =  ENDWCOST("capital",r) * [1+TOr("capital",r)/100] ;
+Formula
+(all,e,ENDW_COMM)(all,r,REG) 
+    EVOA_ADJ(e,r)  = EVOA_tmp(e,r) - EVOA(e,r);        
+Write 
+ EVOA_ADJ to file checks header "VOAA" ;
+ EVOA     to file checks header "VOA0" ;
+
+! Calculate Output tax rates (Tor)!
+Coefficient (all,e,ENDW_COMM)(all,r,REG)
+    CHKTO(e,r) # diff in TO rates before and after adjustment #;
+Formula 
+(all,e,ENDW_COMM)(all,r,REG)
+    CHKTO(e,r) = TOr(e,r);
+(all,e,ENDW_COMM)(all,r,REG)   
+   TOr(e,r) = IF[EVOA(e,r)>0, 100*[EVOA(e,r)/sum(j,PROD_COMM,VFM(e,j,r))-1]
+                   ] ;
+(all,e,ENDW_COMM)(all,r,REG)
+    CHKTO(e,r) = CHKTO(e,r) - TOr(e,r);
+Write 
+ TOr   to file CHECKS header "TOr1" longname "TO after land to cap allocation";
+ CHKTO to file CHECKS header "CTO1";
+! Added by EC: End !
+
+
+!    Checks to how much of land payments are transferred to capital rents !
+Coefficient
+    (all,e,ENDW_COMM) (all,i,REG)                         chk2a(e,i) 
+    # Difference in EVOA after step 2 #;
+    (all,e,ENDW_COMM) (all,p,PROD_COMM) (all,i,REG)       chk2b(e,p,i) 
+    # Difference in EVFA after step 2 #;
+    (all,e,ENDW_COMM) (all,p,PROD_COMM) (all,i,REG)       chk2c(e,p,i) 
+    # Difference in VFM after step 2 #; 
+    (all,e,ENDW_COMM) (all,i,REG)                         chk2d(e,i) 
+    # check for negative EVOA #;
+    (all,e,ENDW_COMM) (all,p,PROD_COMM) (all,i,REG)       chk2e(e,p,i) 
+    # check for negative EVFA #;
+    (all,e,ENDW_COMM) (all,p,PROD_COMM) (all,i,REG)       chk2f(e,p,i) 
+    # check for negative VFM #; 
+
+Formula
+(all,e,ENDW_COMM)(all,i,REG)                         
+    chk2a(e,i)   = EVOA(e,i) - EVOA_tmp(e,i) ;
+(all,e,ENDW_COMM)(all,p,PROD_COMM)(all,i,REG)       
+    chk2b(e,p,i) = EVFA(e,p,i) - EVFA_tmp(e,p,i) ;
+(all,e,ENDW_COMM)(all,p,PROD_COMM)(all,i,REG)       
+    chk2c(e,p,i) = VFM(e,p,i) - VFM_tmp(e,p,i) ;
+(all,e,ENDW_COMM)(all,i,REG)                         
+    chk2d(e,i)   = IF[EVOA(e,i) < 0, 1];
+(all,e,ENDW_COMM)(all,p,PROD_COMM)(all,i,REG)       
+    chk2e(e,p,i) =  IF[EVFA(e,p,i) < 0, 1] ;
+(all,e,ENDW_COMM)(all,p,PROD_COMM)(all,i,REG)       
+    chk2f(e,p,i) =  IF[VFM(e,p,i) < 0, 1] ;
+
+Write 
+      chk2a to file checks header "ch2a" longname
+      "Difference bet. orig. and new EVOA after step 2";
+      chk2b to file checks header "ch2b" longname
+      "Difference bet. orig. and new EVFA after step 2";
+      chk2c to file checks header "ch2c" longname
+      "Difference bet. orig. and new VFM after step 2";
+      chk2d to file checks header "ch2d" longname
+      "Ensure EVOA is non-negative (all should be zero)";
+      chk2e to file checks header "ch2e" longname
+      "Ensure EVFA is non-negative (all should be zero)";
+      chk2f to file checks header "ch2f" longname
+      "Ensure EVFM is non-negative (all should be zero)";
+
+Write
+ EVOA_tmp to file CHECKS header "VOAT" longname " initial EVOA" ;
+ EVFA_tmp to file CHECKS header "VFAT" longname " initial EVFA" ;
+ VFM_tmp  to file CHECKS header "VFMT" longname " initial VFM" ;
+ EVOA to file CHECKS header "EVOA";
+ EVFA to file CHECKS header "EVFA";
+ VFM  to file CHECKS header "VFM";
+
+!============================================================================!
+!   Step 3. Shifting land from nonruminants into other sectors and shifting  !
+!           capital and labor from other sectors to nonruminants             ! 
+!           in order to preserve overall K/L ratio. (Based on v.7 codes)     !     
+!============================================================================!
+
+Coefficient 
+     (all,p,NONRUMINANTS)(all,r,REG)                       LRENT_NRUM(p,r)
+     # Land rents for non-ruminant livestock #;
+     (all,e,KAPLAB)(all,p,AG_GTAP)(all,r,REG)              KLRATIO_ORG(e,p,r) 
+     # Original K/L ratio #;
+     (all,e,ENDW_COMM)(all,p,PROD_COMM)(all,r,REG)         TFE(e,p,r) 
+     # Tax rates on endowment usage by firms #;
+    (all,p,AUGMN_AG)(all,r,REG)                           EVFA_ADJ_tmp(p,r) 
+     # Initial values of adjustment to land payments for selected sectors #;
+    (all,p,AUGMN_AG)(all,r,REG)                           EVFA_DFT_AG(p,r)
+     # Corrected values of adjustment to land payments for selected sectors #;
+     (all,e,KAPLAB)(all,p,AG_GTAP)(all,r,REG)              KLRATIO_NEW(e,p,r) 
+     # New K/L ratio #;
+     (all,e,KAPLAB)(all,p,AG_GTAP)(all,r,REG)              KLRATIO_DIF(e,p,r) 
+     # Difference between the K/L ratios #;  
+     (all,p,AUGMN_AG) (all,i,REG)                           EVFA_check(p,i) 
+    # Check to identify obs. whose EVFA[KapLab] > adjusted land payments #;
+!     (all,e,LAND)(all,p,AUGMN_AG)(all,r,REG)               EVFA_DIFF(e,p,r) 
+    # Difference between EVFA[KapLab] and adjusted land payments #;!
+
+Formula  
+! Calculate existing tax rates. This will be used in calculating the 
+   VFM of land given the following data corrections                   !
+(all,e,ENDW_COMM)(all,p,PROD_COMM)(all,r,REG)         
+    TFE(e,p,r)  = EVFA(e,p,r)/VFM(e,p,r);
+Write !Added by EC!
+ TFE  to file CHECKS header "TFE";
+
+Formula
+ ! Calculate the share of each non-land factors (Capital, Labor) to 
+   Total non-land factor payments in Agricultural Products           !
+(all,e,KAPLAB)(all,p,AG_GTAP)(all,r,REG)              
+    KLRATIO_ORG(e,p,r) = EVFA(e,p,r)/sum{a,KAPLAB, EVFA(a,p,r)};
+
+! Land payments in the non-ruminant sectors that will be transferred !
+(all,p,NONRUMINANTS)(all,r,REG)                       
+    LRENT_NRUM(p,r) = EVFA("land",p,r);
+
+! Calculate the amount of land payments in NON-RUMINANTS [EVFA] to 
+   share out to each AUGMENTED AGRI sectors (i.e. all agri. products 
+   less non-ruminants) using non-ruminant land payments and the ratio of 
+   land payments to total land payments in all augmented agri. sectors
+   as weights !
+(all,p,AUGMN_AG)(all,r,REG)                           
+    EVFA_ADJ_tmp(p,r) 
+         = sum{j,NONRUMINANTS, LRENT_NRUM(j,r)} * 
+           [sum{e,LAND, EVFA(e,p,r)}/sum{e,LAND, sum{i,AUGMN_AG, EVFA(e,i,r)}}];
+
+! Identify observations whose adjusted land payments in non-ruminants are 
+  greater than the payments to the non_land for the augmented agri sector !
+(all,p,AUGMN_AG) (all,r,REG)                         
+    EVFA_check(p,r) 
+         = IF[sum{e,KAPLAB, EVFA(e,p,r)} - EVFA_ADJ_tmp(p,r) <= 0, 1] ;
+
+! Corrected adjusted land payments such that 
+  EVFA[KapLab] <= adjusted land payments, it is greater than that we cap
+  the adjusted land payments to = EVFA[KapLab] !
+(all,p,AUGMN_AG) (all,r,REG)                         
+    EVFA_DFT_AG(p,r) = IF[sum{q, AUGMN_AG, EVFA_check(q,r)} = 0, EVFA_ADJ_tmp(p,r)] 
+                     + IF[sum{q, AUGMN_AG, EVFA_check(q,r)} ne 0, 0] ;
+
+! For obs. with EVFA[KapLab] <= adjusted land payments, add the shared 
+  land payments in the non-ruminant sectors to original land payment 
+  data in each augmented agricultural sector. For observations not meeting
+  this criteria, retain the old data  !
+(all,e,LAND)(all,p,AUGMN_AG)(all,r,REG)               
+    EVFA(e,p,r) 
+         = IF[EVFA_check(p,r) =  0, EVFA(e,p,r) + EVFA_DFT_AG(p,r)] +
+           IF[EVFA_check(p,r) ne 0, EVFA(e,p,r)];
+
+Formula
+! For obs. with EVFA[KapLab] > adjusted land payments, add the shared 
+  land payments in the non-ruminant sectors to capital in non-ruminant sector !
+(all,p,NONRUMINANTS)(all,r,REG)                       
+    EVFA("capital",p,r) 
+     = IF[sum{q, AUGMN_AG, EVFA_check(q,r)} ne 0, 
+                       EVFA("capital",p,r) + LRENT_NRUM(p,r)] +
+       IF[sum{q, AUGMN_AG, EVFA_check(q,r)} = 0, 
+                       EVFA("capital",p,r)];
+
+! Zero-out the land payments in the non-ruminant sector! 
+(all,e,LAND)(all,p,NONRUMINANTS)(all,r,REG)           
+    EVFA(e,p,r) = 0.0;
+
+! To preserve the total payments in AUGMENTED AGRI. sectors,
+  deduct the amount of added land payments to each non-land factor 
+  using the non-land factor payment shares as weights               !
+(all,e,KAPLAB)(all,p,AUGMN_AG)(all,r,REG)             
+    EVFA(e,p,r) = EVFA(e,p,r) - EVFA_DFT_AG(p,r) * KLRATIO_ORG(e,p,r);
+
+! To preserve the total payment in the NON-RUMINANT sector, add back the
+  amount of the shared-out land payments to each non-land factor 
+  using the non-land factor payment shares as weights               !
+(all,e,KAPLAB)(all,p,NONRUMINANTS)(all,r,REG)         
+    EVFA(e,p,r) = IF[sum{q, AUGMN_AG, EVFA_check(q,r)} = 0, 
+                            EVFA(e,p,r) + LRENT_NRUM(p,r) * KLRATIO_ORG(e,p,r)]
+                + IF[sum{q, AUGMN_AG, EVFA_check(q,r)} ne 0, 
+                            EVFA(e,p,r)];
+
+! Recalculate the new VFM of land given the adjustments above       !
+(all,e,KAPLAB)(all,p,AG_GTAP)(all,r,REG)              
+    KLRATIO_NEW(e,p,r) = EVFA(e,p,r) / sum{a,KAPLAB, EVFA(a,p,r)};
+
+
+! Changed by EC!
+Formula     
+!(all,e,LAND)(all,p,AG_GTAP)(all,r,REG)                
+    VFM(e,p,r) = EVFA(e,p,r)/ID01[TFE(e,p,r)] ;!
+(all,e,ENDW_COMM)(all,j,PROD_COMM)(all,r,REG)       
+    VFM(e,j,r) = IF[EVFA(e,j,r)>0, EVFA(e,j,r)/[1+TFr(e,j,r)/100] ];
+! End: Changed by EC!     
+
+(all,e,KAPLAB)(all,p,AG_GTAP)(all,r,REG)              
+    KLRATIO_DIF(e,p,r) = KLRATIO_NEW(e,p,r) - KLRATIO_ORG(e,p,r);
+
+write KLRATIO_ORG to file checks header "KL" 
+                  longname "Original EVFA K/L ratio";
+      KLRATIO_NEW to file checks header "KLNW" 
+                  longname "New EVFA K/L ratio";
+      KLRATIO_DIF to file checks header "KLD" 
+                  longname "Difference EVFA K/L ratio";
+
+!    Checks on the consistency of the adjusted data and the corrected data !
+
+Coefficient
+    (all,e,ENDW_COMM) (all,i,REG)                         chk3a(e,i) 
+    # Difference in EVOA after step 3 #;
+    (all,e,ENDW_COMM) (all,p,PROD_COMM) (all,i,REG)       chk3b(e,p,i) 
+    # Difference in EVFA after step 3 #;
+    (all,e,ENDW_COMM) (all,p,PROD_COMM) (all,i,REG)       chk3c(e,p,i) 
+    # Difference in VFM after step 3 #; 
+    (all,e,ENDW_COMM) (all,i,REG)                         chk3d(e,i) 
+    # check for negative EVOA #;
+    (all,e,ENDW_COMM) (all,p,PROD_COMM) (all,i,REG)       chk3e(e,p,i) 
+    # check for negative EVFA #;
+    (all,e,ENDW_COMM) (all,p,PROD_COMM) (all,i,REG)       chk3f(e,p,i) 
+    # check for negative VFM #; 
+    (all,p,AUGMN_AG) (all,i,REG)                          chk3g(p,i) 
+    # Check if EVFA[KapLab] > Adjustment factors #;  
+Formula
+(all,e,ENDW_COMM) (all,i,REG)
+    chk3a(e,i) = EVOA(e,i) - EVOA_tmp(e,i) ;
+(all,e,ENDW_COMM) (all,p,PROD_COMM) (all,i,REG)
+    chk3b(e,p,i) = EVFA(e,p,i) - EVFA_tmp(e,p,i) ;
+(all,e,ENDW_COMM) (all,p,PROD_COMM) (all,i,REG)         
+    chk3c(e,p,i) = VFM(e,p,i) - VFM_tmp(e,p,i) ;
+(all,e,ENDW_COMM) (all,i,REG)                           
+    chk3d(e,i) = IF[EVOA(e,i) < 0, 1] ;
+(all,e,ENDW_COMM) (all,p,PROD_COMM) (all,i,REG)         
+    chk3e(e,p,i) = IF[EVFA(e,p,i) < 0, 1] ;
+(all,e,ENDW_COMM) (all,p,PROD_COMM) (all,i,REG)         
+    chk3f(e,p,i) = IF[VFM(e,p,i) < 0, 1] ;
+(all,p,AUGMN_AG) (all,r,REG)                            
+    chk3g(p,r) = IF[sum{e,KAPLAB, EVFA(e,p,r)} - EVFA_DFT_AG(p,r) < 0, 1];
+Write
+      chk3a to file checks header "ch3a" longname
+      "Difference bet. orig. and new EVOA after step 3";
+      chk3b to file checks header "ch3b" longname
+      "Difference bet. orig. and new EVFA after step 3";
+      chk3c to file checks header "ch3c" longname
+      "Difference bet. orig. and new VFM after step 3";
+      chk3d to file checks header "ch3d" longname
+      "Check for negative values: EVOA (all should be zero)";
+      chk3e to file checks header "ch3e" longname
+      "Check for negative values: EVFA (all should be zero)";
+      chk3f to file checks header "ch3f" longname
+      "Check for negative values: EVFM (all should be zero)";
+      chk3g to file checks header "ch3g" longname
+      "Check if EVFA[KapLab] > adjusted land payments: after adjustment";
+      EVFA_check to file checks header "ch3h" longname
+      "Check if EVFA[KapLab] > adjusted land payments: before adjustment";
+
+! Added by EC!
+Formula 
+(all,e,ENDW_COMM)(all,j,PROD_COMM)(all,r,REG)
+   TFr(e,j,r) =  IF[EVFA(e,j,r)>0, 100*[EVFA(e,j,r)/VFM(e,j,r)-1]]; 
+(all,e,ENDW_COMM)(all,r,REG)   
+   TOr(e,r) = IF[EVOA(e,r)>0, 100*[EVOA(e,r)/sum(j,PROD_COMM,VFM(e,j,r))-1]];
+Write
+ TFr to file CHECKS header "TFr2" longname
+          "TF after land shifting from oap";
+ TOr to file CHECKS header "TOr2" longname
+          "TO after land shifting from oap";
+! Added by EC: End of changes!
+
+
+!============================================================================!
+!   Step 4. Calculate the AEZ weights to share out national-level livestock  ! 
+!============================================================================!
+
+Coefficient 
+      (all,r,REG)(all,z,AEZ)(all,p,RUMINANTS)            VLIVE3(r,z,p) 
+      # Value of production of livestock sector, at AEZ level #;
+      (all,r,REG)(all,z,AEZ)(all,p,RUMINANTS)            QLIVE3(r,z,p) 
+      # Heads of animals of livestock sector #;
+
+read VLIVE3     from file gtaplulc header "VLV3";
+     QLIVE3     from file gtaplulc header "QLV3";
+     
+!============================================================================!
+!   Step 5. Calculate land rents for accessible forest areas                 !     
+!============================================================================!
+![[!    Edited by Micah Cameron-Harp: The final coefficient in this section, 
+    AG_TMLN_RNTL, is now calculated by the "regional_timber_rents.tab" file at
+    the REGIONAL level. So all we do in this section is read in that regional 
+    data and then disaggregate it using the Land Cover shares. 
+ 
+Coefficient
+     (all,t,TSPEC)(all,a,TVINT)(all,b,AEZ)
+     (all,m,TMGMT)(all,d,CNTRY)                                TAREA(t,a,b,m,d)  
+      # Timberland area, unit: hectare #;
+     (all,t,TSPEC)(all,a,TVINT)(all,b,AEZ)     
+     (all,m,TMGMT)(all,d,CNTRY)                               TCSTOCK(t,a,b,m,d) 
+      # Carbon stock in tree, unit: million ton carbon #;
+     (all,m,TMGMT)(all,c,CNTRY)                                      TRENT(m,c)
+      # Timberland marginal land rent, unit: 2000 US$ per ha per year #;
+
+Read  TAREA    from file forestdata header "TMHA";
+      TCSTOCK  from file forestdata header "CBST";
+      TRENT    from file forestdata header "TMRN";
+
+Coefficient
+     (all,k,CATG_DGTM)(all,t,TSPEC)(all,a,TVINT)
+     (all,b,AEZ)(all,m,TMGMT)(all,d,CNTRY)                   TDGTM(k,t,a,b,m,d) 
+     # DGTM data items: 1. timberland area, 1000ha, 2. CO2 stock, m. ton #;
+     !Combines the DGTM timberland area data and forest carbon stock data into
+      one header. Also converts carbon stock to CO2 stock data (44/12) and area 
+      data into 1 ha to 1000 ha !
+     (all,t,TSPEC)(all,a,TVINT)
+     (all,b,AEZ)(all,m,TMGMT)(all,r,REG)                   TRENTTOT(t,a,b,m,r) 
+      # Total timberland rents (m 2000 USD)#; 
+
+Formula 
+(all,t,TSPEC)(all,a,TVINT)(all,b,AEZ)(all,m,TMGMT)(all,d,CNTRY)                    
+    TDGTM("TimberHA",t,a,b,m,d) = TAREA(t,a,b,m,d)/1000;
+
+(all,t,TSPEC)(all,a,TVINT)(all,b,AEZ)(all,m,TMGMT)(all,d,CNTRY)                     
+    TDGTM("CO2Stok",t,a,b,m,d) = TCSTOCK(t,a,b,m,d)*(44/12);
+
+(all,t,TSPEC)(all,a,TVINT)(all,b,AEZ)(all,m,TMGMT)(all,r,REG)                             
+    TRENTTOT(t,a,b,m,r)  
+      = sum{d,CNTRY: MPCNTRYREG(d) = r, TRENT(m,d)*TDGTM("TimberHA",t,a,b,m,d)/1000000};
+
+![[! Country specific treatments for forestry total land rents due to missing 
+     area data, rent data or negative land rents                          !]]!
+
+(all,t,TSPEC)(all,a,TVINT)(all,b,AEZ)(all,m,TMGMT)
+    TRENTTOT(t,a,b,m,"xoc") = TRENTTOT(t,a,b,m,"nzl");
+(all,t,TSPEC)(all,a,TVINT)(all,b,AEZ)(all,m,TMGMT)
+    TRENTTOT(t,a,b,m,"xna") = TRENTTOT(t,a,b,m,"mex");
+(all,t,TSPEC)(all,a,TVINT)(all,b,AEZ)(all,m,TMGMT)
+    TRENTTOT(t,a,b,m,"cyp") = TRENTTOT(t,a,b,m,"alb");
+(all,t,TSPEC)(all,a,TVINT)(all,b,AEZ)(all,m,TMGMT)
+    TRENTTOT(t,a,b,m,"mlt") = TRENTTOT(t,a,b,m,"alb");
+(all,t,TSPEC)(all,a,TVINT)(all,b,AEZ)(all,m,TMGMT)
+    TRENTTOT(t,a,b,m,"hkg") = TRENTTOT(t,a,b,m,"phl");
+(all,t,TSPEC)(all,a,TVINT)(all,b,AEZ)(all,m,TMGMT)
+    TRENTTOT(t,a,b,m,"twn") = TRENTTOT(t,a,b,m,"phl");
+(all,t,TSPEC)(all,a,TVINT)(all,b,AEZ)(all,m,TMGMT)
+    TRENTTOT(t,a,b,m,"mus") = TRENTTOT(t,a,b,m,"MDG");
+(all,t,TSPEC)(all,a,TVINT)(all,b,AEZ)(all,m,TMGMT)
+    TRENTTOT(t,a,b,m,"can") = TRENT(m,"deu")*TAREA(t,a,b,m,"can")/1000000;
+(all,t,TSPEC)(all,a,TVINT)(all,b,AEZ)(all,m,TMGMT)
+    TRENTTOT(t,a,b,m,"lux") = TRENT(m,"bel")*TAREA(t,a,b,m,"bel")/1000000;
+(all,t,TSPEC)(all,a,TVINT)(all,b,AEZ)(all,m,TMGMT)
+    TRENTTOT(t,a,b,m,"bhr") = TRENTTOT(t,a,b,m,"OMN");
+(all,t,TSPEC)(all,a,TVINT)(all,b,AEZ)(all,m,TMGMT)
+    TRENTTOT(t,a,b,m,"qat") = TRENTTOT(t,a,b,m,"OMN");
+(all,t,TSPEC)(all,a,TVINT)(all,b,AEZ)(all,m,TMGMT)
+    TRENTTOT(t,a,b,m,"xtw") = TRENTTOT(t,a,b,m,"MDG");
+
+Coefficient (all,b,AEZ)(all,r,REG)
+ AG_TMLN_RNTL(b,r) # Aggregated timber land rental #;
+Formula (all,b,AEZ)(all,r,REG)
+ AG_TMLN_RNTL(b,r) = sum{t,TSPEC,Sum{a,TVINT,Sum{m,TMGMT,TRENTTOT(t,a,b,m,r)}}}; 
+!]]!
+
+Coefficient (all,r,REG)
+    R_TMLN_RNTL(r) #Regional level aggregated timber land rental #;
+READ R_TMLN_RNTL from file r_forestdata header "RTMB";
+
+Coefficient (all,r,REG)(all,z,AEZ)(all,j,LCOV) 
+    LCOVER_BIO(r,z,j);
+READ LCOVER_BIO from file gtaplulc header "LAND";
+
+Coefficient (all,z,AEZ)(all,r,REG)
+ AG_TMLN_RNTL(z,r) # Aggregated timber land rental #;
+Formula (all,z,AEZ)(all,r,REG)
+ AG_TMLN_RNTL(z,r) = R_TMLN_RNTL(r) * LCOVER_BIO(r,z,"Forest") / sum(q, AEZ, LCOVER_BIO(r,q,"Forest"));
+
+!============================================================================!
+!   Step 7. Reallocation of land payments to forestry in the GTAP database   !  
+!           and revision of land's value added - based on TH notes           ! 
+!============================================================================!
+
+!To move NaturalResource to Land for "frs" sector:!
+![[! Modified by EC: Change all instances of "natres" to "natlres"          
+     Modified by EC:  Sep 2020 !]]!
+
+! Next 2 Formulae Commented by Erwin 
+  -- This results is 0 natural resources in each region ! 
+!Formula
+(all,r,REG) EVOA("Land",r)   = EVOA("Land",r)   + EVOA("natlres",r);
+(all,r,REG) EVOA("natlres",r) = EVOA("natlres",r) - EVOA("natlres",r);!
+
+Formula
+! EC -- changed Next line !
+![[!(all,p,FORST_GTAP)(all,r,REG)
+ EVFA("Land",p,r) = !EVFA("Land",p,r) +! EVFA("natlres",p,r);!]]!
+(all,p,FORST_GTAP)(all,r,REG)
+ EVFA("Land",p,r) = EVFA("Land",p,r) + EVFA("natlres",p,r);
+! EC: End of changes !
+
+(all,p,FORST_GTAP)(all,r,REG)
+ EVFA("natlres",p,r) = EVFA("natlres",p,r) - EVFA("natlres",p,r);
+
+![[!
+(all,p,FORST_GTAP)(all,r,REG)
+ VFM("Land",p,r) = !VFM("Land",p,r) +! VFM("natlres",p,r);
+(all,p,FORST_GTAP)(all,r,REG)
+ VFM("natlres",p,r) = VFM("natlres",p,r) - VFM("natlres",p,r);
+!]]!
+Write
+ EVFA to file CHECKS header "VFA5";
+ VFM  to file CHECKS header "VFM5";
+ EVOA to file CHECKS header "VOA5";
+
+! Added by EC -- ensure that tax rates are maintained !
+Formula
+(all,e,ENDW_COMM)(all,j,PROD_COMM)(all,r,REG)       
+    VFM(e,j,r) = EVFA(e,j,r)/[1+INITFr(e,j,r)/100];
+(all,e,ENDW_COMM)(all,r,REG)       
+    EVOA(e,r)  =  sum(j,PROD_COMM,VFM(e,j,r)) * [1+INITOr(e,r)/100] ;
+
+! Added by EC!
+Formula 
+(all,e,ENDW_COMM)(all,j,PROD_COMM)(all,r,REG)
+   TFr(e,j,r) =  IF[EVFA(e,j,r)>0, 100*[EVFA(e,j,r)/VFM(e,j,r)-1]]; 
+(all,e,ENDW_COMM)(all,r,REG)   
+   TOr(e,r) = IF[EVOA(e,r)>0, 100*[EVOA(e,r)/sum(j,PROD_COMM,VFM(e,j,r))-1]];
+Write
+ EVOA to file CHECKS header "VOA6";
+ VFM  to file CHECKS header "VFM6";
+ TFr to file CHECKS header "TFr3" longname
+          "TF after land shifting from oap";
+ TOr to file CHECKS header "TOr3" longname
+          "TO after land shifting from oap";
+! EC: End of changes!
+
+
+! So we must first read in total inputs to get total sales. !
+
+Coefficient (all,i,TRAD_COMM)(all,p,PROD_COMM)(all,r,REG) VDFA(i,p,r)
+ # domestic intermediates - Firms' Purchases at Agents' Prices #;
+Read VDFA from file basedata header "VDFA";
+
+Coefficient (all,i,TRAD_COMM)(all,p,PROD_COMM)(all,r,REG) VIFA(i,p,r)
+ # imported intermediates - Firms' Purchases at Agents' Prices #;
+Read VIFA from file basedata header "VIFA";
+
+Coefficient (all,p,PROD_COMM)(all,r,REG) VOA(p,r)
+ # value of sales, by sector #;
+Formula (all,p,PROD_COMM)(all,r,REG)
+VOA(p,r) = sum(e,ENDW_COMM, EVFA(e,p,r)) 
+    + sum(i,TRAD_COMM, [VDFA(i,p,r) + VIFA(i,p,r)]);
+
+! For now, hard-wire the share of land rents in global sales, but we should 
+    be able to compute it from Brent's data. To do so, we need to read in 
+    the accessible shares. !
+
+Coefficient FLANDSHRSALE
+ # share of forest land rents in sales, globally #;
+Formula 
+    FLANDSHRSALE = 0.38 ;
+
+Coefficient FVASHRSALES
+ # share of forest value-added in sales, globally #;
+Formula 
+    FVASHRSALES = 
+    sum(e,ENDW_COMM, sum(p,FORST_GTAP, sum(r,REG, EVFA(e,p,r))))/
+        sum(p,FORST_GTAP, sum(r,REG, VOA(p,r)));
+
+Coefficient FLANDSHRVA
+ # share of forest land rents in value-added #;
+Formula 
+    FLANDSHRVA = FLANDSHRSALE / FVASHRSALES;
+
+! Now reallocate value-added in accordance with this new share. !
+
+Coefficient (all,p,PROD_COMM)(all,r,REG) VA(p,r)
+ # value-added, by sector #;
+Formula (all,p,PROD_COMM)(all,r,REG)
+VA(p,r) = sum(e,ENDW_COMM, EVFA(e,p,r)); 
+
+Coefficient (all,e,ENDW_COMM)(all,r,REG) VOM(e,r)
+ # value of endowments at market prices #;
+Formula (all,e,ENDW_COMM)(all,r,REG)
+    VOM(e,r) = sum(j,PROD_COMM, VFM(e,j,r));
+
+Coefficient (all,e,ENDW_COMM)(all,r,REG) NEVOA(e,r)
+ # New value of endowments - Output at Agents' Prices #;
+Coefficient (all,e,ENDW_COMM)(all,r,REG) NVOM(e,r)
+ # New value of endowments - Output at Market Prices #;
+Coefficient (all,e,ENDW_COMM)(all,p,PROD_COMM)(all,r,REG) NEVFA(e,p,r)
+ # New value of endowments - Firms' Purchases at Agents' Prices #;
+Coefficient (all,e,ENDW_COMM)(all,p,PROD_COMM)(all,r,REG) NVFM(e,p,r)
+ # New value of endowments - Firms' Purchases at Market Prices #;
+
+Formula (all,p,FORST_GTAP)(all,r,REG)
+NEVFA("Land",p,r) = FLANDSHRVA * VA(p,r) ;
+Formula (all,e,NL_ENDW)(all,p,FORST_GTAP)(all,r,REG)
+NEVFA(e,p,r) = [1 - FLANDSHRVA] * VA(p,r)*
+        [EVFA(e,p,r)/sum(k,NL_ENDW, EVFA(k,p,r))]   ;
+Formula (all,e,ENDW_COMM)(all,p,NFORST)(all,r,REG)
+NEVFA(e,p,r) =  EVFA(e,p,r) ;
+
+! Now compute the new values at market prices, preserving the existing power
+    of the tax on firms' use of endowments. !
+
+Formula (all,p,FORST_GTAP)(all,r,REG)
+NVFM("Land",p,r) = NEVFA("Land",p,r) * [VFM("Land",p,r)/EVFA("Land",p,r)] ;
+Formula (all,e,NL_ENDW)(all,p,FORST_GTAP)(all,r,REG)
+NVFM(e,p,r) = NEVFA(e,p,r) * [VFM(e,p,r)/EVFA(e,p,r)] ;
+Formula (all,e,ENDW_COMM)(all,p,NFORST)(all,r,REG)
+NVFM(e,p,r) =  VFM(e,p,r) ;
+
+! Recompute VOM based on these new payments, and then compute a new value of
+    VOA assuming the same power of the tax on income earnings. !
+
+Formula (all,e,ENDW_COMM)(all,r,REG)
+    NVOM(e,r) = sum(p,PROD_COMM, NVFM(e,p,r));
+
+Formula (all,e,ENDW_COMM)(all,r,REG)
+    NEVOA(e,r) = NVOM(e,r) * [EVOA(e,r)/VOM(e,r)];
+
+! Now check this work to be sure that total costs by sector have not changed. 
+  Note that total (after tax) earnings could change if the factor or income
+  taxes vary by factor of production, since we are shifting spending across
+  factors. !
+
+Coefficient (all,p,PROD_COMM)(all,r,REG) VADIFF(p,r)
+ # deviation in value-added: Old - New #;
+Formula (all,p,PROD_COMM)(all,r,REG) 
+    VADIFF(p,r) = VA(p,r) - sum(e,ENDW_COMM, NEVFA(e,p,r)) ;
+Write VADIFF to file checks header "VADF";
+ 
+! Finally, reassign these new values in the GTAP data base. !
+
+Formula (all,e,ENDW_COMM)(all,p,FORST_GTAP)(all,r,REG)
+    EVFA(e,p,r) = NEVFA(e,p,r)  ;
+Formula (all,e,ENDW_COMM)(all,p,FORST_GTAP)(all,r,REG)
+    VFM(e,p,r) = NVFM(e,p,r);
+Formula (all,e,ENDW_COMM)(all,r,REG)
+    VOM(e,r) = NVOM(e,r) ;
+Formula (all,e,ENDW_COMM)(all,r,REG)
+    EVOA(e,r) = NEVOA(e,r) ;
+Write VOM to file CHECKS header "VOM";
+! END TH: March, 2007 -- impose outside estimate of land rents in forestry. !
+
+!============================================================================!
+!   Step 8. Share out the standard GTAP data and write the final output file !     
+!============================================================================!
+
+Coefficient 
+     (all,z,AEZ)(all,g,AG_GTAP)(all,r,REG)                WGHT_MATRIX(z,g,r) 
+     # Weights matrix to share out national land rents to each AEZ #; 
+     (all,q,AEZ_ENDW)(all,p,PROD_COMM)(all,r,REG)         LU_EVFA(q,p,r)
+     # Endowments - Firms' Purchases at Agents' Prices:with AEZ land #;
+     (all,q,AEZ_ENDW)(all,p,PROD_COMM)(all,r,REG)         LU_VFM(q,p,r)
+     # Endowments - Firms' Purchases at Market Prices: with AEZ land #;
+     (all,q,AEZ_ENDW)(all,r,REG)                          LU_EVOA(q,r)
+     # Endowments - Output at Agents' Prices: with AEZ land #;
+     (all,q,AEZ)(all,p,PROD_COMM)(all,r,REG)             AEZ_EVFA(q,p,r)
+     # Land Endowments only - Firms' Purchases at Agents' Prices #;
+     (all,q,AEZ)(all,p,PROD_COMM)(all,r,REG)             AEZ_VFM(q,p,r)
+     # Land Endowments only - Firms' Purchases at Market Prices #;
+     (all,q,AEZ)(all,r,REG)                              AEZ_EVOA(q,r)
+     # Land Endowments only - Output at Agents' Prices #;
+
+Formula
+(all,q,AEZ)(all,p,PROD_COMM)(all,r,REG)  
+    AEZ_VFM(q,p,r) = 0;
+(all,q,AEZ)(all,p,PROD_COMM)(all,r,REG)             
+    AEZ_EVFA(q,p,r) = 0;
+
+(all,z,AEZ)(all,j,CRP9)(all,r,REG)
+    WGHT_MATRIX(z,j,r) = VPROD9(r,z,j) / sum(q, AEZ, VPROD9(r,q,j));
+(all,z,AEZ)(all,l,RUMINANTS)(all,r,REG)
+    WGHT_MATRIX(z,l,r) = VLIVE3(r,z,l) / sum(q, AEZ, VLIVE3(r,q,l));
+(all,z,AEZ)(all,r,REG)
+    WGHT_MATRIX(z,"frs",r) =  AG_TMLN_RNTL(z,r) / sum(q, AEZ, AG_TMLN_RNTL(q,r));
+Write EVFA to file CHECKS header "CVFA";
+Formula
+(all,z,AEZ)(all,g,AG_GTAP)(all,r,REG)
+    LU_EVFA(z,g,r) = WGHT_MATRIX(z,g,r) * EVFA("land",g,r);
+(all,w,NL_ENDW)(all,p,PROD_COMM)(all,r,REG)
+    LU_EVFA(w,p,r) = EVFA(w,p,r);
+(all,z,AEZ)(all,g,AG_GTAP)(all,r,REG)
+    AEZ_EVFA(z,g,r) = WGHT_MATRIX(z,g,r) * EVFA("land",g,r);
+
+(all,z,AEZ)(all,g,AG_GTAP)(all,r,REG)
+    LU_VFM(z,g,r) = WGHT_MATRIX(z,g,r) * VFM("land",g,r);
+(all,w,NL_ENDW)(all,p,PROD_COMM)(all,r,REG)
+    LU_VFM(w,p,r) = VFM(w,p,r);
+(all,z,AEZ)(all,g,AG_GTAP)(all,r,REG)
+    AEZ_VFM(z,g,r) = WGHT_MATRIX(z,g,r) * VFM("land",g,r);
+
+(all,z,AEZ)(all,r,REG)
+    LU_EVOA(z,r) = EVOA("Land",r) * sum{q, AG_GTAP, LU_EVFA(z,q,r)} /
+                                    sum{d, AEZ, sum{p,AG_GTAP,LU_EVFA(d,p,r)}};
+(all,z,AEZ)(all,r,REG)
+    AEZ_EVOA(z,r) = EVOA("Land",r) * sum{q, AG_GTAP, LU_EVFA(z,q,r)} /
+                                     sum{d, AEZ, sum{p,AG_GTAP,LU_EVFA(d,p,r)}};
+(all,w,NL_ENDW)(all,r,REG)
+    LU_EVOA(w,r) = EVOA(w,r);
+
+!    Checks if sharing out process is implemented correctly                  !
+Coefficient
+   (all,e,ENDW_COMM)(all,r,REG)                             DF_LU_EVOA(e,r) 
+    # DF_EVOA of  AEZ + other endw's #; 
+   (all,e,ENDW_COMM)(all,p,AG_GTAP)(all,r,REG)              DF_LU_EVFA(e,p,r)
+    # DF_ EVFA of  AEZ + other endw's #; 
+   (all,e,ENDW_COMM)(all,p,AG_GTAP)(all,r,REG)              DF_LU_VFM(e,p,r) 
+    # DF_ VFM of  AEZ + other endw's #;
+     
+Formula
+(all,e,LAND)(all,r,REG)
+    DF_LU_EVOA(e,r)   = EVOA(e,r)   - Sum{a,AEZ, LU_EVOA(a,r)};
+(all,e,LAND)(all,p,AG_GTAP)(all,r,REG)
+    DF_LU_EVFA(e,p,r) = EVFA(e,p,r) - Sum{a,AEZ, LU_EVFA(a,p,r)};
+(all,e,LAND)(all,p,AG_GTAP)(all,r,REG)
+    DF_LU_VFM(e,p,r)  = VFM(e,p,r)  - Sum{a,AEZ, LU_VFM(a,p,r)};
+
+(all,w,NL_ENDW)(all,r,REG)
+    DF_LU_EVOA(w,r)   = EVOA(w,r)   - LU_EVOA(w,r);
+(all,w,NL_ENDW)(all,p,AG_GTAP)(all,r,REG)
+    DF_LU_EVFA(w,p,r) = EVFA(w,p,r) - LU_EVFA(w,p,r);
+(all,w,NL_ENDW)(all,p,AG_GTAP)(all,r,REG)
+    DF_LU_VFM(w,p,r)  = VFM(w,p,r)  - LU_VFM(w,p,r);
+
+Write DF_LU_EVOA to file checks header "DEVO" longname 
+"DF_EVOA between the original and shared-out data "; 
+Write DF_LU_EVFA to file checks header "DEVF" longname 
+"DF_EVFA between the original and shared-out data "; 
+Write DF_LU_VFM to file checks header "DVFM" longname 
+"DF_VFM between the original and shared-out data "; 
+
+! Added by EC !
+![[! Address imblabalance between EVOA and LU_EVOA and EVFA vs. LU_EVFA
+     This arises when  AEZ data = 0 while GTAP EVOA and EVFA still have flows
+     For V10A -- this is about $312 million and limited to hkg, sgp, vnm, xna,
+     ury, pri, tto, mlt, isr, jor, mus and bwa  () !]]!
+
+Coefficient (all,e,NL_ENDW)(all,p,AG_GTAP)(all,r,REG)              
+    NLSHREVFA(e,p,r) # share of each non-land endowment in total non-land EVFA #; 
+Formula (all,e,NL_ENDW)(all,p,AG_GTAP)(all,r,REG)              
+    NLSHREVFA(e,p,r) = EVFA(e,p,r) / sum{ee, NL_ENDW, EVFA(ee,p,r)} ; 
+Coefficient (all,e,NL_ENDW)(all,p,AG_GTAP)(all,r,REG)               
+    NLSHRVFM(e,p,r) # share of each non-land endowment in total non-land EVOA #; 
+Formula (all,e,NL_ENDW)(all,p,AG_GTAP)(all,r,REG)               
+    NLSHRVFM(e,p,r) = VFM(e,p,r) / sum{ee, NL_ENDW, VFM(ee,p,r)} ;
+ 
+Set REGLUDIFF1 # REgions with LU and GTAP flow differences # 
+       = (all,r,REG: ABS[sum{p,AG_GTAP, DF_LU_EVFA("land",p,r)}]>1 );
+
+Coefficient  (all,p,AG_GTAP)(all,r,REGLUDIFF1)
+ FLAGEVFA(p,r) # Flag non zero difference between AEZ and GTAP in EVFA #; 
+Formula (all,p,AG_GTAP)(all,r,REGLUDIFF1)
+ FLAGEVFA(p,r) = IF[ABS[DF_LU_EVFA("land",p,r)]>0.01, 1.0] ;
+
+Set REGLUDIFF2 # REgions with LU and GTAP flow differences # 
+       = (all,r,REG: ABS[sum{p,AG_GTAP, DF_LU_VFM("land",p,r)}]>1 );
+
+Coefficient  (all,p,AG_GTAP)(all,r,REGLUDIFF2)
+ FLAGVFM(p,r) # Flag non zero difference between AEZ and GTAP in VFM #; 
+Formula (all,p,AG_GTAP)(all,r,REGLUDIFF2)
+ FLAGVFM(p,r) = IF[ABS[DF_LU_VFM("land",p,r)]>0.01, 1.0] ;
+
+! Adjust EVFA !
+Formula (all,e,NL_ENDW)(all,p,AG_GTAP)(all,r,REGLUDIFF1)
+ EVFA(e,p,r) = EVFA(e,p,r) 
+             + IF[FLAGEVFA(p,r)=1.0, NLSHREVFA(e,p,r)*DF_LU_EVFA("land",p,r)];
+Formula (all,p,AG_GTAP)(all,r,REGLUDIFF1)
+ EVFA("land",p,r) = IF[FLAGEVFA(p,r) ne 1.0, EVFA("land",p,r)]; 
+
+! Adjust VFM !
+Formula (all,e,NL_ENDW)(all,p,AG_GTAP)(all,r,REGLUDIFF2)
+ VFM(e,p,r) = VFM(e,p,r) 
+             + IF[FLAGVFM(p,r)=1.0, NLSHRVFM(e,p,r)*DF_LU_VFM("land",p,r)];
+Formula (all,p,AG_GTAP)(all,r,REGLUDIFF2)
+ VFM("land",p,r) = IF[FLAGVFM(p,r) ne 1.0, VFM("land",p,r)]; 
+
+Write 
+ NVOM      to file CHECKS header "NVOM";
+ NEVFA     to file CHECKS header "NVFA";
+ NEVOA     to file CHECKS header "NVOA";
+ LU_VFM    to file CHECKS header "LVFM";
+ LU_EVFA   to file CHECKS header "LVFA";
+ LU_EVOA   to file CHECKS header "LVOA";
+ NLSHRVFM  to file CHECKS header "SVFM";
+ NLSHREVFA to file CHECKS header "SVFA";
+ EVFA      to file CHECKS header "VFAC";
+ VFM       to file CHECKS header "VFMM";
+ FLAGEVFA  to file CHECKS header "FVFA";
+ FLAGVFM   to file CHECKS header "FVFM";
+ (set)REGLUDIFF1 to file CHECKS header "RLD1";
+ (set)REGLUDIFF2 to file CHECKS header "RLD2";
+
+! Share out again !
+Formula
+(all,z,AEZ)(all,g,AG_GTAP)(all,r,REG)
+    LU_EVFA(z,g,r) = WGHT_MATRIX(z,g,r) * EVFA("land",g,r);
+(all,w,NL_ENDW)(all,p,PROD_COMM)(all,r,REG)
+    LU_EVFA(w,p,r) = EVFA(w,p,r);
+(all,z,AEZ)(all,g,AG_GTAP)(all,r,REG)
+    AEZ_EVFA(z,g,r) = WGHT_MATRIX(z,g,r) * EVFA("land",g,r);
+
+(all,z,AEZ)(all,g,AG_GTAP)(all,r,REG)
+    LU_VFM(z,g,r) = WGHT_MATRIX(z,g,r) * VFM("land",g,r);
+(all,w,NL_ENDW)(all,p,PROD_COMM)(all,r,REG)
+    LU_VFM(w,p,r) = VFM(w,p,r);
+(all,z,AEZ)(all,g,AG_GTAP)(all,r,REG)
+    AEZ_VFM(z,g,r) = WGHT_MATRIX(z,g,r) * VFM("land",g,r);
+
+(all,z,AEZ)(all,r,REG)
+    LU_EVOA(z,r) = EVOA("Land",r) * sum{q, AG_GTAP, LU_EVFA(z,q,r)} /
+                                    sum{d, AEZ, sum{p,AG_GTAP,LU_EVFA(d,p,r)}};
+(all,z,AEZ)(all,r,REG)
+    AEZ_EVOA(z,r) = EVOA("Land",r) * sum{q, AG_GTAP, LU_EVFA(z,q,r)} /
+                                     sum{d, AEZ, sum{p,AG_GTAP,LU_EVFA(d,p,r)}};
+(all,w,NL_ENDW)(all,r,REG)
+    LU_EVOA(w,r) = EVOA(w,r);
+
+Formula
+(all,e,LAND)(all,r,REG)
+    DF_LU_EVOA(e,r)   = EVOA(e,r)   - Sum{a,AEZ, LU_EVOA(a,r)};
+(all,e,LAND)(all,p,AG_GTAP)(all,r,REG)
+    DF_LU_EVFA(e,p,r) = EVFA(e,p,r) - Sum{a,AEZ, LU_EVFA(a,p,r)};
+(all,e,LAND)(all,p,AG_GTAP)(all,r,REG)
+    DF_LU_VFM(e,p,r)  = VFM(e,p,r)  - Sum{a,AEZ, LU_VFM(a,p,r)};
+
+(all,w,NL_ENDW)(all,r,REG)
+    DF_LU_EVOA(w,r)   = EVOA(w,r)   - LU_EVOA(w,r);
+(all,w,NL_ENDW)(all,p,AG_GTAP)(all,r,REG)
+    DF_LU_EVFA(w,p,r) = EVFA(w,p,r) - LU_EVFA(w,p,r);
+(all,w,NL_ENDW)(all,p,AG_GTAP)(all,r,REG)
+    DF_LU_VFM(w,p,r)  = VFM(w,p,r)  - LU_VFM(w,p,r);
+
+Write DF_LU_EVOA to file checks header "DEO1" longname 
+"DF_EVOA between the original and shared-out data "; 
+Write DF_LU_EVFA to file checks header "DEF1" longname 
+"DF_EVFA between the original and shared-out data "; 
+Write DF_LU_VFM to file checks header "DFM1" longname 
+"DF_VFM between the original and shared-out data "; 
+! End Added by EC !
+
+! Writing final GTAP output file for posting                                !
+Coefficient
+   (all,e,AEZ_ENDW)(all,r,REG)                                EVOA_AEZ(e,r); 
+   (all,e,AEZ_ENDW)(all,p,PROD_COMM)(all,r,REG)               EVFA_AEZ(e,p,r);
+   (all,e,AEZ_ENDW)(all,p,PROD_COMM)(all,r,REG)                VFM_AEZ(e,p,r);
+   (all,e,AEZ_ENDW)(all,p,AGFRS_GTAP)(all,r,REG)          AGFRSVFM_AEZ(e,p,r);
+   (all,i,REG)(all,z,AEZ)(all,j,CROP_GTAP)                    PROD_AEZ(i,z,j);
+   (all,i,REG)(all,z,AEZ)(all,j,CROP_GTAP)                HARVAREA_AEZ(i,z,j);
+   (all,i,REG)(all,z,AEZ)(all,j,LAND_COVER)                 LCOVER_AEZ(i,z,j);
+   (all,i,REG)(all,z,AEZ)(all,j,RUMINANTS)                  LVSTCK_AEZ(i,z,j);
+
+Formula
+(all,e,AEZ_ENDW)(all,r,REG)
+    EVOA_AEZ(e,r) = LU_EVOA(e,r);
+(all,e,AEZ_ENDW)(all,p,PROD_COMM)(all,r,REG)
+    EVFA_AEZ(e,p,r) = LU_EVFA(e,p,r);
+(all,e,AEZ_ENDW)(all,p,PROD_COMM)(all,r,REG)
+    VFM_AEZ(e,p,r) = LU_VFM(e,p,r);
+(all,e,AEZ_ENDW)(all,p,AGFRS_GTAP)(all,r,REG)
+    AGFRSVFM_AEZ(e,p,r) = LU_VFM(e,p,r);
+(all,i,REG)(all,z,AEZ)(all,j,CROP_GTAP)
+    PROD_AEZ(i,z,j) = QPROD9(i,z,j) ;
+(all,i,REG)(all,z,AEZ)(all,j,CROP_GTAP)
+    HARVAREA_AEZ(i,z,j) = HARV9(i,z,j);
+(all,i,REG)(all,z,AEZ)(all,j,LAND_COVER)
+    LCOVER_AEZ(i,z,j) = sum{c, LCOV: LTYPE(c) EQ j, LCOVER(i,z,c)};
+(all,i,REG)(all,z,AEZ)(all,j,RUMINANTS)
+    LVSTCK_AEZ(i,z,j) = QLIVE3(i,z,j);
+
+! Added by EC: Ensure tax rates are unchanged !
+Formula
+(all,e,ENDW_COMM)(all,j,PROD_COMM)(all,r,REG)       
+    VFM(e,j,r) = EVFA(e,j,r)/[1+INITFr(e,j,r)/100];
+(all,e,ENDW_COMM)(all,r,REG)       
+    EVOA(e,r)  =  sum(j,PROD_COMM,VFM(e,j,r)) * [1+INITOr(e,r)/100] ;
+
+(all,e,AEZ)(all,j,AG_GTAP)(all,r,REG)
+    AEZ_VFM(e,j,r) = EVFA_AEZ(e,j,r)/[1+INITFr("land",j,r)/100] ;
+(all,e,AEZ)(all,r,REG)
+    EVOA_AEZ(e,r)  =  sum(j,PROD_COMM,AEZ_VFM(e,j,r)) * [1+INITOr("land",r)/100] ;
+
+![ [!
+Coefficient
+    VFMGINI  # VFM global: initial #;
+    VFMGLOB  # VFM global #;
+    VFMGDIF  # VFM global difference #;
+    EVOAGINI # EVOA global: initial #;
+    EVOAGLOB # EVOA global #;
+    EVOAGDIF # EVOA global difference #;
+    EVFAGINI # EVFA global: initial #;
+    EVFAGLOB # EVOA global #;
+    EVFAGDIF # EVOA global difference #;
+Formula
+    VFMGINI = sum{e,ENDW_COMM, sum{j,PROD_COMM, sum{r,REG, VFM_tmp(e,j,r)}}};
+    VFMGLOB = sum{e,ENDW_COMM, sum{j,PROD_COMM, sum{r,REG, VFM(e,j,r)}}};
+    VFMGDIF = VFMGINI - VFMGLOB;
+Formula
+    EVOAGINI = sum{e,ENDW_COMM, sum{r,REG, EVOA_tmp(e,r)}};
+    EVOAGLOB = sum{e,ENDW_COMM, sum{r,REG, EVOA(e,r)}};
+    EVOAGDIF = EVOAGINI - EVOAGLOB;
+Formula
+    EVFAGINI = sum{e,ENDW_COMM, sum{j,PROD_COMM, sum{r,REG, EVFA_tmp(e,j,r)}}};
+    EVFAGLOB = sum{e,ENDW_COMM, sum{j,PROD_COMM, sum{r,REG, EVFA(e,j,r)}}};
+    EVFAGDIF = EVFAGINI - EVFAGLOB;
+ 
+!Scale Final VFM, EVOA and EVFA flows to match global total in standard GTAP DB !
+![[!
+(all,e,ENDW_COMM)(all,j,PROD_COMM)(all,r,REG)       
+    VFM(e,j,r) = VFMGINI * [VFM(e,j,r)/VFMGLOB]; 
+(all,e,ENDW_COMM)(all,r,REG)       
+    EVOA(e,r) = EVOAGINI * [EVOA(e,r)/EVOAGLOB]; 
+(all,e,ENDW_COMM)(all,j,PROD_COMM)(all,r,REG)       
+    EVFA(e,j,r) = EVFAGINI * [EVFA(e,j,r)/EVFAGLOB]; 
+!]]!
+(all,e,ENDW_COMM)(all,j,PROD_COMM)(all,r,REG)       
+    VFM(e,j,r) = VFM(e,j,r) +  VFMGDIF * [VFM(e,j,r)/VFMGLOB]; 
+(all,e,ENDW_COMM)(all,r,REG)       
+    EVOA(e,r) = EVOA(e,r) +  EVOAGDIF * [EVOA(e,r)/EVOAGLOB]; 
+(all,e,ENDW_COMM)(all,j,PROD_COMM)(all,r,REG)       
+    EVFA(e,j,r) = EVFA(e,j,r) +  EVFAGDIF * [EVFA(e,j,r)/EVFAGLOB]; 
+
+! Ensure tax rates are unchanged !
+Formula
+(all,e,ENDW_COMM)(all,j,PROD_COMM)(all,r,REG)       
+    VFM(e,j,r) = EVFA(e,j,r)/[1+INITFr(e,j,r)/100];
+(all,e,ENDW_COMM)(all,r,REG)       
+    EVOA(e,r)  =  sum(j,PROD_COMM,VFM(e,j,r)) * [1+INITOr(e,r)/100] ;
+!]]!
+
+Write
+ VFM  to file CHECKS header "VFMF";
+ EVOA to file CHECKS header "VOAF";
+ EVFA to file CHECKS header "VFAF";
+! Added by EC: Final tax rate check !
+Formula (all,e,ENDW_COMM)(all,r,REG)   
+   TOr(e,r) = 100*[EVOA(e,r)/sum{j,PROD_COMM,VFM(e,j,r)}-1]; 
+Formula (all,i,ENDW_COMM)(all,j,PROD_COMM)(all,r,REG)
+   TFr(i,j,r) = IF[EVFA(i,j,r)>0, 100*[EVFA(i,j,r)/VFM(i,j,r)-1] ];
+Write 
+ TOr  to file CHECKS header "FTOr" longname "Final TO";
+ TFr  to file CHECKS header "FTFr" longname "Final TF";
+ 
+! Added by EC: Final tax KL ratio check !
+Coefficient (all,e,KAPLAB)(all,p,AG_GTAP)(all,r,REG)
+    KLRATIOCHK(e,p,r) # Check: original = new KL ratio #;              
+Formula (all,e,KAPLAB)(all,p,AG_GTAP)(all,r,REG)              
+    KLRATIOCHK(e,p,r) = [EVFA(e,p,r) / sum{a,KAPLAB, EVFA(a,p,r)}]
+                      - KLRATIO_NEW(e,p,r);
+Write
+ KLRATIOCHK  to file CHECKS header "CKLN"; 
+Formula (all,e,KAPLAB)(all,p,AG_GTAP)(all,r,REG)              
+    KLRATIOCHK(e,p,r) = [EVFA(e,p,r) / sum{a,KAPLAB, EVFA(a,p,r)}]
+                      - KLRATIO_ORG(e,p,r);
+Write
+ KLRATIOCHK  to file CHECKS header "CKLF"; 
+! EC: End of changes !
+
+! Calculate TO and TFR again !
+
+Coefficient 
+                 (all,e,AEZ)(all,r,REG) AEZTOr(e,r)   # TO by AEZ #;
+(all,e,AEZ)(all,j,PROD_COMM)(all,r,REG) AEZTFr(e,j,r) # TFR by AEZ #; 
+
+Formula (all,e,AEZ)(all,r,REG)   
+   AEZTOr(e,r) = IF[EVOA_AEZ(e,r)>0, 100*[EVOA_AEZ(e,r)/sum{j,PROD_COMM,AEZ_VFM(e,j,r)}-1] ]; 
+Formula (all,e,AEZ)(all,j,PROD_COMM)(all,r,REG)
+   AEZTFr(e,j,r) = IF[EVFA_AEZ(e,j,r)>0, 100*[EVFA_AEZ(e,j,r)/AEZ_VFM(e,j,r)-1] ];
+
+Write
+ AEZTOr  to file CHECKS header "ATOr" longname "Final TO";
+ AEZTFr  to file CHECKS header "ATFr" longname "Final TF";
+
+! Added by EC: Ensure tax rates are unchanged !
+Formula
+(all,e,AEZ)(all,j,AG_GTAP)(all,r,REG)
+    LU_VFM(e,j,r) = LU_EVFA(e,j,r)/[1+INITFr("land",j,r)/100] ;
+(all,e,AEZ)(all,r,REG)
+    LU_EVOA(e,r)  =  sum(j,PROD_COMM, LU_VFM(e,j,r)) * [1+INITOr("land",r)/100] ;
+
+Formula (all,e,AEZ)(all,r,REG)   
+   AEZTOr(e,r) = IF[LU_EVOA(e,r)>0, 100*[LU_EVOA(e,r)/sum{j,PROD_COMM,LU_VFM(e,j,r)}-1] ]; 
+Formula (all,e,AEZ)(all,j,PROD_COMM)(all,r,REG)
+   AEZTFr(e,j,r) = IF[LU_EVFA(e,j,r)>0, 100*[LU_EVFA(e,j,r)/LU_VFM(e,j,r)-1] ];
+
+Write
+ AEZTOr  to file CHECKS header "ATOF" longname "Final TO";
+ AEZTFr  to file CHECKS header "ATFF" longname "Final TF";
+ (all,r,REG) TOr("land",r) to file gtaplulcaez header "TOr" 
+    longname "Initial TO";
+ (all,p,PROD_COMM)(all,r,REG) TFr("land",p,r) to file gtaplulcaez header "TFr" 
+    longname "Initial TFR";
+
+! EC start of changes: combine gtapaez and gtaplulcaez outfile into 1 !
+Write 
+     (all,z,AEZ)(all,g,AG_GTAP)(all,r,REG)          WGHT_MATRIX(z,g,r) 
+      to file gtaplulcaez header "WGHT" 
+      longname "AEZ weights used to share out data";
+     (all,e,AEZ_ENDW)(all,p,PROD_COMM)(all,r,REG)   LU_VFM(e,p,r) 
+      to file gtaplulcaez header "VFM "
+      longname "VFM of AEZs + other endw's";
+     (all,e,AEZ_ENDW)(all,r,REG)                    LU_EVOA(e,r) 
+      to file gtaplulcaez header "EVOA" 
+      longname "EVOA of AEZs + other endw's";
+     (all,e,AEZ_ENDW)(all,p,PROD_COMM)(all,r,REG)   LU_EVFA(e,p,r)
+      to file gtaplulcaez header "EVFA" 
+      longname "EVFA of AEZs + other endw's";
+     (all,e,AEZ)(all,p,PROD_COMM)(all,r,REG)   AEZ_VFM(e,p,r) 
+      to file gtaplulcaez header "AVFM"
+      longname "VFM of AEZs";
+     (all,e,AEZ)(all,r,REG)                    AEZ_EVOA(e,r) 
+      to file gtaplulcaez header "AVOA" 
+      longname "EVOA of AEZs";
+     (all,e,AEZ)(all,p,PROD_COMM)(all,r,REG)   AEZ_EVFA(e,p,r)
+      to file gtaplulcaez header "AVFA" 
+      longname "EVFA of AEZs";
+     (all,i,REG)(all,z,AEZ)(all,j,CROP_GTAP)                   PROD_AEZ(i,z,j)
+      to file gtaplulcaez header "SGPD" 
+      longname "Production (1000 metric tonnes): 8 crop sectors";
+     (all,i,REG)(all,z,AEZ)(all,j,CROP_GTAP)               HARVAREA_AEZ(i,z,j)
+      to file gtaplulcaez header "SGHA" 
+      longname "Harvested Area (1000 hectares): 8 crop sectors";
+      (all,i,REG)(all,z,AEZ)(all,j,LCOV)                     LCOVER(i,z,j)
+      to file gtaplulcaez header "SGLC" 
+      longname "Land Cover (1000 hectares): land cover types";
+      (all,i,REG)(all,z,AEZ)(all,j,RUMINANTS)                LVSTCK_AEZ(i,z,j)
+      to file gtaplulcaez header "SGLV" 
+      longname "Livestock Production (1000 heads): 3 livestock sectors";
+
+Write 
+![[! !EC commented out!
+   (all,e,AEZ_ENDW)(all,r,REG)                                 EVOA_AEZ(e,r)
+to file gtaplulcaez header "EVOA" 
+longname "EVOA of  AEZ + other endw's" ; 
+   (all,e,AEZ_ENDW)(all,p,PROD_COMM)(all,r,REG)              EVFA_AEZ(e,p,r)
+to file gtaplulcaez header "EVFA" 
+longname "EVFA of  AEZ + other endw's" ;
+   (all,e,AEZ_ENDW)(all,p,PROD_COMM)(all,r,REG)               VFM_AEZ(e,p,r)
+to file gtaplulcaez header "VFM"  
+longname "VFM of  AEZ + other endw's";
+!]]!
+   (all,e,AEZ_ENDW)(all,p,AGFRS_GTAP)(all,r,REG)         AGFRSVFM_AEZ(e,p,r)
+to file gtaplulcaez header "VFMA" 
+longname "VFM of  AEZ, Agriculture and Forestry";
+![[! !EC commented out!   
+(all,i,REG)(all,z,AEZ)(all,j,CROP_GTAP)                   PROD_AEZ(i,z,j)
+to file gtaplulcaez header "SGPD" 
+longname "Production (1000 metric tonnes): 8 crop sectors";
+   (all,i,REG)(all,z,AEZ)(all,j,CROP_GTAP)               HARVAREA_AEZ(i,z,j)
+to file gtaplulcaez header "SGHA" 
+longname "Harvested Area (1000 hectares): 8 crop sectors";
+   (all,i,REG)(all,z,AEZ)(all,j,RUMINANTS)                 LVSTCK_AEZ(i,z,j)
+to file gtaplulcaez header "SGLV" 
+longname "Livestock Production (1000 heads): 3 livestock sectors";!]]!
+   (all,i,REG)(all,z,AEZ)(all,j,LAND_COVER)                LCOVER_AEZ(i,z,j)
+to file gtaplulcaez header "SGLH" 
+longname "Land Cover (1000 hectares): 4 land cover types";
+ 
+
+!     Write GTAP database version number  !
+Write 
+(SET) REG TO FILE gtaplulcset HEADER "REG" 
+longname "GTAP v.9 Regions";
+(SET) AEZ TO FILE gtaplulcset HEADER "AEZ" 
+longname "Agro-ecological Zones (AEZs)";
+(SET) PROD_COMM TO FILE gtaplulcset HEADER "PROD" 
+longname "Production Commodities";
+(SET) AEZ_ENDW TO FILE gtaplulcset HEADER "ENDZ" 
+longname "Endowment Commodities + Land in  AEZs";
+(SET) AGFRS_GTAP TO FILE gtaplulcset HEADER "AGFR" 
+longname "Agriculture + Forestry Sectors (13)";
+(SET) CROP_GTAP TO FILE gtaplulcset HEADER "CROP" 
+longname "Crop Sectors (8)";
+(SET) LAND_COVER TO FILE gtaplulcset HEADER "LC04" 
+longname "GTAP Land Cover Types (4)";
+(SET) LCOV TO FILE gtaplulcset HEADER "LC07" 
+longname "GTAP Land Cover Types (7)";
+
+!    Checks for negative EVOA, EVFA, and VFM  !
+Coefficient 
+    (all,e,AEZ_ENDW)(all,r,REG)                           chk5a(e,r)
+    # regions and crops with negative EVOA # ; 
+    (all,e,AEZ_ENDW)(all,p,PROD_COMM)(all,r,REG)          chk5b(e,p,r)
+    # regions and crops with negative EVFA # ; 
+    (all,e,AEZ_ENDW)(all,p,PROD_COMM)(all,r,REG)          chk5c(e,p,r)
+    # regions and crops with negative VFM # ;
+
+Formula
+   
+(all,e,AEZ_ENDW)(all,r,REG)                            
+    chk5a(e,r) = IF[EVOA_AEZ(e,r) < 0, 1]; 
+(all,e,AEZ_ENDW)(all,p,PROD_COMM)(all,r,REG)          
+    chk5b(e,p,r) = IF[EVFA_AEZ(e,p,r) < 0, 1]; 
+(all,e,AEZ_ENDW)(all,p,PROD_COMM)(all,r,REG)          
+    chk5c(e,p,r) = IF[VFM_AEZ(e,p,r) < 0, 1]; 
+
+Write 
+      chk5a to file checks header "ch5a" longname
+      "regions and crops with negative EVOA";
+      chk5b to file checks header "ch5b" longname
+      "regions and crops with negative EVFA";
+      chk5c to file checks header "ch5c" longname
+      "regions and crops with negative VFM";
+
+![[! Modified by EC: moved to file 04_gaezdat                               !]]!
+
+Transfer "DREL" from file basedata to file gtaplulcaez;
+Transfer unwritten from file basedata to file gtaplulcaez;
+Transfer unwritten from file basesets to file gtaplulcset;
+
+![[! Modified by MVCH: Added 7-18-24                                        !]]!
+Write (SET) AUGMN_AG TO FILE gtaplulcset HEADER "AGFL" 
+    longname "Land Using Agricultural Sectors + Forestry Sectors (12)";
+

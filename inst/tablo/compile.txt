@@ -1,0 +1,14 @@
+tablo -wfp 03_rentcalc.tab
+call ltg 03_rentcalc
+copy *.exe ..\
+copy *.axt ..\
+copy *.axs ..\
+del *.exe *.axs *.axt *.min opt* *.inf
+
+
+
+
+
+
+
+

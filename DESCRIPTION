@@ -1,0 +1,29 @@
+Package: gtapshape
+Type: Package
+Title: Spatial disaggregation of GTAP LULC data
+Version: 0.0.1
+Authors@R: 
+    person("Micah", "Cameron-Harp", , "mcameronharp@ksu.edu", role = c("aut", "cre"),
+           comment = c(ORCID = "0009-0008-8934-1923"))
+Description: Creates a land use and land cover GTAP database specific to the users
+    choice of spatial unit.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.2
+Depends: 
+    terra (>= 1.7-78),
+Imports: 
+    sf,
+    dplyr,
+    stringr,
+    countrycode,
+    FAOSTAT,
+    tidyr,
+    readxl,
+    caTools,
+    magrittr
+Suggests: 
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr
