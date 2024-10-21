@@ -4,17 +4,23 @@
 \alias{create_shares}
 \title{Create shares to disaggregate GTAP land rents}
 \usage{
-create_shares(monfreda_fao_concord_file, tmp_dir = getwd())
+create_shares(monfreda_fao_concord_file, workdir_dir = getwd())
 }
 \arguments{
 \item{monfreda_fao_concord_file}{File path to concordance linking monfreda
 crop names to fao crop codes}
 
-\item{tmp_dir}{Location of the tmp dir created using gtap_setup function. The default is the current working directory set by getwd()}
+\item{workdir_dir}{Location of the workdir dir created using gtap_setup function. The default is the current working directory set by getwd()}
 }
 \value{
-Saves .rds files containing share variables for country and
+Saves  the three .rds files below to ./workdir/. These files contain share variables for country and
 subnational area combinations.
+
+gadm_bio_crop_prod_shares.rds
+
+gadm_bio_landcov_shares.rds
+
+\link{NV: What are these data for and which function uses them?}
 }
 \description{
 This function creates country-BIOME share variables so the FAO production

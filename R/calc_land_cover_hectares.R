@@ -3,14 +3,14 @@
 #' Calculates hectares using the rasters for each of the 7 land cover types
 #' created by the combine_land_covers function
 #'
-#' @param tmp_dir Location of the tmp dir created using gtap_setup function. The default is the current working directory set by getwd()
+#' @param workdir_dir Location of the workdir dir created using gtap_setup function. The default is the current working directory set by getwd()
 #'
 #' @return Creates 7 rasters, one for each land cover type, containing hectares
 #'   in each grid cell
 #' @export
-calc_land_cover_hectares <- function(tmp_dir=getwd()) {
+calc_land_cover_hectares <- function(workdir_dir=getwd()) {
   #Load in the land cover rasters containing the fraction of each cell
-  baseyr_lc_frac_list <- list.files(path = file.path(tmp_dir, 'tmp/rasters/'),
+  baseyr_lc_frac_list <- list.files(path = file.path(workdir_dir, 'workdir/rasters/'),
                                     pattern = "fraction.tif",
                                     full.names = TRUE)
   base_year_frac_rasts <- lapply(baseyr_lc_frac_list, terra::rast)

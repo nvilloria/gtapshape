@@ -4,14 +4,14 @@
 \alias{land_cover}
 \title{Land cover}
 \usage{
-land_cover(gadm_rast_file, subnat_bound_file, tmp_dir = getwd())
+land_cover(gadm_rast_file, subnat_bound_file, workdir_dir = getwd())
 }
 \arguments{
 \item{gadm_rast_file}{File name for raster containing GADM countries}
 
 \item{subnat_bound_file}{Simple feature object containing the subnational boundaries}
 
-\item{tmp_dir}{Location of the tmp dir created using gtap_setup function. The default is the current working directory set by getwd()}
+\item{workdir_dir}{Location of the workdir dir created using gtap_setup function. The default is the current working directory set by getwd()}
 }
 \value{
 Land cover data in hectares for each combination of GADM country and

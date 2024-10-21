@@ -1,26 +1,45 @@
 #' Output aggregated data as GEMPACK txt files
 #'
-#' This function outputs the aggregated data from the "aggr" command as
-#' GEMPACK text files so they can be read into GTAP analyses.
+#' This function outputs the aggregated data from the "aggr" command
+#' as GEMPACK text files so they can be read into GTAP analyses. [NV:
+#' Add the files that this function reads, and the functions that
+#' created them.]
 #'
-#' @param tmp_dir Location of the tmp dir created using gtap_setup function. The default is the current working directory set by getwd()
+#' @param workdir_dir Location of the workdir dir created using gtap_setup function. The default is the current working directory set by getwd()
 #' @param cpc_gsc3_concordance_file File name of file containing concordance
 #'    which links CPC codes to their GSC3 GTAP sector codes
-#' @return Saves .txt files in GEMPACK txt file format containing aggregated data.
+#'
+#' @return Saves the six .txt files below in ./workdir/output_data. These are GEMPACK txt file format containing data to the GTAP regions and sub-national geographies created by [NV: link to function].
+#'
+#' The GEMPACK text files in directory ./workdir/output_data are:
+#'
+#' lulc_cropprod_data.txt
+#'
+#' lulc_harvarea_data.txt
+#'
+#' lulc_lcov_data.txt
+#'
+#' lulc_lvstkprod_data.txt
+#'
+#' lulc_valcropprod_data.txt
+#'
+#' lulc_vallvstkprod_data.txt
+#'
+#' [NV: These files are used by [link to function]].
 #' @export
-gpack_txt <- function(tmp_dir=getwd(), cpc_gsc3_concordance_file) {
+gpack_txt <- function(workdir_dir=getwd(), cpc_gsc3_concordance_file) {
   #Make a "not in" function
   '%!in%' <- function(x,y)!('%in%'(x,y))
 
   #Load in the REG set created by 'define_sets'
-  REG_set <- readRDS(file.path(tmp_dir, 'tmp/sets/set_REG.rds'))
+  REG_set <- readRDS(file.path(workdir_dir, 'workdir/sets/set_REG.rds'))
   REG_set <- data.frame(REG = REG_set)
   #Make column showing the number so we can keep things in order
   REG_set <- REG_set %>%
     dplyr::mutate(REG_num = row_number())
 
   #Load in the BIO set created by 'define_sets'
-  BIO_set <- readRDS(file.path(tmp_dir, 'tmp/sets/set_BIO.rds'))
+  BIO_set <- readRDS(file.path(workdir_dir, 'workdir/sets/set_BIO.rds'))
   BIO_set <- data.frame(BIO = BIO_set)
   #Make column showing the number so we can keep things in order
   BIO_set <- BIO_set %>%
@@ -49,7 +68,7 @@ gpack_txt <- function(tmp_dir=getwd(), cpc_gsc3_concordance_file) {
 
   #### Land Cover ####
   #Read in land cover data
-  landcover <- readRDS(file.path(tmp_dir, 'tmp/output_data/reg_bio_land_cover.rds'))
+  landcover <- readRDS(file.path(workdir_dir, 'workdir/output_data/reg_bio_land_cover.rds'))
   #Add in the REG and BIO numbers
   landcover <- dplyr::left_join(landcover, REG_set, by = c('REG'))
   landcover <- dplyr::left_join(landcover, BIO_set, by = c('BIO'))
@@ -104,7 +123,7 @@ gpack_txt <- function(tmp_dir=getwd(), cpc_gsc3_concordance_file) {
   #For example, the first (.,.,1) matrix is for the first LCOV category ('Forest')
   matrix_list <- lapply(LCOV_GTAP_list, to_wide)
   #Now append all the matrices
-  filename <- file.path(tmp_dir, 'tmp/output_data/lulc_lcov_data.txt')
+  filename <- file.path(workdir_dir, 'workdir/output_data/lulc_lcov_data.txt')
   write.table(hmd, file=filename, row.names=FALSE, col.names=FALSE, quote = FALSE)
   for (i in 1:length(LCOV_GTAP_list)) {
     comment_text <- c(paste0('! Now the matrix for LCOV category ', LCOV_GTAP_list[[i]], ' !'))
@@ -113,10 +132,10 @@ gpack_txt <- function(tmp_dir=getwd(), cpc_gsc3_concordance_file) {
   }
 
   #### CROP PRODUCTION ####
-  rm(list=ls()[! ls() %in% c("tmp_dir", "REG_set", "BIO_set", "cpc_gsc3_concordance", "cpc_gsc3_concordance_crop", "cpc_gsc3_concordance_lvstk")])
+  rm(list=ls()[! ls() %in% c("workdir_dir", "REG_set", "BIO_set", "cpc_gsc3_concordance", "cpc_gsc3_concordance_crop", "cpc_gsc3_concordance_lvstk")])
   gc()
   #Load in crop production data
-  crop_prod <- readRDS(file.path(tmp_dir, 'tmp/output_data/reg_bio_crop_prod.rds'))
+  crop_prod <- readRDS(file.path(workdir_dir, 'workdir/output_data/reg_bio_crop_prod.rds'))
   #Add in the GSC3 codes so we can keep them in order
   crop_prod <- dplyr::left_join(crop_prod, cpc_gsc3_concordance_crop, by = c('GSC3'))
   crop_prod %>% dplyr::select(GSC3) %>% unique
@@ -168,7 +187,7 @@ gpack_txt <- function(tmp_dir=getwd(), cpc_gsc3_concordance_file) {
   #For example, the first (.,.,1) matrix is for the first sector ('pdr')
   matrix_list <- lapply(CROP_GTAP_num_list, to_wide)
   #Now append all the matrices
-  filename <- file.path(tmp_dir, 'tmp/output_data/lulc_cropprod_data.txt')
+  filename <- file.path(workdir_dir, 'workdir/output_data/lulc_cropprod_data.txt')
   write.table(hmd, file=filename, row.names=FALSE, col.names=FALSE, quote = FALSE)
   for (i in 1:length(CROP_GTAP_name_list)) {
     comment_text <- c(paste0('! Now the matrix for GSC3 sector ', CROP_GTAP_name_list[[i]], ' !'))
@@ -177,10 +196,10 @@ gpack_txt <- function(tmp_dir=getwd(), cpc_gsc3_concordance_file) {
   }
 
   #### Value of CROP PRODUCTION ####
-  rm(list=ls()[! ls() %in% c("tmp_dir", "REG_set", "BIO_set", "cpc_gsc3_concordance", "cpc_gsc3_concordance_crop", "cpc_gsc3_concordance_lvstk")])
+  rm(list=ls()[! ls() %in% c("workdir_dir", "REG_set", "BIO_set", "cpc_gsc3_concordance", "cpc_gsc3_concordance_crop", "cpc_gsc3_concordance_lvstk")])
   gc()
   #Load in crop production data
-  val_crop_prod <- readRDS(file.path(tmp_dir, 'tmp/output_data/reg_bio_crop_valprod.rds'))
+  val_crop_prod <- readRDS(file.path(workdir_dir, 'workdir/output_data/reg_bio_crop_valprod.rds'))
   #Add in the GSC3 codes so we can keep them in order
   val_crop_prod <- dplyr::left_join(val_crop_prod, cpc_gsc3_concordance_crop, by = c('GSC3'))
   val_crop_prod %>% dplyr::select(GSC3) %>% unique
@@ -230,7 +249,7 @@ gpack_txt <- function(tmp_dir=getwd(), cpc_gsc3_concordance_file) {
   #For example, the first (.,.,1) matrix is for the first sector ('pdr')
   matrix_list <- lapply(CROP_GTAP_num_list, to_wide)
   #Now append all the matrices
-  filename <-  file.path(tmp_dir, 'tmp/output_data/lulc_valcropprod_data.txt')
+  filename <-  file.path(workdir_dir, 'workdir/output_data/lulc_valcropprod_data.txt')
   write.table(hmd, file=filename, row.names=FALSE, col.names=FALSE, quote = FALSE)
   for (i in 1:length(CROP_GTAP_name_list)) {
     comment_text <- c(paste0('! Now the matrix for GSC3 sector ', CROP_GTAP_name_list[[i]], ' !'))
@@ -239,10 +258,10 @@ gpack_txt <- function(tmp_dir=getwd(), cpc_gsc3_concordance_file) {
   }
 
   #### Harvested Area ####
-  rm(list=ls()[! ls() %in% c("tmp_dir", "REG_set", "BIO_set", "cpc_gsc3_concordance", "cpc_gsc3_concordance_crop", "cpc_gsc3_concordance_lvstk")])
+  rm(list=ls()[! ls() %in% c("workdir_dir", "REG_set", "BIO_set", "cpc_gsc3_concordance", "cpc_gsc3_concordance_crop", "cpc_gsc3_concordance_lvstk")])
   gc()
   #Load in crop harvested area data
-  harv_area <- readRDS(file.path(tmp_dir, 'tmp/output_data/reg_bio_harv_area.rds'))
+  harv_area <- readRDS(file.path(workdir_dir, 'workdir/output_data/reg_bio_harv_area.rds'))
   #Add in the GSC3 codes so we can keep them in order
   harv_area <- dplyr::left_join(harv_area, cpc_gsc3_concordance_crop, by = c('GSC3'))
   harv_area %>% dplyr::select(GSC3) %>% unique
@@ -295,7 +314,7 @@ gpack_txt <- function(tmp_dir=getwd(), cpc_gsc3_concordance_file) {
   #For example, the first (.,.,1) matrix is for the first sector ('pdr')
   matrix_list <- lapply(CROP_GTAP_num_list, to_wide)
   #Now append all the matrices
-  filename <- file.path(tmp_dir, 'tmp/output_data/lulc_harvarea_data.txt')
+  filename <- file.path(workdir_dir, 'workdir/output_data/lulc_harvarea_data.txt')
   write.table(hmd, file=filename, row.names=FALSE, col.names=FALSE, quote = FALSE)
   for (i in 1:length(CROP_GTAP_name_list)) {
     comment_text <- c(paste0('! Now the matrix for GSC3 sector ', CROP_GTAP_name_list[[i]], ' !'))
@@ -304,10 +323,10 @@ gpack_txt <- function(tmp_dir=getwd(), cpc_gsc3_concordance_file) {
   }
 
   #### Livestock Production ####
-  rm(list=ls()[! ls() %in% c("tmp_dir", "REG_set", "BIO_set", "cpc_gsc3_concordance", "cpc_gsc3_concordance_crop", "cpc_gsc3_concordance_lvstk")])
+  rm(list=ls()[! ls() %in% c("workdir_dir", "REG_set", "BIO_set", "cpc_gsc3_concordance", "cpc_gsc3_concordance_crop", "cpc_gsc3_concordance_lvstk")])
   gc()
   #Load in livestock production data
-  lvstk_prod <- readRDS(file.path(tmp_dir, 'tmp/output_data/reg_bio_livestock_numanimals.rds'))
+  lvstk_prod <- readRDS(file.path(workdir_dir, 'workdir/output_data/reg_bio_livestock_numanimals.rds'))
   #Add in the GSC3 codes so we can keep them in order
   lvstk_prod <- dplyr::left_join(lvstk_prod, cpc_gsc3_concordance_lvstk, by = c('GSC3'))
   lvstk_prod %>% dplyr::select(GSC3) %>% unique
@@ -356,7 +375,7 @@ gpack_txt <- function(tmp_dir=getwd(), cpc_gsc3_concordance_file) {
   #For example, the first (.,.,1) matrix is for the first sector ('pdr')
   matrix_list <- lapply(LVSTK_GTAP_num_list, to_wide)
   #Now append all the matrices
-  filename <- file.path(tmp_dir, 'tmp/output_data/lulc_lvstkprod_data.txt')
+  filename <- file.path(workdir_dir, 'workdir/output_data/lulc_lvstkprod_data.txt')
   write.table(hmd, file=filename, row.names=FALSE, col.names=FALSE, quote = FALSE)
   for (i in 1:length(LVSTK_GTAP_name_list)) {
     comment_text <- c(paste0('! Now the matrix for GSC3 sector ', LVSTK_GTAP_name_list[[i]], ' !'))
@@ -365,10 +384,10 @@ gpack_txt <- function(tmp_dir=getwd(), cpc_gsc3_concordance_file) {
   }
 
   #### Livestock Value of Production ####
-  rm(list=ls()[! ls() %in% c("tmp_dir", "REG_set", "BIO_set", "cpc_gsc3_concordance", "cpc_gsc3_concordance_crop", "cpc_gsc3_concordance_lvstk")])
+  rm(list=ls()[! ls() %in% c("workdir_dir", "REG_set", "BIO_set", "cpc_gsc3_concordance", "cpc_gsc3_concordance_crop", "cpc_gsc3_concordance_lvstk")])
   gc()
   #Load in Value of Livestock production data
-  val_lvstk_prod <- readRDS(file.path(tmp_dir, 'tmp/output_data/reg_bio_val_livestock_production.rds'))
+  val_lvstk_prod <- readRDS(file.path(workdir_dir, 'workdir/output_data/reg_bio_val_livestock_production.rds'))
   #Add in the GSC3 codes so we can keep them in order
   val_lvstk_prod <- dplyr::left_join(val_lvstk_prod, cpc_gsc3_concordance_lvstk, by = c('GSC3'))
   val_lvstk_prod %>% dplyr::select(GSC3) %>% unique
@@ -417,7 +436,7 @@ gpack_txt <- function(tmp_dir=getwd(), cpc_gsc3_concordance_file) {
   #For example, the first (.,.,1) matrix is for the first sector ('pdr')
   matrix_list <- lapply(LVSTK_GTAP_num_list, to_wide)
   #Now append all the matrices
-  filename <- file.path(tmp_dir, 'tmp/output_data/lulc_vallvstkprod_data.txt')
+  filename <- file.path(workdir_dir, 'workdir/output_data/lulc_vallvstkprod_data.txt')
   write.table(hmd, file=filename, row.names=FALSE, col.names=FALSE, quote = FALSE)
   for (i in 1:length(LVSTK_GTAP_name_list)) {
     comment_text <- c(paste0('! Now the matrix for GSC3 sector ', LVSTK_GTAP_name_list[[i]], ' !'))

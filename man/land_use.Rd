@@ -8,7 +8,7 @@ land_use(
   crop_production_rast_dir,
   crop_area_rast_dir,
   livestock_density_rast_dir,
-  tmp_dir = getwd()
+  workdir_dir = getwd()
 )
 }
 \arguments{

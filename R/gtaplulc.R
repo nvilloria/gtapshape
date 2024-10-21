@@ -3,7 +3,7 @@
 #' This function uses the user defined sets to create a .har file using MODHAR,
 #' then it reads in the gempack text files created by gpack_txt
 #'
-#' @param tmp_dir Location of the tmp dir created using gtap_setup function. The default is the current working directory set by getwd()
+#' @param workdir_dir Location of the workdir dir created using gtap_setup function. The default is the current working directory set by getwd()
 #' @param gempack_lulc_dir Location of the directory where inputs and outputs
 #'     to LULC GEMPACK executables are stored.
 #' @param gempack_timber_dir Location of the directory where inputs and outputs
@@ -12,9 +12,9 @@
 #'    for the GEMPACK rentcalc executables are
 #' @return Outputs gtaplulcaez.har file.
 #' @export
-gtaplulc <- function(tmp_dir=getwd(), gempack_lulc_dir, gempack_timber_dir, gempack_rentcalc_dir) {
+gtaplulc <- function(workdir_dir=getwd(), gempack_lulc_dir, gempack_timber_dir, gempack_rentcalc_dir) {
   #Copy the sets we defined in Step 1 to where the GEMPACK code runs
-  set_files <- list.files(path = file.path(tmp_dir, 'tmp/sets/'),
+  set_files <- list.files(path = file.path(workdir_dir, 'workdir/sets/'),
                           pattern = '.txt',
                           full.names = T)
   #GEMPACK gtaplulc input folder
@@ -50,7 +50,7 @@ gtaplulc <- function(tmp_dir=getwd(), gempack_lulc_dir, gempack_timber_dir, gemp
   #imports the BIOME level data from the .txt files output in Step8.
   #Copy the .txt files from output_data folder where the input folder of the GEMPACK
   #code.
-  input_files <- list.files(path = file.path(tmp_dir, 'output_data/'),
+  input_files <- list.files(path = file.path(workdir_dir, 'output_data/'),
                             pattern = '_data.txt',
                             full.names = T)
   #GEMPACK input folder

@@ -4,10 +4,10 @@
 \alias{aggr}
 \title{Aggregate data to GTAP commodities}
 \usage{
-aggr(tmp_dir = getwd(), reg_country_conc_file, cpc_gsc3_concordance_file)
+aggr(workdir_dir = getwd(), reg_country_conc_file, cpc_gsc3_concordance_file)
 }
 \arguments{
-\item{tmp_dir}{Location of the tmp dir created using gtap_setup function. The default is the current working directory set by getwd()}
+\item{workdir_dir}{Location of the workdir dir created using gtap_setup function. The default is the current working directory set by getwd()}
 
 \item{reg_country_conc_file}{Location of a file linking the GADM countries to
 the GTAP regions specified}
@@ -16,7 +16,21 @@ the GTAP regions specified}
 which links CPC codes to their GSC3 GTAP sector codes}
 }
 \value{
-Saves .rds files containing aggregated data.
+Saves the following six .rds files containing aggregated data in ./workdir/output_data:
+
+reg_bio_crop_prod.rds
+
+reg_bio_crop_valprod.rds
+
+reg_bio_harv_area.rds
+
+reg_bio_land_cover.rds
+
+reg_bio_livestock_numanimals.rds
+
+reg_bio_val_livestock_production.rds
+
+\link{NV: What are these data used for and which function uses them---link to the function}
 }
 \description{
 This function aggregates the country-subnational division data to the

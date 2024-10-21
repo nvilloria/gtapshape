@@ -7,7 +7,7 @@
 share_data(
   lvstk_prices_4spec_file,
   cpc_gsc3_concordance_file,
-  tmp_dir = getwd()
+  workdir_dir = getwd()
 )
 }
 \arguments{
@@ -18,12 +18,33 @@ livestock species. Should have five columns: "QLIVE_18", "X1.BUFFALOES",
 \item{cpc_gsc3_concordance_file}{File name of file containing concordance
 which links CPC codes to their GSC3 GTAP sector codes}
 
-\item{tmp_dir}{Location of the tmp dir created using gtap_setup function. The default is the current working directory set by getwd()}
+\item{workdir_dir}{Location of the workdir dir created using gtap_setup function. The default is the current working directory set by getwd()}
 }
 \value{
-Saves .rds files containing land cover, crop production, livestock
-production, and value of production data for country and subnational
-area combinations.
+Saves the nine .rds files below in
+./workdir/gtap_ref_year. These rsd files containing land cover,
+crop production, livestock production, and value of production
+data for country and subnational area combinations.
+
+gadm_bio_crop_harvarea.rds *
+
+gadm_bio_crop_production.rds *
+
+gadm_bio_livestock_valprod_ctlrmkwol.rds
+
+gadm_bio_livestock_valprod_4species.rds
+
+gadm_bio_livestock_production_4species.rds
+
+gadm_bio_livestock_numanimals.rds *
+
+gadm_bio_land_cover.rds *
+
+gadm_bio_vallvstkprod_rmk_wol.rds *
+
+gadm_bio_val_crop_production.rds *
+
+The data with a star * are an input to \link{aggr}.
 }
 \description{
 This function uses the country-BIOME share variables to disaggregate the fao

@@ -6,11 +6,11 @@
 #' @param bip_file Path to the bip file containing urban land cover data
 #' @param hdr_file Path to the hdr file for the urban land cover data
 #' @param cropland_file Path to the file containing cropland data
-#' @param tmp_dir Location of the tmp dir created using gtap_setup function. The default is the current working directory set by getwd()
+#' @param workdir_dir Location of the workdir dir created using gtap_setup function. The default is the current working directory set by getwd()
 #'
 #' @return Creates urban cover raster
 #' @export
-urban_land_cover <- function(bip_file, hdr_file, cropland_file, tmp_dir=getwd()) {
+urban_land_cover <- function(bip_file, hdr_file, cropland_file, workdir_dir=getwd()) {
   #Read in the urban land cover raster
     urban_rast <- terra::rast(bip_file)
     #Check the header file
@@ -43,7 +43,7 @@ urban_land_cover <- function(bip_file, hdr_file, cropland_file, tmp_dir=getwd())
 
   #Now aggregate it to the 5 arc minute resolution
     urban_5min_res <- terra::aggregate(urban_rast_wgs1984, aggr_factor, fun = mean)
-    terra::writeRaster(urban_5min_res, filename = file.path(tmp_dir, 'tmp/rasters/urban_cover.tif'), overwrite = TRUE)
+    terra::writeRaster(urban_5min_res, filename = file.path(workdir_dir, 'workdir/rasters/urban_cover.tif'), overwrite = TRUE)
 
   #Cleanup
     rm(list=ls())

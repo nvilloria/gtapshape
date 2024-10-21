@@ -22,7 +22,7 @@
 #' @import dplyr
 #'
 #' @export
-land_use <- function(crop_production_rast_dir, crop_area_rast_dir, livestock_density_rast_dir, tmp_dir=getwd()) {
+land_use <- function(crop_production_rast_dir, crop_area_rast_dir, livestock_density_rast_dir, workdir_dir=getwd()) {
   #### Crop production ####
   #Load in the crop output and harvested area (ha) data
   crop_output_raster_list <- list.files(crop_production_rast_dir,
@@ -33,7 +33,7 @@ land_use <- function(crop_production_rast_dir, crop_area_rast_dir, livestock_den
   crop_output_raster_stack <- terra::rast(crop_output_raster_list)
 
   #Load in the GADM-BIO combination raster
-  GADM_BIOME_rast <- terra::rast(file.path(tmp_dir, 'tmp/rasters/GADM_BIOME_rast.tif'))
+  GADM_BIOME_rast <- terra::rast(file.path(workdir_dir, 'workdir/rasters/GADM_BIOME_rast.tif'))
 
   #Combine with the production rasters
   output_rast <- c(GADM_BIOME_rast, crop_output_raster_stack)
@@ -51,8 +51,8 @@ land_use <- function(crop_production_rast_dir, crop_area_rast_dir, livestock_den
                                            BIO = substr(GADM_BIO, 5, nchar(paste0(GADM_BIO)))) %>%
     dplyr::select(GADM, BIO, GADM_BIO, everything())
   #Save as rds
-  saveRDS(output_df, file = file.path(tmp_dir, 'tmp/base_year/crop_production_tons.rds'))
-  rm(list=ls()[! ls() %in% c("GADM_BIOME_rast", "crop_production_rast_dir", "crop_area_rast_dir", "livestock_density_rast_dir", "tmp_dir")])
+  saveRDS(output_df, file = file.path(workdir_dir, 'workdir/base_year/crop_production_tons.rds'))
+  rm(list=ls()[! ls() %in% c("GADM_BIOME_rast", "crop_production_rast_dir", "crop_area_rast_dir", "livestock_density_rast_dir", "workdir_dir")])
   gc()
 
   #### Harvested Area ####
@@ -81,8 +81,8 @@ land_use <- function(crop_production_rast_dir, crop_area_rast_dir, livestock_den
                                            BIO = substr(GADM_BIO, 5, nchar(paste0(GADM_BIO)))) %>%
     dplyr::select(GADM, BIO, GADM_BIO, everything())
   #Save as rds
-  saveRDS(output_df, file = file.path(tmp_dir, 'tmp/base_year/crop_harvarea_ha.rds'))
-  rm(list=ls()[! ls() %in% c("GADM_BIOME_rast", "crop_production_rast_dir", "crop_area_rast_dir", "livestock_density_rast_dir", "tmp_dir")])
+  saveRDS(output_df, file = file.path(workdir_dir, 'workdir/base_year/crop_harvarea_ha.rds'))
+  rm(list=ls()[! ls() %in% c("GADM_BIOME_rast", "crop_production_rast_dir", "crop_area_rast_dir", "livestock_density_rast_dir", "workdir_dir")])
   gc()
 
   #### Livestock production ####
@@ -114,13 +114,13 @@ land_use <- function(crop_production_rast_dir, crop_area_rast_dir, livestock_den
   species_names <- lapply(species_names, function(x) (substr(x, 2, regexpr("_", x) - 1)))
   species_names <- unlist(species_names)
   names(lvstk_head_rast_stack) <- species_names
-  terra::writeRaster(lvstk_head_rast_stack, filename = file.path(tmp_dir, 'tmp/rasters/lvstk_total_head.tif'), overwrite = TRUE)
-  rm(list=ls()[! ls() %in% c("GADM_BIOME_rast", "lvstk_head_rast_stack", "tmp_dir")])
+  terra::writeRaster(lvstk_head_rast_stack, filename = file.path(workdir_dir, 'workdir/rasters/lvstk_total_head.tif'), overwrite = TRUE)
+  rm(list=ls()[! ls() %in% c("GADM_BIOME_rast", "lvstk_head_rast_stack", "workdir_dir")])
   gc()
 
   #### Output livestock quantity by GADM and BIOME combinations
   #Load in GADM-BIOME concatenation raster
-  GADM_BIOME_rast <- terra::rast(file.path(tmp_dir, 'tmp/rasters/GADM_BIOME_rast.tif'))
+  GADM_BIOME_rast <- terra::rast(file.path(workdir_dir, 'workdir/rasters/GADM_BIOME_rast.tif'))
   #Combine with the production rasters
   output_rast <- c(GADM_BIOME_rast, lvstk_head_rast_stack)
   #Turn into dataframe
@@ -137,7 +137,7 @@ land_use <- function(crop_production_rast_dir, crop_area_rast_dir, livestock_den
                                            BIO = substr(GADM_BIO, 5, nchar(paste0(GADM_BIO)))) %>%
     dplyr::select(GADM, BIO, GADM_BIO, everything())
   #Save as rds
-  saveRDS(output_df, file = file.path(tmp_dir, 'tmp/base_year/livestock_production_head.rds'))
+  saveRDS(output_df, file = file.path(workdir_dir, 'workdir/base_year/livestock_production_head.rds'))
   rm(list=ls())
   gc()
 }

@@ -4,10 +4,10 @@
 \alias{calc_land_cover_hectares}
 \title{Calculate hectares in each land cover}
 \usage{
-calc_land_cover_hectares(tmp_dir = getwd())
+calc_land_cover_hectares(workdir_dir = getwd())
 }
 \arguments{
-\item{tmp_dir}{Location of the tmp dir created using gtap_setup function. The default is the current working directory set by getwd()}
+\item{workdir_dir}{Location of the workdir dir created using gtap_setup function. The default is the current working directory set by getwd()}
 }
 \value{
 Creates 7 rasters, one for each land cover type, containing hectares

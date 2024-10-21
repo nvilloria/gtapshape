@@ -8,20 +8,20 @@
 #'
 #' @param gadm_rast_file File name for raster containing GADM countries
 #' @param subnat_bound_file Simple feature object containing the subnational boundaries
-#' @param tmp_dir Location of the tmp dir created using gtap_setup function. The default is the current working directory set by getwd()
+#' @param workdir_dir Location of the workdir dir created using gtap_setup function. The default is the current working directory set by getwd()
 #'
 #' @return Land cover data in hectares for each combination of GADM country and
 #'      subnational division
 #'
 #' @export
-land_cover <- function(gadm_rast_file, subnat_bound_file, tmp_dir=getwd()) {
+land_cover <- function(gadm_rast_file, subnat_bound_file, workdir_dir=getwd()) {
   #### Calculate hectares by country-BIOME combination ####
   #Load in the GADM raster
   gadm_rast <- terra::rast(gadm_rast_file)
 
   #Now do BIOME Raster
     #List the rasters containing hectares of land covers
-    baseyr_lc_ha_list <- list.files(path = file.path(tmp_dir, 'tmp/rasters/'),
+    baseyr_lc_ha_list <- list.files(path = file.path(workdir_dir, 'workdir/rasters/'),
                                     pattern = "ha.tif",
                                     full.names = TRUE)
     #Load the cropland hectares raster so we can use its dimensions when
@@ -35,14 +35,14 @@ land_cover <- function(gadm_rast_file, subnat_bound_file, tmp_dir=getwd()) {
   BIOME_vect <- terra::vect(BIOME_vect)
   BIOME_rast <- terra::rast(crs = terra::crs(cropland_rast), resolution = terra::res(cropland_rast), extent = terra::ext(cropland_rast))
   #Define the levels for the raster
-  set_BIO_list <- readRDS(file.path(tmp_dir, 'tmp/sets/set_BIO.rds'))
+  set_BIO_list <- readRDS(file.path(workdir_dir, 'workdir/sets/set_BIO.rds'))
   BIOME_cats <- data.frame(ID=1:length(set_BIO_list), BIO=set_BIO_list)
   #Make a rest of world category with value equal to the final number in specified biome list
   restofworld_num <- as.numeric(length(set_BIO_list))
   BIOME_rast <- terra::rasterize(BIOME_vect, BIOME_rast, 'biome_num', background = restofworld_num)
   #Replace NA values with "7" for the rest of the world
   levels(BIOME_rast) <- BIOME_cats
-  terra::writeRaster(BIOME_rast, filename = file.path(tmp_dir, 'tmp/rasters/BIOME_rast.tif'), overwrite = T)
+  terra::writeRaster(BIOME_rast, filename = file.path(workdir_dir, 'workdir/rasters/BIOME_rast.tif'), overwrite = T)
 
   #Concatenate two categorical rasters to get one that shows the combinations of their levels
   #REG and BIOMES
@@ -82,7 +82,7 @@ land_cover <- function(gadm_rast_file, subnat_bound_file, tmp_dir=getwd()) {
   GADM_BIOME_rast <- GADM_BIOME_output_rast
   #####
 
-  terra::writeRaster(GADM_BIOME_rast, filename = file.path(tmp_dir, 'tmp/rasters/GADM_BIOME_rast.tif'), overwrite = TRUE)
+  terra::writeRaster(GADM_BIOME_rast, filename = file.path(workdir_dir, 'workdir/rasters/GADM_BIOME_rast.tif'), overwrite = TRUE)
   #Remove old objects, clean up environment
   rm(cropland_rast, gadm_rast, BIOME_rast, BIOME_vect, GADM_BIOME_output_rast,
      GADM_BIOME_levels, GADM_BIOME_values, GADM_BIOME_replace, GADM_BIOME_output_rast_levels,
@@ -115,5 +115,5 @@ land_cover <- function(gadm_rast_file, subnat_bound_file, tmp_dir=getwd()) {
     dplyr::group_by(GADM_BIO) %>%
     summarise_all(sum, na.rm = TRUE)
   #Save
-  saveRDS(output_df, file = file.path(tmp_dir, 'tmp/base_year/GADM_BIO_landcover_rasterdata_ha.rds'))
+  saveRDS(output_df, file = file.path(workdir_dir, 'workdir/base_year/GADM_BIO_landcover_rasterdata_ha.rds'))
 }

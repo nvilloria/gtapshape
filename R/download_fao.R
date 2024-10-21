@@ -4,15 +4,45 @@
 #' specified year, as well as price data.
 #'
 #' @param gtap_year Year of FAO data to be downloaded
-#' @param tmp_dir Location of the tmp dir created using gtap_setup function. The default is the current working directory set by getwd()
+#' @param workdir_dir Location of the workdir dir created using gtap_setup function. The default is the current working directory set by getwd()
+#'
 #' @return Saves .rds files containing production and price data
+#'
+#' The following files are saved in ./workdir/fao_data/
+#'
+#' fao_cpc_item_codes.rds
+#'
+#' fao_land_cover.rds
+#'
+#' fao_prices.rds
+#'
+#' fao_production_crops.rds
+#'
+#' fao_production.rds
+#'
+#' fao_val_prod.rds
+#'
+#' And the following files are saved in:
+#'
+#' fao_land_cover.rds
+#'
+#' fao_livestock_numanimals.rds
+#'
+#' fao_prod_harvarea.rds
+#'
+#' fao_producer_prices.rds
+#'
+#' fao_val_prod_1000usd.rds
+#'
+#' [NV: where are these data used and for what. Link to function. I think is [create_shares]
+#'
 #' @export
-download_fao <- function(gtap_year, tmp_dir=getwd()) {
+download_fao <- function(gtap_year, workdir_dir=getwd()) {
   #Define GTAP year
   gtap_ref_year <- gtap_year
 
   #Specify the data folder where raw FAO data gets downloaded to
-  data_folder <- paste(tmp_dir, '/tmp/fao_data/',sep="")
+  data_folder <- paste(workdir_dir, '/workdir/fao_data/',sep="")
 
   #### Production ####
   #Bulk download production data for crops and livestock
@@ -53,7 +83,7 @@ download_fao <- function(gtap_year, tmp_dir=getwd()) {
   prod_harvarea <- prod_harvarea %>%
     dplyr::select(ISO3, year_code, item, item_code_cpc, item_code_fao, element, unit, value)
   #Save
-  saveRDS(prod_harvarea, file.path(tmp_dir, 'tmp/gtap_ref_year/fao_prod_harvarea.rds'))
+  saveRDS(prod_harvarea, file.path(workdir_dir, 'workdir/gtap_ref_year/fao_prod_harvarea.rds'))
 
   # Number of livestock animals data - just need ruminants (ctl, rmk, wol GTAP categories)
   livestock_numanimals <- fao_production %>%
@@ -69,7 +99,7 @@ download_fao <- function(gtap_year, tmp_dir=getwd()) {
   livestock_numanimals <- livestock_numanimals %>%
     dplyr::select(ISO3, year_code, item, item_code_cpc, item_code_fao, element, unit, value)
   #Save
-  saveRDS(livestock_numanimals, file.path(tmp_dir, 'tmp/gtap_ref_year/fao_livestock_numanimals.rds'))
+  saveRDS(livestock_numanimals, file.path(workdir_dir, 'workdir/gtap_ref_year/fao_livestock_numanimals.rds'))
 
   #### Prices ####
   # Bulk download prices - by choosing the "PP" code we select the Producer Price in USD/tonne
@@ -97,7 +127,7 @@ download_fao <- function(gtap_year, tmp_dir=getwd()) {
   producer_prices <- producer_prices %>%
     dplyr::select(ISO3, year_code, item, item_code_cpc, item_code_fao, element, unit, value)
   #Save
-  saveRDS(producer_prices, file.path(tmp_dir, 'tmp/gtap_ref_year/fao_producer_prices.rds'))
+  saveRDS(producer_prices, file.path(workdir_dir, 'workdir/gtap_ref_year/fao_producer_prices.rds'))
 
   #### Value of Agricultural Production ####
   #Bulk download value of production data for crops and livestock
@@ -125,7 +155,7 @@ download_fao <- function(gtap_year, tmp_dir=getwd()) {
   fao_val_production <- fao_val_production %>%
     dplyr::select(ISO3, year_code, item, item_code_cpc, item_code_fao, element, unit, value)
   #Save
-  saveRDS(fao_val_production, file.path(tmp_dir, 'tmp/gtap_ref_year/fao_val_prod_1000usd.rds'))
+  saveRDS(fao_val_production, file.path(workdir_dir, 'workdir/gtap_ref_year/fao_val_prod_1000usd.rds'))
 
   #### Land cover ####
   # Bulk download land cover data - 1000 hectares in arable land (item code 6621),
@@ -175,5 +205,5 @@ download_fao <- function(gtap_year, tmp_dir=getwd()) {
                   land_area_ha = 1000*land_area_ha) %>%
     dplyr::select(ISO3, year_code, cropland_ha, pasture_ha, land_area_ha)
   #Save
-  saveRDS(land_cover_wide, file.path(tmp_dir, 'tmp/gtap_ref_year/fao_land_cover.rds'))
+  saveRDS(land_cover_wide, file.path(workdir_dir, 'workdir/gtap_ref_year/fao_land_cover.rds'))
 }

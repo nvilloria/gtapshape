@@ -5,14 +5,30 @@
 #' aggregates crop production and the value of crop production to the 9
 #' GTAP crop categories.
 #'
-#' @param tmp_dir Location of the tmp dir created using gtap_setup function. The default is the current working directory set by getwd()
+#' @param workdir_dir Location of the workdir dir created using gtap_setup function. The default is the current working directory set by getwd()
 #' @param reg_country_conc_file Location of a file linking the GADM countries to
 #'    the GTAP regions specified
 #' @param cpc_gsc3_concordance_file File name of file containing concordance
 #'    which links CPC codes to their GSC3 GTAP sector codes
-#' @return Saves .rds files containing aggregated data.
+#' @return Saves the following six .rds files containing aggregated data in ./workdir/output_data:
+#'
+#' reg_bio_crop_prod.rds
+#'
+#' reg_bio_crop_valprod.rds
+#'
+#' reg_bio_harv_area.rds
+#'
+#' reg_bio_land_cover.rds
+#'
+#' reg_bio_livestock_numanimals.rds
+#'
+#' reg_bio_val_livestock_production.rds
+#'
+#' [NV: What are these data used for and which function uses them---link to the function]
+
+#'
 #' @export
-aggr <- function(tmp_dir=getwd(), reg_country_conc_file, cpc_gsc3_concordance_file) {
+aggr <- function(workdir_dir=getwd(), reg_country_conc_file, cpc_gsc3_concordance_file) {
   #Load in the REG-GADM concordance
   reg_country_conc <- read.csv(reg_country_conc_file, header = TRUE) %>%
     dplyr::select(-name) %>%
@@ -20,7 +36,7 @@ aggr <- function(tmp_dir=getwd(), reg_country_conc_file, cpc_gsc3_concordance_fi
                   REG = GTAP_160)
 
   #### Land cover ####
-  land_cov <- readRDS(file.path(tmp_dir, 'tmp/gtap_ref_year/gadm_bio_land_cover.rds')) %>%
+  land_cov <- readRDS(file.path(workdir_dir, 'workdir/gtap_ref_year/gadm_bio_land_cover.rds')) %>%
     dplyr::mutate(GADM = tolower(GADM))
   #Merge with the REG-GADM concordance
   land_cov <- dplyr::left_join(land_cov, reg_country_conc, by = c('GADM'))
@@ -38,13 +54,13 @@ aggr <- function(tmp_dir=getwd(), reg_country_conc_file, cpc_gsc3_concordance_fi
     summarise(across(cropland_ha:other_ha, sum)) %>%
     ungroup()
   #Save
-  saveRDS(land_cov, file = file.path(tmp_dir, 'tmp/output_data/reg_bio_land_cover.rds'))
+  saveRDS(land_cov, file = file.path(workdir_dir, 'workdir/output_data/reg_bio_land_cover.rds'))
 
   #### Crop production ####
-  rm(list=ls()[! ls() %in% c("tmp_dir", "reg_country_conc", "cpc_gsc3_concordance_file")])
+  rm(list=ls()[! ls() %in% c("workdir_dir", "reg_country_conc", "cpc_gsc3_concordance_file")])
   gc()
   #Load in crop production data
-  crop_prod <- readRDS(file = file.path(tmp_dir, 'tmp/gtap_ref_year/gadm_bio_crop_production.rds')) %>%
+  crop_prod <- readRDS(file = file.path(workdir_dir, 'workdir/gtap_ref_year/gadm_bio_crop_production.rds')) %>%
     dplyr::mutate(GADM = tolower(GADM))
   #Merge with the REG-GADM concordance
   crop_prod <- dplyr::left_join(crop_prod, reg_country_conc, by = c('GADM'))
@@ -100,13 +116,13 @@ aggr <- function(tmp_dir=getwd(), reg_country_conc_file, cpc_gsc3_concordance_fi
     dplyr::summarise(tons = sum(tons, na.rm = T)) %>%
     dplyr::ungroup()
   #Save
-  saveRDS(crop_prod_GSC3, file = file.path(tmp_dir, 'tmp/output_data/reg_bio_crop_prod.rds'))
+  saveRDS(crop_prod_GSC3, file = file.path(workdir_dir, 'workdir/output_data/reg_bio_crop_prod.rds'))
 
   #### Value of crop production ####
-  rm(list=ls()[! ls() %in% c("tmp_dir", "reg_country_conc", "cpc_gsc3_concordance", "gsc3_cpc_codes")])
+  rm(list=ls()[! ls() %in% c("workdir_dir", "reg_country_conc", "cpc_gsc3_concordance", "gsc3_cpc_codes")])
   gc()
   #Load in crop production at country-BIOME level
-  crop_valprod <- readRDS(file = file.path(tmp_dir, 'tmp/gtap_ref_year/gadm_bio_val_crop_production.rds')) %>%
+  crop_valprod <- readRDS(file = file.path(workdir_dir, 'workdir/gtap_ref_year/gadm_bio_val_crop_production.rds')) %>%
     dplyr::mutate(GADM = tolower(GADM))
   #Merge with the REG-GADM concordance
   crop_valprod <- dplyr::left_join(crop_valprod, reg_country_conc, by = c('GADM'))
@@ -151,13 +167,13 @@ aggr <- function(tmp_dir=getwd(), reg_country_conc_file, cpc_gsc3_concordance_fi
     dplyr::summarise(usd1000 = sum(usd1000, na.rm = T)) %>%
     dplyr::ungroup()
   #Save
-  saveRDS(crop_valprod_GSC3, file = file.path(tmp_dir, 'tmp/output_data/reg_bio_crop_valprod.rds'))
+  saveRDS(crop_valprod_GSC3, file = file.path(workdir_dir, 'workdir/output_data/reg_bio_crop_valprod.rds'))
 
   #### Harvested Area ####
-  rm(list=ls()[! ls() %in% c("tmp_dir", "reg_country_conc", "cpc_gsc3_concordance", "gsc3_cpc_codes")])
+  rm(list=ls()[! ls() %in% c("workdir_dir", "reg_country_conc", "cpc_gsc3_concordance", "gsc3_cpc_codes")])
   gc()
   #Load in harvested area data at country-BIOME level
-  harv_area <- readRDS(file.path(tmp_dir, 'tmp/gtap_ref_year/gadm_bio_crop_harvarea.rds')) %>%
+  harv_area <- readRDS(file.path(workdir_dir, 'workdir/gtap_ref_year/gadm_bio_crop_harvarea.rds')) %>%
     dplyr::mutate(GADM = tolower(GADM))
   #Merge with the REG-GADM concordance
   harv_area <- dplyr::left_join(harv_area, reg_country_conc, by = c('GADM'))
@@ -200,13 +216,13 @@ aggr <- function(tmp_dir=getwd(), reg_country_conc_file, cpc_gsc3_concordance_fi
     dplyr::summarise(ha = sum(ha, na.rm = T)) %>%
     dplyr::ungroup()
   #Save
-  saveRDS(harv_area_GSC3, file = file.path(tmp_dir, 'tmp/output_data/reg_bio_harv_area.rds'))
+  saveRDS(harv_area_GSC3, file = file.path(workdir_dir, 'workdir/output_data/reg_bio_harv_area.rds'))
 
   #### Livestock number of animals ####
-  rm(list=ls()[! ls() %in% c("tmp_dir", "reg_country_conc", "cpc_gsc3_concordance", "gsc3_cpc_codes")])
+  rm(list=ls()[! ls() %in% c("workdir_dir", "reg_country_conc", "cpc_gsc3_concordance", "gsc3_cpc_codes")])
   gc()
   #Load in livestock production at country-BIOME level
-  livestock_numanimals <- readRDS(file.path(tmp_dir, 'tmp/gtap_ref_year/gadm_bio_livestock_numanimals.rds')) %>%
+  livestock_numanimals <- readRDS(file.path(workdir_dir, 'workdir/gtap_ref_year/gadm_bio_livestock_numanimals.rds')) %>%
     dplyr::mutate(GADM = tolower(GADM))
   #Merge with the REG-GADM concordance
   livestock_numanimals <- dplyr::left_join(livestock_numanimals, reg_country_conc, by = c('GADM'))
@@ -221,15 +237,15 @@ aggr <- function(tmp_dir=getwd(), reg_country_conc_file, cpc_gsc3_concordance_fi
     dplyr::summarise(head1000 = sum(head1000, na.rm = T)) %>%
     dplyr::ungroup()
   #Save
-  saveRDS(livestock_numanimals, file = file.path(tmp_dir, 'tmp/output_data/reg_bio_livestock_numanimals.rds'))
+  saveRDS(livestock_numanimals, file = file.path(workdir_dir, 'workdir/output_data/reg_bio_livestock_numanimals.rds'))
 
   #### Value of Livestock production ####
   #Created using the prices for the 4 species calculated using gtaplulc18.har
   #file.
-  rm(list=ls()[! ls() %in% c("tmp_dir", "reg_country_conc", "cpc_gsc3_concordance", "gsc3_cpc_codes")])
+  rm(list=ls()[! ls() %in% c("workdir_dir", "reg_country_conc", "cpc_gsc3_concordance", "gsc3_cpc_codes")])
   gc()
   #Load in livestock production at country-BIOME level
-  val_livestock_production <- readRDS(file.path(tmp_dir, 'tmp/gtap_ref_year/gadm_bio_livestock_valprod_ctlrmkwol.rds')) %>%
+  val_livestock_production <- readRDS(file.path(workdir_dir, 'workdir/gtap_ref_year/gadm_bio_livestock_valprod_ctlrmkwol.rds')) %>%
     dplyr::mutate(GADM = tolower(GADM))
   #Merge with the REG-GADM concordance
   val_livestock_production <- dplyr::left_join(val_livestock_production, reg_country_conc, by = c('GADM'))
@@ -244,5 +260,5 @@ aggr <- function(tmp_dir=getwd(), reg_country_conc_file, cpc_gsc3_concordance_fi
     dplyr::summarise(usd1000 = sum(usd1000, na.rm = T)) %>%
     dplyr::ungroup()
   #Save
-  saveRDS(val_livestock_production, file = file.path(tmp_dir, 'tmp/output_data/reg_bio_val_livestock_production.rds'))
+  saveRDS(val_livestock_production, file = file.path(workdir_dir, 'workdir/output_data/reg_bio_val_livestock_production.rds'))
 }

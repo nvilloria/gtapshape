@@ -4,7 +4,7 @@
 \alias{urban_land_cover}
 \title{Urban land cover}
 \usage{
-urban_land_cover(bip_file, hdr_file, cropland_file, tmp_dir = getwd())
+urban_land_cover(bip_file, hdr_file, cropland_file, workdir_dir = getwd())
 }
 \arguments{
 \item{bip_file}{Path to the bip file containing urban land cover data}
@@ -13,7 +13,7 @@ urban_land_cover(bip_file, hdr_file, cropland_file, tmp_dir = getwd())
 
 \item{cropland_file}{Path to the file containing cropland data}
 
-\item{tmp_dir}{Location of the tmp dir created using gtap_setup function. The default is the current working directory set by getwd()}
+\item{workdir_dir}{Location of the workdir dir created using gtap_setup function. The default is the current working directory set by getwd()}
 }
 \value{
 Creates urban cover raster

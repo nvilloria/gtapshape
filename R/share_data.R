@@ -10,21 +10,44 @@
 #'    "X2.CATTLE", "X3.GOATS", "X4.SHEEP")
 #' @param cpc_gsc3_concordance_file File name of file containing concordance
 #'    which links CPC codes to their GSC3 GTAP sector codes
-#' @param tmp_dir Location of the tmp dir created using gtap_setup function. The default is the current working directory set by getwd()
-#' @return Saves .rds files containing land cover, crop production, livestock
-#'  production, and value of production data for country and subnational
-#'  area combinations.
+#' @param workdir_dir Location of the workdir dir created using gtap_setup function. The default is the current working directory set by getwd()
+#'
+#' @return Saves the nine .rds files below in
+#'     ./workdir/gtap_ref_year. These rsd files containing land cover,
+#'     crop production, livestock production, and value of production
+#'     data for country and subnational area combinations.
+#'
+#' gadm_bio_crop_harvarea.rds *
+#'
+#' gadm_bio_crop_production.rds *
+#'
+#' gadm_bio_livestock_valprod_ctlrmkwol.rds
+#'
+#' gadm_bio_livestock_valprod_4species.rds
+#'
+#' gadm_bio_livestock_production_4species.rds
+#'
+#' gadm_bio_livestock_numanimals.rds *
+#'
+#' gadm_bio_land_cover.rds *
+#'
+#' gadm_bio_vallvstkprod_rmk_wol.rds *
+#'
+#' gadm_bio_val_crop_production.rds *
+#'
+#' The data with a star * are an input to [aggr].
+
 #' @export
-share_data <- function(lvstk_prices_4spec_file, cpc_gsc3_concordance_file, tmp_dir=getwd()) {
+share_data <- function(lvstk_prices_4spec_file, cpc_gsc3_concordance_file, workdir_dir=getwd()) {
   #### Land Cover ####
   #Read in data for the year specified
-  landcov_2017 <- readRDS(file.path(tmp_dir, 'tmp/gtap_ref_year/fao_land_cover.rds')) %>%
+  landcov_2017 <- readRDS(file.path(workdir_dir, 'workdir/gtap_ref_year/fao_land_cover.rds')) %>%
     dplyr::rename(GADM = ISO3)
   #Read in the shares
   #NOTE - If a country is missing shares, it means that we did not have
   #cropland, pastureland, and other land type data. So we keep the original
   #base year acreage instead of updating the data.
-  landcov_shares <- readRDS(file.path(tmp_dir, 'tmp/gadm_bio_landcov_shares.rds')) %>%
+  landcov_shares <- readRDS(file.path(workdir_dir, 'workdir/gadm_bio_landcov_shares.rds')) %>%
     dplyr::select(GADM, BIO, country_total_urban, starts_with('lc_share'), starts_with('bio_share')) %>%
     unique()
   #Join to the land cover data by GADM
@@ -63,7 +86,7 @@ share_data <- function(lvstk_prices_4spec_file, cpc_gsc3_concordance_file, tmp_d
   #Now we need to add in the countries which will not have updated land
   #cover data because they do not have cropland, pastureland, and
   #other land cover data in the base year
-  base_lc_df <- readRDS(file.path(tmp_dir, 'tmp/base_year/GADM_BIO_landcover_rasterdata_ha.rds')) %>%
+  base_lc_df <- readRDS(file.path(workdir_dir, 'workdir/base_year/GADM_BIO_landcover_rasterdata_ha.rds')) %>%
     dplyr::mutate(GADM = substr(GADM_BIO, 1, 3),
                   BIO = substr(GADM_BIO, 5, nchar(paste0(GADM_BIO)))) %>%
     dplyr::select(GADM, BIO, GADM_BIO, everything())
@@ -91,19 +114,19 @@ share_data <- function(lvstk_prices_4spec_file, cpc_gsc3_concordance_file, tmp_d
   #   dplyr::mutate(all_lcov_ha = rowSums(across(cropland_ha:other_ha)))
 
   #Save
-  saveRDS(gadm_bio_land_cover_output, file = file.path(tmp_dir, 'tmp/gtap_ref_year/gadm_bio_land_cover.rds'))
+  saveRDS(gadm_bio_land_cover_output, file = file.path(workdir_dir, 'workdir/gtap_ref_year/gadm_bio_land_cover.rds'))
 
   #### Crop production ####
-  rm(list=ls()[! ls() %in% c("tmp_dir", "lvstk_prices_4spec_file",  "cpc_gsc3_concordance_file")])
+  rm(list=ls()[! ls() %in% c("workdir_dir", "lvstk_prices_4spec_file",  "cpc_gsc3_concordance_file")])
   gc()
   #Load in the set of biome names
-  set_BIO_list <- readRDS(file.path(tmp_dir, 'tmp/sets/set_BIO.rds'))
+  set_BIO_list <- readRDS(file.path(workdir_dir, 'workdir/sets/set_BIO.rds'))
   #Load fao data for chosen gtap year (2017)
-  crop_production_fao <- readRDS(file.path(tmp_dir, 'tmp/gtap_ref_year/fao_prod_harvarea.rds')) %>%
+  crop_production_fao <- readRDS(file.path(workdir_dir, 'workdir/gtap_ref_year/fao_prod_harvarea.rds')) %>%
     dplyr::filter(element == 'production') %>%
     dplyr::rename(GADM = ISO3)
   #Load the GADM-BIOME shares for crop production
-  crop_production_shares <- readRDS(file = file.path(tmp_dir, 'tmp/gadm_bio_crop_prod_shares.rds'))
+  crop_production_shares <- readRDS(file = file.path(workdir_dir, 'workdir/gadm_bio_crop_prod_shares.rds'))
   #Make it wide
   crop_production_shares_wide <- crop_production_shares %>%
     tidyr::pivot_wider(id_cols = c(GADM, crop, item_code_cpc), names_from = BIO, values_from = share_gadm_output)
@@ -127,15 +150,15 @@ share_data <- function(lvstk_prices_4spec_file, cpc_gsc3_concordance_file, tmp_d
                         values_to = 'tons',
                         names_to = 'BIO')
   #Save
-  saveRDS(merged_long, file = file.path(tmp_dir, 'tmp/gtap_ref_year/gadm_bio_crop_production.rds'))
+  saveRDS(merged_long, file = file.path(workdir_dir, 'workdir/gtap_ref_year/gadm_bio_crop_production.rds'))
 
   #### Value of crop production ####
-  rm(list=ls()[! ls() %in% c("tmp_dir", "lvstk_prices_4spec_file",  "cpc_gsc3_concordance_file")])
+  rm(list=ls()[! ls() %in% c("workdir_dir", "lvstk_prices_4spec_file",  "cpc_gsc3_concordance_file")])
   gc()
   #Load the crop production data just created at the GADM-BIO intersection
-  crop_val_production <- readRDS(file.path(tmp_dir, 'tmp/gtap_ref_year/gadm_bio_crop_production.rds'))
+  crop_val_production <- readRDS(file.path(workdir_dir, 'workdir/gtap_ref_year/gadm_bio_crop_production.rds'))
   #Merge in prices
-  producer_prices <- readRDS(file.path(tmp_dir, 'tmp/gtap_ref_year/fao_producer_prices.rds')) %>%
+  producer_prices <- readRDS(file.path(workdir_dir, 'workdir/gtap_ref_year/fao_producer_prices.rds')) %>%
     dplyr::rename(GADM = ISO3,
                   price_usd_ton = value) %>%
     dplyr::select(GADM, item_code_cpc, price_usd_ton)
@@ -156,20 +179,20 @@ share_data <- function(lvstk_prices_4spec_file, cpc_gsc3_concordance_file, tmp_d
   crop_val_production <- crop_val_production %>%
     dplyr::mutate(usd1000 = tons*price_usd_ton/1000)
   #Save
-  saveRDS(crop_val_production, file = file.path(tmp_dir, 'tmp/gtap_ref_year/gadm_bio_val_crop_production.rds'))
+  saveRDS(crop_val_production, file = file.path(workdir_dir, 'workdir/gtap_ref_year/gadm_bio_val_crop_production.rds'))
 
 
   #### Harvested Area ####
-  rm(list=ls()[! ls() %in% c("tmp_dir", "lvstk_prices_4spec_file",  "cpc_gsc3_concordance_file")])
+  rm(list=ls()[! ls() %in% c("workdir_dir", "lvstk_prices_4spec_file",  "cpc_gsc3_concordance_file")])
   gc()
   #Load in the set of biome names
-  set_BIO_list <- readRDS(file.path(tmp_dir, 'tmp/sets/set_BIO.rds'))
+  set_BIO_list <- readRDS(file.path(workdir_dir, 'workdir/sets/set_BIO.rds'))
   #Load fao data for chosen gtap year (2017)
-  harv_area_fao <- readRDS(file.path(tmp_dir, 'tmp/gtap_ref_year/fao_prod_harvarea.rds')) %>%
+  harv_area_fao <- readRDS(file.path(workdir_dir, 'workdir/gtap_ref_year/fao_prod_harvarea.rds')) %>%
     dplyr::filter(element == 'area_harvested') %>%
     dplyr::rename(GADM = ISO3)
   #Load the GADM-BIOME shares for crop production
-  crop_production_shares <- readRDS(file = file.path(tmp_dir, 'tmp/gadm_bio_crop_prod_shares.rds'))
+  crop_production_shares <- readRDS(file = file.path(workdir_dir, 'workdir/gadm_bio_crop_prod_shares.rds'))
   #Make it wide
   crop_production_shares_wide <- crop_production_shares %>%
     tidyr::pivot_wider(id_cols = c(GADM, crop, item_code_cpc), names_from = BIO, values_from = share_gadm_output)
@@ -193,15 +216,15 @@ share_data <- function(lvstk_prices_4spec_file, cpc_gsc3_concordance_file, tmp_d
                         values_to = 'ha',
                         names_to = 'BIO')
   #Save
-  saveRDS(merged_long, file = file.path(tmp_dir, 'tmp/gtap_ref_year/gadm_bio_crop_harvarea.rds'))
+  saveRDS(merged_long, file = file.path(workdir_dir, 'workdir/gtap_ref_year/gadm_bio_crop_harvarea.rds'))
 
   #### Livestock number of animals ####
-  rm(list=ls()[! ls() %in% c("tmp_dir", "lvstk_prices_4spec_file",  "cpc_gsc3_concordance_file")])
+  rm(list=ls()[! ls() %in% c("workdir_dir", "lvstk_prices_4spec_file",  "cpc_gsc3_concordance_file")])
   gc()
   #Load in the set of biome names
-  set_BIO_list <- readRDS(file.path(tmp_dir, 'tmp/sets/set_BIO.rds'))
+  set_BIO_list <- readRDS(file.path(workdir_dir, 'workdir/sets/set_BIO.rds'))
   #Load fao data for chosen gtap year (2017)
-  fao_livestock_numanimals <- readRDS(file.path(tmp_dir, 'tmp/gtap_ref_year/fao_livestock_numanimals.rds')) %>%
+  fao_livestock_numanimals <- readRDS(file.path(workdir_dir, 'workdir/gtap_ref_year/fao_livestock_numanimals.rds')) %>%
     dplyr::rename(GADM = ISO3)
   #Drop categories with multiple items and ones we don't need
   fao_livestock_numanimals <- fao_livestock_numanimals %>%
@@ -239,7 +262,7 @@ share_data <- function(lvstk_prices_4spec_file, cpc_gsc3_concordance_file, tmp_d
     dplyr::select(-value)
 
   #Load in livestock shares
-  lvstk_production_shares <- readRDS(file.path(tmp_dir, 'tmp/gadm_bio_lvstk_prod_shares.rds'))
+  lvstk_production_shares <- readRDS(file.path(workdir_dir, 'workdir/gadm_bio_lvstk_prod_shares.rds'))
   #Make it wide
   lvstk_production_shares_wide <- lvstk_production_shares %>%
     tidyr::pivot_wider(id_cols = c(GADM, GSC3), names_from = BIO, values_from = share_gadm_output)
@@ -263,16 +286,16 @@ share_data <- function(lvstk_prices_4spec_file, cpc_gsc3_concordance_file, tmp_d
                         values_to = 'head1000',
                         names_to = 'BIO')
   #Save
-  saveRDS(merged_long, file = file.path(tmp_dir, 'tmp/gtap_ref_year/gadm_bio_livestock_numanimals.rds'))
+  saveRDS(merged_long, file = file.path(workdir_dir, 'workdir/gtap_ref_year/gadm_bio_livestock_numanimals.rds'))
 
   #### Value of livestock production - wol and rmk ####
-  rm(list=ls()[! ls() %in% c("tmp_dir", "lvstk_prices_4spec_file",  "cpc_gsc3_concordance_file")])
+  rm(list=ls()[! ls() %in% c("workdir_dir", "lvstk_prices_4spec_file",  "cpc_gsc3_concordance_file")])
   gc()
   #Load in the set of biome names
-  set_BIO_list <- readRDS(file.path(tmp_dir, 'tmp/sets/set_BIO.rds'))
+  set_BIO_list <- readRDS(file.path(workdir_dir, 'workdir/sets/set_BIO.rds'))
   #### Need to do wol and rmk categories separately from ctl???
   #Load fao production data for chosen gtap year (2017)
-  production_fao <- readRDS(file.path(tmp_dir, 'tmp/gtap_ref_year/fao_prod_harvarea.rds')) %>%
+  production_fao <- readRDS(file.path(workdir_dir, 'workdir/gtap_ref_year/fao_prod_harvarea.rds')) %>%
     dplyr::filter(element == 'production') %>%
     dplyr::rename(GADM = ISO3) %>%
     dplyr::mutate(item_code_cpc_2 = substr(item_code_cpc, 1, 2),
@@ -306,7 +329,7 @@ share_data <- function(lvstk_prices_4spec_file, cpc_gsc3_concordance_file, tmp_d
     dplyr::filter(!is.na(GSC3))
 
   #Merge in prices
-  producer_prices <- readRDS(file.path(tmp_dir, 'tmp/gtap_ref_year/fao_producer_prices.rds')) %>%
+  producer_prices <- readRDS(file.path(workdir_dir, 'workdir/gtap_ref_year/fao_producer_prices.rds')) %>%
     dplyr::rename(GADM = ISO3,
                   price_usd_ton = value) %>%
     dplyr::select(GADM, item_code_cpc, price_usd_ton)
@@ -326,7 +349,7 @@ share_data <- function(lvstk_prices_4spec_file, cpc_gsc3_concordance_file, tmp_d
     dplyr::mutate(usd1000 = value*price_usd_ton/1000)
 
   #Load in livestock shares
-  lvstk_production_shares <- readRDS(file.path(tmp_dir, 'tmp/gadm_bio_lvstk_prod_shares.rds'))
+  lvstk_production_shares <- readRDS(file.path(workdir_dir, 'workdir/gadm_bio_lvstk_prod_shares.rds'))
   #Make it wide
   lvstk_production_shares_wide <- lvstk_production_shares %>%
     tidyr::pivot_wider(id_cols = c(GADM, GSC3), names_from = BIO, values_from = share_gadm_output)
@@ -350,15 +373,15 @@ share_data <- function(lvstk_prices_4spec_file, cpc_gsc3_concordance_file, tmp_d
                         values_to = 'usd1000',
                         names_to = 'BIO')
   #Save
-  saveRDS(merged_long, file = file.path(tmp_dir, 'tmp/gtap_ref_year/gadm_bio_vallvstkprod_rmk_wol.rds'))
+  saveRDS(merged_long, file = file.path(workdir_dir, 'workdir/gtap_ref_year/gadm_bio_vallvstkprod_rmk_wol.rds'))
 
   #### Livestock production - 4 ruminant species ####
-  rm(list=ls()[! ls() %in% c("tmp_dir", "lvstk_prices_4spec_file",  "cpc_gsc3_concordance_file")])
+  rm(list=ls()[! ls() %in% c("workdir_dir", "lvstk_prices_4spec_file",  "cpc_gsc3_concordance_file")])
   gc()
   #Load in the set of biome names
-  set_BIO_list <- readRDS(file.path(tmp_dir, 'tmp/sets/set_BIO.rds'))
+  set_BIO_list <- readRDS(file.path(workdir_dir, 'workdir/sets/set_BIO.rds'))
   #Load fao data for chosen gtap year
-  fao_livestock_production <- readRDS(file.path(tmp_dir, 'tmp/gtap_ref_year/fao_livestock_numanimals.rds')) %>%
+  fao_livestock_production <- readRDS(file.path(workdir_dir, 'workdir/gtap_ref_year/fao_livestock_numanimals.rds')) %>%
     dplyr::rename(GADM = ISO3)
   #Drop categories with multiple items and ones we don't need
   fao_livestock_production <- fao_livestock_production %>%
@@ -378,7 +401,7 @@ share_data <- function(lvstk_prices_4spec_file, cpc_gsc3_concordance_file, tmp_d
     dplyr::ungroup()
 
   #Load in livestock shares
-  lvstk_production_shares <- readRDS(file.path(tmp_dir, 'tmp/gadm_bio_lvstk_prod_shares.rds'))
+  lvstk_production_shares <- readRDS(file.path(workdir_dir, 'workdir/gadm_bio_lvstk_prod_shares.rds'))
   #Make it wide
   lvstk_production_shares_wide <- lvstk_production_shares %>%
     tidyr::pivot_wider(id_cols = c(GADM, GSC3), names_from = BIO, values_from = share_gadm_output)
@@ -402,15 +425,15 @@ share_data <- function(lvstk_prices_4spec_file, cpc_gsc3_concordance_file, tmp_d
                         values_to = 'head1000',
                         names_to = 'BIO')
   #Save
-  saveRDS(merged_long, file = file.path(tmp_dir, 'tmp/gtap_ref_year/gadm_bio_livestock_production_4species.rds'))
+  saveRDS(merged_long, file = file.path(workdir_dir, 'workdir/gtap_ref_year/gadm_bio_livestock_production_4species.rds'))
 
   #### Value of livestock production - 4 ruminant species ####
-  rm(list=ls()[! ls() %in% c("tmp_dir", "lvstk_prices_4spec_file",  "cpc_gsc3_concordance_file")])
+  rm(list=ls()[! ls() %in% c("workdir_dir", "lvstk_prices_4spec_file",  "cpc_gsc3_concordance_file")])
   gc()
   #Load in the set of biome names
-  set_BIO_list <- readRDS(file.path(tmp_dir, 'tmp/sets/set_BIO.rds'))
+  set_BIO_list <- readRDS(file.path(workdir_dir, 'workdir/sets/set_BIO.rds'))
   #Load production data from above
-  val_lvstk_prod_4spec <- readRDS(file.path(tmp_dir, 'tmp/gtap_ref_year/gadm_bio_livestock_production_4species.rds'))
+  val_lvstk_prod_4spec <- readRDS(file.path(workdir_dir, 'workdir/gtap_ref_year/gadm_bio_livestock_production_4species.rds'))
   #Load in prices calculated using gtaplulc18.har file
   lvstk_prices_4spec <- read.csv(lvstk_prices_4spec_file, header = T) %>%
     dplyr::rename("GADM" = "QLIVE_18",
@@ -451,10 +474,10 @@ share_data <- function(lvstk_prices_4spec_file, cpc_gsc3_concordance_file, tmp_d
     dplyr::mutate(usd1000 = head1000*1000*price/1000)
 
   #Save
-  saveRDS(val_lvstk_prod_4spec, file = file.path(tmp_dir, 'tmp/gtap_ref_year/gadm_bio_livestock_valprod_4species.rds'))
+  saveRDS(val_lvstk_prod_4spec, file = file.path(workdir_dir, 'workdir/gtap_ref_year/gadm_bio_livestock_valprod_4species.rds'))
 
   #### Combine 'ctl', 'rmk', and 'wol' data ####
-  rmk_wol_valprod <- readRDS(file.path(tmp_dir, 'tmp/gtap_ref_year/gadm_bio_vallvstkprod_rmk_wol.rds')) %>%
+  rmk_wol_valprod <- readRDS(file.path(workdir_dir, 'workdir/gtap_ref_year/gadm_bio_vallvstkprod_rmk_wol.rds')) %>%
     dplyr::select(GADM, BIO, GSC3, usd1000)
   #Sum val of prod across 4 ctl species
   ctl_valprod <- val_lvstk_prod_4spec %>%
@@ -464,5 +487,5 @@ share_data <- function(lvstk_prices_4spec_file, cpc_gsc3_concordance_file, tmp_d
   #Combine the three categories
   val_lvstk_prod <- rbind(ctl_valprod, rmk_wol_valprod)
   #Save
-  saveRDS(val_lvstk_prod, file = file.path(tmp_dir, 'tmp/gtap_ref_year/gadm_bio_livestock_valprod_ctlrmkwol.rds'))
+  saveRDS(val_lvstk_prod, file = file.path(workdir_dir, 'workdir/gtap_ref_year/gadm_bio_livestock_valprod_ctlrmkwol.rds'))
 }

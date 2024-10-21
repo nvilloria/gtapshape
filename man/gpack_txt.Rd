@@ -4,18 +4,36 @@
 \alias{gpack_txt}
 \title{Output aggregated data as GEMPACK txt files}
 \usage{
-gpack_txt(tmp_dir = getwd(), cpc_gsc3_concordance_file)
+gpack_txt(workdir_dir = getwd(), cpc_gsc3_concordance_file)
 }
 \arguments{
-\item{tmp_dir}{Location of the tmp dir created using gtap_setup function. The default is the current working directory set by getwd()}
+\item{workdir_dir}{Location of the workdir dir created using gtap_setup function. The default is the current working directory set by getwd()}
 
 \item{cpc_gsc3_concordance_file}{File name of file containing concordance
 which links CPC codes to their GSC3 GTAP sector codes}
 }
 \value{
-Saves .txt files in GEMPACK txt file format containing aggregated data.
+Saves the six .txt files below in ./workdir/output_data. These are GEMPACK txt file format containing data to the GTAP regions and sub-national geographies created by \link{NV: link to function}.
+
+The GEMPACK text files in directory ./workdir/output_data are:
+
+lulc_cropprod_data.txt
+
+lulc_harvarea_data.txt
+
+lulc_lcov_data.txt
+
+lulc_lvstkprod_data.txt
+
+lulc_valcropprod_data.txt
+
+lulc_vallvstkprod_data.txt
+
+[NV: These files are used by \link{link to function}].
 }
 \description{
-This function outputs the aggregated data from the "aggr" command as
-GEMPACK text files so they can be read into GTAP analyses.
+This function outputs the aggregated data from the "aggr" command
+as GEMPACK text files so they can be read into GTAP analyses. \link[=NV:
+Add the files that this function reads, and the functions that
+created them.]{NV: Add the files that this function reads, and the functions that created them.}
 }

@@ -4,12 +4,12 @@
 \alias{potential_vegetation}
 \title{Potential vegetation}
 \usage{
-potential_vegetation(pot_veg_file, tmp_dir = getwd())
+potential_vegetation(pot_veg_file, workdir_dir = getwd())
 }
 \arguments{
 \item{pot_veg_file}{Path to the raster file indicating potential vegetation classes}
 
-\item{tmp_dir}{Location of the tmp dir create using gtap_setup function. The default is the current working directory set by getwd()}
+\item{workdir_dir}{Location of the workdir dir create using gtap_setup function. The default is the current working directory set by getwd()}
 }
 \value{
 Saves 4 rasters for the "Forests", "Shrubland",
@@ -17,5 +17,5 @@ Saves 4 rasters for the "Forests", "Shrubland",
 the original data produced by Ramankutty & Foley.
 }
 \description{
-This function creates rasters for potential vegetation.
+This function creates rasters for potential vegetation. [NV: explain what these data are used for (in which functions) and also where they are stored)
 }

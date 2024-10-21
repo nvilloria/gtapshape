@@ -5,14 +5,14 @@
 \title{Create gtaplulcaez.har file}
 \usage{
 gtaplulc(
-  tmp_dir = getwd(),
+  workdir_dir = getwd(),
   gempack_lulc_dir,
   gempack_timber_dir,
   gempack_rentcalc_dir
 )
 }
 \arguments{
-\item{tmp_dir}{Location of the tmp dir created using gtap_setup function. The default is the current working directory set by getwd()}
+\item{workdir_dir}{Location of the workdir dir created using gtap_setup function. The default is the current working directory set by getwd()}
 
 \item{gempack_lulc_dir}{Location of the directory where inputs and outputs
 to LULC GEMPACK executables are stored.}

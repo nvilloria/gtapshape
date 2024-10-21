@@ -4,15 +4,43 @@
 \alias{download_fao}
 \title{Download FAO data}
 \usage{
-download_fao(gtap_year, tmp_dir = getwd())
+download_fao(gtap_year, workdir_dir = getwd())
 }
 \arguments{
 \item{gtap_year}{Year of FAO data to be downloaded}
 
-\item{tmp_dir}{Location of the tmp dir created using gtap_setup function. The default is the current working directory set by getwd()}
+\item{workdir_dir}{Location of the workdir dir created using gtap_setup function. The default is the current working directory set by getwd()}
 }
 \value{
 Saves .rds files containing production and price data
+
+The following files are saved in ./workdir/fao_data/
+
+fao_cpc_item_codes.rds
+
+fao_land_cover.rds
+
+fao_prices.rds
+
+fao_production_crops.rds
+
+fao_production.rds
+
+fao_val_prod.rds
+
+And the following files are saved in:
+
+fao_land_cover.rds
+
+fao_livestock_numanimals.rds
+
+fao_prod_harvarea.rds
+
+fao_producer_prices.rds
+
+fao_val_prod_1000usd.rds
+
+[NV: where are these data used and for what. Link to function. I think is \link{create_shares}
 }
 \description{
 This function downloads FAO crop and livestock production data for a

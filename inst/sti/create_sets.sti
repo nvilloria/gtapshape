@@ -1,0 +1,21 @@
+bat  !  This runs the program in "batch" mode
+ 
+n
+regbiosets.har
+at
+reg_set.txt
+A
+at
+biome_set.txt
+A
+at
+biome_endw_set.txt
+A
+at
+crp9_set.txt
+A
+at
+lcov_set.txt
+A
+ex
+0

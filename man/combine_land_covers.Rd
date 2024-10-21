@@ -4,14 +4,18 @@
 \alias{combine_land_covers}
 \title{Combine data to create 7 different land covers}
 \usage{
-combine_land_covers(cropland_rast_file, pasture_rast_file, tmp_dir = getwd())
+combine_land_covers(
+  cropland_rast_file,
+  pasture_rast_file,
+  workdir_dir = getwd()
+)
 }
 \arguments{
 \item{cropland_rast_file}{Path to the raster containing cropland area}
 
 \item{pasture_rast_file}{Path to the raster containing pasture area}
 
-\item{tmp_dir}{Location of the tmp dir created using gtap_setup function. The default is the current working directory set by getwd()}
+\item{workdir_dir}{Location of the workdir dir created using gtap_setup function. The default is the current working directory set by getwd()}
 }
 \value{
 Creates 7 rasters, one for each land cover type. Each raster

@@ -5,14 +5,22 @@
 #'
 #' @param monfreda_fao_concord_file File path to concordance linking monfreda
 #'    crop names to fao crop codes
-#' @param tmp_dir Location of the tmp dir created using gtap_setup function. The default is the current working directory set by getwd()
-#' @return Saves .rds files containing share variables for country and
+#' @param workdir_dir Location of the workdir dir created using gtap_setup function. The default is the current working directory set by getwd()
+#'
+#' @return Saves  the three .rds files below to ./workdir/. These files contain share variables for country and
 #'    subnational area combinations.
+#'
+#' gadm_bio_crop_prod_shares.rds
+#'
+#' gadm_bio_landcov_shares.rds
+#'
+#' [NV: What are these data for and which function uses them?]
+#'
 #' @export
-create_shares <- function(monfreda_fao_concord_file, tmp_dir=getwd()) {
+create_shares <- function(monfreda_fao_concord_file, workdir_dir=getwd()) {
   #### Crop production in base year ####
   #First load and process crop production data
-  base_year_crop_production <- readRDS(file.path(tmp_dir, 'tmp/base_year/crop_production_tons.rds'))
+  base_year_crop_production <- readRDS(file.path(workdir_dir, 'workdir/base_year/crop_production_tons.rds'))
   base_year_crop_production <- tidyr::pivot_longer(base_year_crop_production,
                                                    cols = abaca_Production:yautia_Production,
                                                    names_to = 'crop',
@@ -27,7 +35,7 @@ create_shares <- function(monfreda_fao_concord_file, tmp_dir=getwd()) {
                   crop = crop_raster_name) %>%
     dplyr::mutate(crop = gsub(' ', '', crop))
   #Merge in the fao_codes - from Step 4
-  crop_fao_item_codes <- readRDS(file = file.path(paste(tmp_dir, '/tmp/fao_data/',sep=""), "fao_cpc_item_codes.rds"))
+  crop_fao_item_codes <- readRDS(file = file.path(paste(workdir_dir, '/workdir/fao_data/',sep=""), "fao_cpc_item_codes.rds"))
   monfreda_fao_concord <- dplyr::left_join(monfreda_fao_concord, crop_fao_item_codes, by = c('item'))
   #Merge
   base_year_crop_production <- dplyr::left_join(base_year_crop_production, monfreda_fao_concord, by = c('crop'))
@@ -45,12 +53,12 @@ create_shares <- function(monfreda_fao_concord_file, tmp_dir=getwd()) {
   crop_production_shares <- crop_production_shares %>%
     dplyr::mutate(share_gadm_output = ifelse(reg_total_prod==0, 0, production_tons/reg_total_prod))
   #Save
-  saveRDS(crop_production_shares, file.path(tmp_dir, 'tmp/gadm_bio_crop_prod_shares.rds'))
+  saveRDS(crop_production_shares, file.path(workdir_dir, 'workdir/gadm_bio_crop_prod_shares.rds'))
 
   #### Livestock production in base year
-  rm(list=ls()[! ls() %in% c("tmp_dir")])
+  rm(list=ls()[! ls() %in% c("workdir_dir")])
   gc()
-  base_year_livestock_production <- readRDS(file.path(tmp_dir, 'tmp/base_year/livestock_production_head.rds'))
+  base_year_livestock_production <- readRDS(file.path(workdir_dir, 'workdir/base_year/livestock_production_head.rds'))
   #Add up the animals by GTAP category
   #  ctl - cattle, buffaloes, camels, other camelids, sheep, goats, live animals NES, horses, asses, mules, crude organic materials NES (bovine semen)
   #  rmk - Cow milk, whole (fresh), Buffalo milk, Sheep milk, Goat milk, Camel milk
@@ -75,7 +83,7 @@ create_shares <- function(monfreda_fao_concord_file, tmp_dir=getwd()) {
   lvstk_production_shares <- lvstk_production_shares %>%
     dplyr::mutate(share_gadm_output = ifelse(reg_total_prod==0, 0, head/reg_total_prod))
   #Save
-  saveRDS(lvstk_production_shares, file = file.path(tmp_dir, 'tmp/gadm_bio_lvstk_prod_shares.rds'))
+  saveRDS(lvstk_production_shares, file = file.path(workdir_dir, 'workdir/gadm_bio_lvstk_prod_shares.rds'))
 
   #### Land Cover from Step 2 ####
   #Select country-BIO with cropland, pasture, and other land cover types
@@ -83,7 +91,7 @@ create_shares <- function(monfreda_fao_concord_file, tmp_dir=getwd()) {
   #"Note that land cover is updated only in region-108AEZ wherein both cropland, pasture and other
   #land types are present (if this condition is not met, land cover in a region-108AEZ is fixed to the
   #2001 base year values)."
-  base_lc_df <- readRDS(file.path(tmp_dir, 'tmp/base_year/GADM_BIO_landcover_rasterdata_ha.rds')) %>%
+  base_lc_df <- readRDS(file.path(workdir_dir, 'workdir/base_year/GADM_BIO_landcover_rasterdata_ha.rds')) %>%
     dplyr::mutate(GADM = substr(GADM_BIO, 1, 3),
                   BIO = substr(GADM_BIO, 5, nchar(paste0(GADM_BIO)))) %>%
     dplyr::select(GADM, BIO, GADM_BIO, everything())
@@ -124,5 +132,5 @@ create_shares <- function(monfreda_fao_concord_file, tmp_dir=getwd()) {
   cntry_bio_landcov_update <- cntry_bio_landcov_update %>%
     dplyr::select(-country_total_area)
   #Save
-  saveRDS(cntry_bio_landcov_update, file = file.path(tmp_dir, 'tmp/gadm_bio_landcov_shares.rds'))
+  saveRDS(cntry_bio_landcov_update, file = file.path(workdir_dir, 'workdir/gadm_bio_landcov_shares.rds'))
 }
