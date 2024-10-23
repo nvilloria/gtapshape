@@ -15,7 +15,7 @@ define_sets(reg_set_file, subnat_bound_file, workdir_dir = getwd())
 }
 \value{
 Sets for the final set of endowments (BIO_ENDW), 9 Crop commodity,
-aggregates (CRP9) and 7 land cover types (LCOV) (NV: Add more details of what the ouput is and where the output is at. E.g., five text files with the sets ... and two Rds files with the sets ... in workdir/sets/ Also add links to the functions that use these sets to facilitate followint the logic of the building process)
+aggregates (CRP9) and 7 land cover types (LCOV) (NV: Add more details of what the ouput is and where the output is at. E.g., five text files with the sets ... and two Rds files with the sets ... in workdir/sets/ Also add links to the functions that use these sets to facilitate following the logic of the building process)
 }
 \description{
 This function defines the sets used to generate agricultural

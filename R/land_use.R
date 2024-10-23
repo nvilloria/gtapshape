@@ -24,7 +24,7 @@
 #' @export
 land_use <- function(crop_production_rast_dir, crop_area_rast_dir, livestock_density_rast_dir, workdir_dir=getwd()) {
   #### Crop production ####
-  #Load in the crop output and harvested area (ha) data
+  #Load in the crop output and harvested area (ha) rasters (172 of those):
   crop_output_raster_list <- list.files(crop_production_rast_dir,
                                         pattern = '_Production.tif$',
                                         recursive = TRUE,

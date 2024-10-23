@@ -1,0 +1,57 @@
+crop_production_rast_dir = "C:/Users/nvill/Dropbox/papers/Current/GTAPBIOMES_shared/GTAP_BIOMES/raw_data/HarvestedAreaYield175Crops_Geotiff/GeoTiff"
+crop_area_rast_dir =       "C:/Users/nvill/Dropbox/papers/Current/GTAPBIOMES_shared/GTAP_BIOMES/raw_data/HarvestedAreaYield175Crops_Geotiff/GeoTiff"
+
+# Preprocess output: create data frames that are stored in the gtapshape data folder:
+output.file.names <- list.files(crop_production_rast_dir,
+                                        pattern = '_Production.tif$',
+                                        recursive = TRUE,
+                                        full.names = TRUE)
+
+harea.file.names <- list.files(crop_area_rast_dir,
+                                           pattern = '_HarvestedAreaHectares.tif$',
+                                           recursive = TRUE,
+                                           full.names = TRUE)
+
+## Save the files to data:
+require(dplyr)
+output.by.crop <- lapply( output.file.names[1:3], function(.r){
+    r <- as.data.frame( terra::rast(.r), xy=TRUE)
+    r$variable <- colnames(r)[3]
+    colnames(r)[3] <- "value"
+    r <- r[r$value>0,]
+    return(r)
+})
+
+## getwd()
+object.size(output.by.crop)/1e6
+
+output.by.crop <- do.call(rbind, output.by.crop)
+
+nrow(output.by.crop)
+
+## save(output.by.crop, file="./data/output.by.crop.RData", compress = "xz",compression_level = 9)
+
+## usethis::use_data(output.by.crop, overwrite = TRUE)
+
+## install.packages('qs')
+
+## Save the files to inst/monfreda:
+lapply( output.file.names, function(.r){
+    require(dplyr)
+    ## (.r <- output.file.names[[1]])
+    r <- terra::rast(.r)
+    r <- as.data.frame(r, xy=TRUE)
+    c <- colnames(r)[3]
+    r1 <- r %>% filter(!!sym(c)>0)
+    filename <- tools::file_path_sans_ext(basename(.r))
+    assign(filename,r1)
+    save(list=filename,file= paste("./gtapshape/inst/monfreda/",filename,".rda",sep=""), compress = "xz",
+         compression_level = 9, envir = .GlobalEnv)
+}
+)
+
+load("./gtapshape/inst/monfreda/maize_Production.rda")
+objects()
+head(maize_Production)
+
+

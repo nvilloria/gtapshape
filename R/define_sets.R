@@ -30,7 +30,7 @@
 #' @param subnat_bound_file Simple feature object containing the subnational boundaries (NV: Add a link to the function that creates this----would it be a good idea to have few of this included as defaults?)
 #' @param workdir_dir Location of the workdir dir create using gtap_setup function. The default is the current working directory set by getwd()
 #' @return Sets for the final set of endowments (BIO_ENDW), 9 Crop commodity,
-#'         aggregates (CRP9) and 7 land cover types (LCOV) (NV: Add more details of what the ouput is and where the output is at. E.g., five text files with the sets ... and two Rds files with the sets ... in workdir/sets/ Also add links to the functions that use these sets to facilitate followint the logic of the building process)
+#'         aggregates (CRP9) and 7 land cover types (LCOV) (NV: Add more details of what the ouput is and where the output is at. E.g., five text files with the sets ... and two Rds files with the sets ... in workdir/sets/ Also add links to the functions that use these sets to facilitate following the logic of the building process)
 #'
 #'
 #' @export
