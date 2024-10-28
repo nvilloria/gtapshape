@@ -1,0 +1,38 @@
+---
+title: "raster_processing"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{raster_processing}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+The data underlying the GTAP-AEZ database is enormous and
+complex. This vignette describes the processing of the data on land
+use and land cover. The objective is to transform the original data
+delivered as rasters into R dataframes. Such transformation makes
+feasible including the data in gtapshape and speeds up calculations.
+
+The functions below operate over data stored in folder named
+raw-data. The raw-data is in a large zipped archive that can be
+downloaded from the GTAP servers. Downloading these data takes
+time. The zipped file is 8GB and unzipped it occupies around 32GB.
+
+
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r, eval = FALSE}
+## It's come here.
+
+```
+
+
+```{r setup}
+#library(gtapshape)
+```
