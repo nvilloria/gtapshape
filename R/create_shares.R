@@ -30,10 +30,13 @@ create_shares <- function(monfreda_fao_concord_file, workdir_dir=getwd()) {
   #Available in "Global Harvested Area and Yield for 175 Crops Metadata and Technical Documentation"
   #at https://geodata.ucdavis.edu/geodata/crops/monfreda/METADATA_HarvestedAreaYield175Crops_June2018.pdf
   monfreda_fao_concord <- readxl::read_excel(monfreda_fao_concord_file)
-  monfreda_fao_concord <- monfreda_fao_concord %>%
-    dplyr::rename(item = monfreda_detailed,
-                  crop = crop_raster_name) %>%
-    dplyr::mutate(crop = gsub(' ', '', crop))
+
+    monfreda_fao_concord <-
+        monfreda_fao_concord %>%
+        dplyr::rename(item = monfreda_detailed,
+               crop = crop_raster_name) %>%
+        dplyr::mutate(crop = gsub(' ', '', crop))
+
   #Merge in the fao_codes - from Step 4
   crop_fao_item_codes <- readRDS(file = file.path(paste(workdir_dir, '/workdir/fao_data/',sep=""), "fao_cpc_item_codes.rds"))
   monfreda_fao_concord <- dplyr::left_join(monfreda_fao_concord, crop_fao_item_codes, by = c('item'))

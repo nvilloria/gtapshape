@@ -15,7 +15,7 @@
 #'     than x,y) aggregated to the countries and geographic boundaries
 #'     defined by GADM_BIOME_df.
 #' @export
-aggregate_to_country_biome <- function(GADM_BIOME_df, path.file.to.aggregate){
+aggregate_gridded_df_to_subnatbound <- function(GADM_BIOME_df, path.file.to.aggregate){
     ## path.file.to.aggregate <- gridded.livestock.file.names[[1]]
     ## require(dplyr)
     ## Create a temporary environment within the function to hold the
@@ -26,10 +26,15 @@ aggregate_to_country_biome <- function(GADM_BIOME_df, path.file.to.aggregate){
     data.to.aggregate <- temp.env[[loaded_name]]
     j <- right_join(GADM_BIOME_df, data.to.aggregate, by=c("x","y"))
     m <- j %>%
-        dplyr::select(!c(x,y)) %>%
         dplyr::filter(!is.na(GADM_BIO)) %>%
-        dplyr::group_by(GADM_BIO) %>%
+        dplyr::select(!c(GADM_BIO,x,y)) %>%
+        dplyr::group_by(iso3,bio) %>%
         dplyr::summarise_all(sum, na.rm = T)
+    ## 'use' would be a crop, or a land cover:
+    m$use <- names(m)[3]
+    ## Units of 'cell.value' can be either ha or metric tons
+    names(m)[3] <- 'subnatbound.value'
+    m <- with(m, m[, c("use","iso3","bio","subnatbound.value")])
     return(m)
 }
 

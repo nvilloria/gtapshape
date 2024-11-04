@@ -4,7 +4,7 @@
 #'
 #' @return A SpatRaster object with boundaries for countries and the geographies of interest.
 #' @export
-make_country_biome_raster <- function(subnat_bound_file){
+make_subnatbound_raster <- function(subnat_bound_file){
     ## Global raster to enforce raster settings:
     gr <- make.global.raster()
     ## Load the raster with countries (seems to me tha can come into
