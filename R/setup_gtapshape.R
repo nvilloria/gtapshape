@@ -16,7 +16,7 @@ setup_gtapshape<- function() {
     if (!dir.exists('workdir')){
         cat("\n\nCreating working directory...\n")
         make_workdir()
-        cat("\n\nDone creating working directory (Eventually we want to distribute much of these data within the package---or do we?).\n")
+        cat("\n\nDone creating working directory (Eventually we want to distribute much of these data within the package).\n")
     }else{
         cat("\n\nA folder named workdir exists. This suggests that the [minimum] data needed used to split the national land use and land cover data is present. If for any reason this is not the case and it is highly recommended to, run the function \nfunction setup_gtapshape().\n")
                                                    }

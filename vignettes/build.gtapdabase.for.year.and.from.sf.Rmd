@@ -1,0 +1,22 @@
+---
+title: "Build a GTAP database with land use split in subnational bounds"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{raster_processing}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r, eval = FALSE}
+## It's come here.
+
+```
+
