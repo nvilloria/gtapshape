@@ -4,6 +4,7 @@ devtools::document("..")
 crop_production_rast_dir = "C:/Users/nvill/Dropbox/papers/Current/GTAPBIOMES_shared/GTAP_BIOMES/raw_data/HarvestedAreaYield175Crops_Geotiff/GeoTiff"
 crop_area_rast_dir =       "C:/Users/nvill/Dropbox/papers/Current/GTAPBIOMES_shared/GTAP_BIOMES/raw_data/HarvestedAreaYield175Crops_Geotiff/GeoTiff"
 livestock_density_rast_dir = "C:/Users/nvill/Dropbox/papers/Current/GTAPBIOMES_shared/GTAP_BIOMES/raw_data/Gridded livestock_FAO/2005"
+workdir_dir <-  "c:/Users/nvill/Dropbox/REPOS/"
 
 output.file.names <- list.files(crop_production_rast_dir,
                                         pattern = '_Production.tif$',
@@ -22,7 +23,6 @@ dir_paths <- dir(path = livestock_density_rast_dir, recursive = FALSE, full.name
 livestock_rast_file_names <- lapply(dir_paths, FUN = list.files,
                                    pattern = ".tif$", full.names = T)
 
-workdir_dir=getwd()
 baseyr_lc_ha_file_names<- list.files(path = file.path(workdir_dir, 'workdir/rasters/'),
                                     pattern = "ha.tif",
                                     full.names = TRUE)
@@ -95,8 +95,10 @@ lapply( livestock_rast_file_names, function(.r){
 )
 
 lapply( baseyr_lc_ha_file_names, function(.r){
-    ## (.r <- baseyr_lc_ha_list[[5]])
+    ## (.r <- baseyr_lc_ha_file_names[[5]])
     r <- terra::rast(.r)
+    filename <- tools::file_path_sans_ext(basename(.r))
+    names(r) <-sub("_ha$", "", filename)
     ## Ensure raster has the default resolution, extent, and
     ## coordinate reference system:
     r <- apply_global_raster_properties(input.raster = r, global.raster = gr)
@@ -107,7 +109,7 @@ lapply( baseyr_lc_ha_file_names, function(.r){
     ## Round up geographic coordinates to ensure compatibility with
     ## the country-geography raster used for aggregation:
     r1 <- round_up_coordinates(raster.df=r1)
-    filename <- tools::file_path_sans_ext(basename(.r))
+
     assign(filename,r1)
     supplementary.data.path <- system.file("land_cover_2000", package = "gtapshape")
     save(list=filename, file= file.path(supplementary.data.path, paste(filename,".rda",sep="")), compress = "xz",

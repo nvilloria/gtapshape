@@ -120,7 +120,8 @@ usethis::use_data(iso.animal.production.2011.2022, overwrite = TRUE)
   # item_list <- c("Arable land","Permanent crops", "Permanent meadows and pastures")
   item_code_list <- c(6621, 6650, 6655, 6601)
   #Format columns, select the three item codes, choose years
-  land_cover <- land_cover.bulk %>%
+land_cover <- land_cover.bulk %>%
+      dplyr::filter(year_code > 2010) %>%
 #    dplyr::filter(year_code == gtap_ref_year) %>%
     dplyr::rename(area_code_m49 = area_code__m49_) %>%
     dplyr::mutate(element_code = as.numeric(element_code),
@@ -146,18 +147,30 @@ usethis::use_data(iso.animal.production.2011.2022, overwrite = TRUE)
   land_cover_wide <- land_cover_wide %>%
     dplyr::rename(arable = `Arable land`,
                   permanent_crop = `Permanent crops`,
-                  pasture_ha = `Permanent meadows and pastures`,
-                  land_area_ha = `Land area`) %>%
+                  pasture = `Permanent meadows and pastures`,
+                  land_area = `Land area`) %>%
     dplyr::mutate(arable = ifelse(is.na(arable), 0, arable),
                   permanent_crop = ifelse(is.na(permanent_crop), 0, permanent_crop),
-                  pasture_ha = ifelse(is.na(pasture_ha), 0, pasture_ha),
-                  land_area_ha = ifelse(is.na(land_area_ha), 0, land_area_ha))
+                  pasture = ifelse(is.na(pasture), 0, pasture),
+                  land_area = ifelse(is.na(land_area), 0, land_area))
   #Now add up the categories to get the values for cropland and pasture.
   #Values are in 1000 ha, convert to ha
   land_cover_wide <- land_cover_wide %>%
-    dplyr::mutate(cropland_ha = 1000*(arable + permanent_crop),
-                  pasture_ha = 1000*pasture_ha,
-                  land_area_ha = 1000*land_area_ha) %>%
-    dplyr::select(ISO3, year_code, cropland_ha, pasture_ha, land_area_ha)
+    dplyr::mutate(cropland = 1000*(arable + permanent_crop),
+                  pasture = 1000*pasture,
+                  land_area = 1000*land_area) %>%
+    dplyr::select(ISO3, year_code, cropland, pasture, land_area)
 head(land_cover_wide)
 ## saveRDS(land_cover_wide, file.path(workdir_dir, 'workdir/gtap_ref_year/fao_land_cover.rds'))
+iso.land.covers.2011.2022 <- land_cover_wide
+iso.land.covers.2011.2022 <- gdata::rename.vars(iso.land.covers.2011.2022, from=c("ISO3", "year_code"), to=c("iso3", "year"))
+
+iso.land.covers.2011.2022 <- reshape2::melt(iso.land.covers.2011.2022,
+                     id.vars=c("iso3","year"),
+                     measure.vars=c("cropland","pasture","land_area"),
+                     variable.name='use',
+                     value.name='value')
+
+usethis::use_data(iso.land.covers.2011.2022, overwrite = TRUE)
+##usethis::use_r("iso.land.covers.2011.2022.R")
+##
