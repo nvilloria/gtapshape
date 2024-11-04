@@ -65,7 +65,7 @@ lapply( livestock_rast_file_names, function(.r){
     ## multiply density by area of grid cells to get quantity of animals
     grid_cell_area <- terra::cellSize(r, mask=FALSE, lyrs=FALSE, unit="km", transform=TRUE)
     r <-  r * grid_cell_area
-    ## Aggregate the rasters because they're at a finer resolution
+    ## Aggregate the rasters because they're at a finer resolution (specific to 2005 global livestock of the world.)
     r <- terra::aggregate(r, fact = 10, fun = "sum")
     r <- na_to_zero(r)
     ## Ensure raster has the default resolution, extent, and
