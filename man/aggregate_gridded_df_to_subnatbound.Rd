@@ -5,10 +5,13 @@
 \title{Aggregate gridded land use and land cover to countries and geographic
 boundaries of interest}
 \usage{
-aggregate_gridded_df_to_subnatbound(GADM_BIOME_df, path.file.to.aggregate)
+aggregate_gridded_df_to_subnatbound(
+  GADM_subnatbound_df,
+  path.file.to.aggregate
+)
 }
 \arguments{
-\item{GADM_BIOME_df}{Dataframe mapping the centroids of
+\item{GADM_subnatbound_df}{Dataframe mapping the centroids of
 (five-minute?) grid-cell coordinate to countries and geographic
 boundaries of interest. This file is created by
 \link{land_cover}}
@@ -18,12 +21,12 @@ dataframe with gridded information on land use (crop output and
 harvested area) or land cover. These dataframes need to have
 two columns labeled x an y with the coordinates of the
 centroids of each five minutes gridcell on earth, under the
-same projection GADM_BIOME_df}
+same projection GADM_subnatbound_df}
 }
 \value{
 A data frame with the columns of \code{file.to.aggregate} (other
 than x,y) aggregated to the countries and geographic boundaries
-defined by GADM_BIOME_df.
+defined by GADM_subnatbound_df.
 }
 \description{
 Aggregate gridded land use and land cover to countries and geographic

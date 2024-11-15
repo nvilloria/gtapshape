@@ -39,90 +39,90 @@
 
 #' @export
 share_data <- function(lvstk_prices_4spec_file, cpc_gsc3_concordance_file, workdir_dir=getwd()) {
-  #### Land Cover ####
-  #Read in data for the year specified
-  landcov_2017 <- readRDS(file.path(workdir_dir, 'workdir/gtap_ref_year/fao_land_cover.rds')) %>%
-    dplyr::rename(GADM = ISO3)
-  #Read in the shares
-  #NOTE - If a country is missing shares, it means that we did not have
-  #cropland, pastureland, and other land type data. So we keep the original
-  #base year acreage instead of updating the data.
-  landcov_shares <- readRDS(file.path(workdir_dir, 'workdir/gadm_bio_landcov_shares.rds')) %>%
-    dplyr::select(GADM, BIO, country_total_urban, starts_with('lc_share'), starts_with('bio_share')) %>%
-    unique()
-  #Join to the land cover data by GADM
-  landcov_update_2017 <- dplyr::left_join(landcov_shares, landcov_2017, by = c('GADM'))
-  #Make a variable showing how much land area needs to be filled in after
-  #accounting for cropland, pasture, and urban areas. Then use this to
-  #update the non-cropland/pasture land cover areas
-  ###### URBAN DOESNT CHANGE ####
-  landcov_update_2017 <- landcov_update_2017 %>%
-    dplyr::mutate(fillin_ha = land_area_ha - cropland_ha - pasture_ha - country_total_urban,
-                  lc_share_noncroppasturban = lc_share_country_forest +
-                    lc_share_country_other + lc_share_country_grassland +
-                    lc_share_country_shrubland,
-                  country_total_cropland = cropland_ha,
-                  country_total_pasture = pasture_ha,
-                  country_total_forest = fillin_ha*(lc_share_country_forest/lc_share_noncroppasturban),
-                  country_total_other = fillin_ha*(lc_share_country_other/lc_share_noncroppasturban),
-                  country_total_grassland = fillin_ha*(lc_share_country_grassland/lc_share_noncroppasturban),
-                  country_total_shrubland = fillin_ha*(lc_share_country_shrubland/lc_share_noncroppasturban))
+  ## #### Land Cover ####
+  ## #Read in data for the year specified
+  ## landcov_2017 <- readRDS(file.path(workdir_dir, 'workdir/gtap_ref_year/fao_land_cover.rds')) %>%
+  ##   dplyr::rename(GADM = ISO3)
+  ## #Read in the shares
+  ## #NOTE - If a country is missing shares, it means that we did not have
+  ## #cropland, pastureland, and other land type data. So we keep the original
+  ## #base year acreage instead of updating the data.
+  ## landcov_shares <- readRDS(file.path(workdir_dir, 'workdir/gadm_bio_landcov_shares.rds')) %>%
+  ##   dplyr::select(GADM, BIO, country_total_urban, starts_with('lc_share'), starts_with('bio_share')) %>%
+  ##   unique()
+  ## #Join to the land cover data by GADM
+  ## landcov_update_2017 <- dplyr::left_join(landcov_shares, landcov_2017, by = c('GADM'))
+  ## #Make a variable showing how much land area needs to be filled in after
+  ## #accounting for cropland, pasture, and urban areas. Then use this to
+  ## #update the non-cropland/pasture land cover areas
+  ## ###### URBAN DOESNT CHANGE ####
+  ## landcov_update_2017 <- landcov_update_2017 %>%
+  ##   dplyr::mutate(fillin_ha = land_area_ha - cropland_ha - pasture_ha - country_total_urban,
+  ##                 lc_share_noncroppasturban = lc_share_country_forest +
+  ##                   lc_share_country_other + lc_share_country_grassland +
+  ##                   lc_share_country_shrubland,
+  ##                 country_total_cropland = cropland_ha,
+  ##                 country_total_pasture = pasture_ha,
+  ##                 country_total_forest = fillin_ha*(lc_share_country_forest/lc_share_noncroppasturban),
+  ##                 country_total_other = fillin_ha*(lc_share_country_other/lc_share_noncroppasturban),
+  ##                 country_total_grassland = fillin_ha*(lc_share_country_grassland/lc_share_noncroppasturban),
+  ##                 country_total_shrubland = fillin_ha*(lc_share_country_shrubland/lc_share_noncroppasturban))
 
-  #Now share out countries' total acreage by BIOME
-  landcov_update_2017 <- landcov_update_2017 %>%
-    dplyr::mutate(cropland_ha = country_total_cropland*bio_share_country_cropland,
-                  pasture_ha = country_total_pasture*bio_share_country_pasture,
-                  forest_ha = country_total_forest*bio_share_country_forest,
-                  urban_ha = country_total_urban*bio_share_country_urban,
-                  other_ha = country_total_other*bio_share_country_other,
-                  grassland_ha = country_total_grassland*bio_share_country_grassland,
-                  shrubland_ha = country_total_shrubland*bio_share_country_shrubland)
+  ## #Now share out countries' total acreage by BIOME
+  ## landcov_update_2017 <- landcov_update_2017 %>%
+  ##   dplyr::mutate(cropland_ha = country_total_cropland*bio_share_country_cropland,
+  ##                 pasture_ha = country_total_pasture*bio_share_country_pasture,
+  ##                 forest_ha = country_total_forest*bio_share_country_forest,
+  ##                 urban_ha = country_total_urban*bio_share_country_urban,
+  ##                 other_ha = country_total_other*bio_share_country_other,
+  ##                 grassland_ha = country_total_grassland*bio_share_country_grassland,
+  ##                 shrubland_ha = country_total_shrubland*bio_share_country_shrubland)
 
-  #Keep only the land cover data for the countries that we updated
-  bio_fao_updated <- landcov_update_2017 %>%
-    dplyr::select(GADM, BIO, cropland_ha, pasture_ha,
-                  forest_ha, urban_ha, grassland_ha, shrubland_ha, other_ha)
+  ## #Keep only the land cover data for the countries that we updated
+  ## bio_fao_updated <- landcov_update_2017 %>%
+  ##   dplyr::select(GADM, BIO, cropland_ha, pasture_ha,
+  ##                 forest_ha, urban_ha, grassland_ha, shrubland_ha, other_ha)
 
-  #Now we need to add in the countries which will not have updated land
-  #cover data because they do not have cropland, pastureland, and
-  #other land cover data in the base year
-  base_lc_df <- readRDS(file.path(workdir_dir, 'workdir/base_year/GADM_BIO_landcover_rasterdata_ha.rds')) %>%
-    dplyr::mutate(GADM = substr(GADM_BIO, 1, 3),
-                  BIO = substr(GADM_BIO, 5, nchar(paste0(GADM_BIO)))) %>%
-    dplyr::select(GADM, BIO, GADM_BIO, everything())
-  #Make a not in operator
-  '%!in%' <- function(x,y)!('%in%'(x,y))
-  #Keep ones not being updated
-  gadm_bio_NONupdated <- base_lc_df %>%
-    dplyr::filter(GADM %!in% bio_fao_updated$GADM) %>%
-    dplyr::select(GADM, BIO, cropland_ha, pasture_ha,
-                  forest_ha, urban_ha, grassland_ha, shrubland_ha, other_ha)
-  #Combine with updated GADM-BIO combinations
-  gadm_bio_land_cover_output <- rbind(bio_fao_updated, gadm_bio_NONupdated)
-  # #Test to see that we have data for all GADM-BIO combinations in the base
-  #   #year data
-  # base_count_gadm_bio <- base_lc_df %>%
-  #   dplyr::select(GADM_BIO) %>% unique()
+  ## #Now we need to add in the countries which will not have updated land
+  ## #cover data because they do not have cropland, pastureland, and
+  ## #other land cover data in the base year
+  ## base_lc_df <- readRDS(file.path(workdir_dir, 'workdir/base_year/GADM_BIO_landcover_rasterdata_ha.rds')) %>%
+  ##   dplyr::mutate(GADM = substr(GADM_BIO, 1, 3),
+  ##                 BIO = substr(GADM_BIO, 5, nchar(paste0(GADM_BIO)))) %>%
+  ##   dplyr::select(GADM, BIO, GADM_BIO, everything())
+  ## #Make a not in operator
+  ## '%!in%' <- function(x,y)!('%in%'(x,y))
+  ## #Keep ones not being updated
+  ## gadm_bio_NONupdated <- base_lc_df %>%
+  ##   dplyr::filter(GADM %!in% bio_fao_updated$GADM) %>%
+  ##   dplyr::select(GADM, BIO, cropland_ha, pasture_ha,
+  ##                 forest_ha, urban_ha, grassland_ha, shrubland_ha, other_ha)
+  ## #Combine with updated GADM-BIO combinations
+  ## gadm_bio_land_cover_output <- rbind(bio_fao_updated, gadm_bio_NONupdated)
+  ## # #Test to see that we have data for all GADM-BIO combinations in the base
+  ## #   #year data
+  ## # base_count_gadm_bio <- base_lc_df %>%
+  ## #   dplyr::select(GADM_BIO) %>% unique()
 
-  #Replace NaN and NA values with zeroes
-  gadm_bio_land_cover_output <- gadm_bio_land_cover_output %>%
-    dplyr::mutate(across(cropland_ha:other_ha, ~ ifelse(is.nan(.x), 0, .x))) %>%
-    dplyr::mutate(across(cropland_ha:other_ha, ~ ifelse(is.na(.x), 0, .x)))
+  ## #Replace NaN and NA values with zeroes
+  ## gadm_bio_land_cover_output <- gadm_bio_land_cover_output %>%
+  ##   dplyr::mutate(across(cropland_ha:other_ha, ~ ifelse(is.nan(.x), 0, .x))) %>%
+  ##   dplyr::mutate(across(cropland_ha:other_ha, ~ ifelse(is.na(.x), 0, .x)))
 
-  # #Drop countries with no data for all land cover types
-  # gadm_bio_land_cover_output <- gadm_bio_land_cover_output %>%
-  #   dplyr::mutate(all_lcov_ha = rowSums(across(cropland_ha:other_ha)))
+  ## # #Drop countries with no data for all land cover types
+  ## # gadm_bio_land_cover_output <- gadm_bio_land_cover_output %>%
+  ## #   dplyr::mutate(all_lcov_ha = rowSums(across(cropland_ha:other_ha)))
 
-  #Save
-  saveRDS(gadm_bio_land_cover_output, file = file.path(workdir_dir, 'workdir/gtap_ref_year/gadm_bio_land_cover.rds'))
+  ## #Save
+  ## saveRDS(gadm_bio_land_cover_output, file = file.path(workdir_dir, 'workdir/gtap_ref_year/gadm_bio_land_cover.rds'))
 
-  #### Crop production ####
-  rm(list=ls()[! ls() %in% c("workdir_dir", "lvstk_prices_4spec_file",  "cpc_gsc3_concordance_file")])
-  gc()
-  #Load in the set of biome names
-    set_BIO_list <- readRDS(
-        file.path(workdir_dir, 'workdir/sets/set_BIO.rds')
-    )
+  ## #### Crop production ####
+  ## rm(list=ls()[! ls() %in% c("workdir_dir", "lvstk_prices_4spec_file",  "cpc_gsc3_concordance_file")])
+  ## gc()
+  ## #Load in the set of biome names
+  ##   set_BIO_list <- readRDS(
+  ##       file.path(workdir_dir, 'workdir/sets/set_BIO.rds')
+  ##   )
   ## #Load fao data for chosen gtap year (2017)
   ## crop_production_fao <- readRDS(file.path(workdir_dir, 'workdir/gtap_ref_year/fao_prod_harvarea.rds')) %>%
   ##   dplyr::filter(element == 'production') %>%
@@ -154,9 +154,9 @@ share_data <- function(lvstk_prices_4spec_file, cpc_gsc3_concordance_file, workd
   ## #Save
   ## saveRDS(merged_long, file = file.path(workdir_dir, 'workdir/gtap_ref_year/gadm_bio_crop_production.rds'))
 
-  #### Value of crop production ####
-  rm(list=ls()[! ls() %in% c("workdir_dir", "lvstk_prices_4spec_file",  "cpc_gsc3_concordance_file")])
-  gc()
+  ## #### Value of crop production ####
+  ## rm(list=ls()[! ls() %in% c("workdir_dir", "lvstk_prices_4spec_file",  "cpc_gsc3_concordance_file")])
+  ## gc()
   #Load the crop production data just created at the GADM-BIO intersection
   crop_val_production <- readRDS(file.path(workdir_dir, 'workdir/gtap_ref_year/gadm_bio_crop_production.rds'))
   #Merge in prices
