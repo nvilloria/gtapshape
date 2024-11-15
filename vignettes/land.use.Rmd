@@ -1,0 +1,183 @@
+---
+title: "Process global land use data"
+author: "Micah Cameron-Harp"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Process global land use data}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+This vignette will go over how we generate land use data in the GTAP Land Use and Land Cover datasets used in the *gtapshape* package. The data are created using publicly available raster data depicting global crop yields and harvested area for 172 crops and 4 livestock species. In each sub-section below, we detail how the underlying raster data was pre-processed. The raster data used in each sub-section are downloaded when the \link{getrawdata} function is executed. Note, some of the pre-processing described here mirrors the processes described by Baldos (2017) in "Development of GTAP version 9 Land Use and Land Cover database for years 2004, 2007 and 2011."	(Available at https://doi.org/10.21642/GTAP.RM30)
+
+## Crop production 
+
+First, we load in the data on crop production from Monfreda, C., N. Ramankutty, and J. A. Foley (2008), available at https://doi.org/10.1029/2007GB002947. We use the "Production" rasters which indicate the average total crop production in metric tons on the land-area of a grid cell during the years 1997-2003. We create a stack of the rasters so that we can calculate country-subnational area values for all crops at once.   
+        
+```{r, eval = FALSE}
+ #### Crop production ####
+  #Load in the crop output and harvested area (ha) rasters (172 of those):
+  crop_output_raster_list <- list.files(path = "HarvestedAreaYield175Crops_Geotiff/GeoTiff",
+                                        pattern = '_Production.tif$',
+                                        recursive = TRUE,
+                                        full.names = TRUE)
+  #Make a stack of the production(tons) rasters
+  crop_output_raster_stack <- terra::rast(crop_output_raster_list)
+```
+
+Next, we load in the categorical raster indicating the country-subnational area combination for each grid cell, combine it with the stack of crop production rasters, and convert it into a dataframe. Now, each row in the dataframe indicates the country-subnational area and crop production values for a single grid cell location. Finally, we summarize the dataframe by summing crop production values for each country-subnational area to get the total crop production by country-subnational area. 
+
+```{r, eval = FALSE}
+  #Load in the GADM-BIO combination raster
+  GADM_BIOME_rast <- terra::rast(file.path(workdir_dir, 'workdir/rasters/GADM_BIOME_rast.tif'))
+
+  #Combine with the production rasters
+  output_rast <- c(GADM_BIOME_rast, crop_output_raster_stack)
+  #Turn into dataframe
+  output_df <- as.data.frame(output_rast)
+  #remove objects from environment
+  rm(crop_output_raster_stack, output_rast)
+  gc()
+  #Summarize output at the GADM-BIOME level
+  output_df <- output_df %>% dplyr::filter(!is.na(GADM_BIO)) %>%
+    dplyr::group_by(GADM_BIO) %>%
+    dplyr::summarise_all(sum, na.rm = T)
+  #Create columns showing individual GADM and BIOME values
+  output_df <- output_df %>% dplyr::mutate(GADM = substr(GADM_BIO, 1, 3),
+                                           BIO = substr(GADM_BIO, 5, nchar(paste0(GADM_BIO)))) %>%
+    dplyr::select(GADM, BIO, GADM_BIO, everything())
+  #Save as rds
+  saveRDS(output_df, file = file.path(workdir_dir, 'workdir/base_year/crop_production_tons.rds'))
+  #Clean-up
+  rm(list=ls())
+  gc()
+```
+
+## Crop harvested area
+
+Next, we load in the data on crop harvested area from Monfreda, C., N. Ramankutty, and J. A. Foley (2008), available at https://doi.org/10.1029/2007GB002947. We use the "HarvestedAreaHectares" rasters which indicate the average number of hectares harvested s on the land-area of a grid cell during the years 1997-2003. We create a stack of the rasters so that we can calculate country-subnational area values for all crops at once.   
+
+```{r, eval = FALSE}
+ #### Harvested Area ####
+  #Load in the crop output and harvested area (ha) data from Monfreda et al (2008)
+  #List only the harvested area rasters
+  harvested_area_raster_list <- list.files(path = "HarvestedAreaYield175Crops_Geotiff/GeoTiff",
+                                           pattern = '_HarvestedAreaHectares.tif$',
+                                           recursive = TRUE,
+                                           full.names = TRUE)
+  #Make a stack of the production(tons) rasters
+  harvested_area_raster_stack <- terra::rast(harvested_area_raster_list)
+```
+
+Next, we load in the categorical raster indicating the country-subnational area combination for each grid cell, combine it with the stack of crop harvested area rasters, and convert it into a dataframe. Now, each row in the dataframe indicates the country-subnational area and harvested area values for a single grid cell location. Finally, we summarize the dataframe by summing values for each country-subnational area to get the total crop harvested area by country-subnational area. 
+
+```{r, eval = FALSE}
+  #Combine with the ISO-aez raster
+  output_rast <- c(GADM_BIOME_rast, harvested_area_raster_stack)
+  #Turn into dataframe
+  output_df <- as.data.frame(output_rast)
+  #remove objects from environment
+  rm(harvested_area_raster_stack, output_rast)
+  gc()
+  #Summarize harvested area at the GADM-BIOME level
+  output_df <- output_df %>% dplyr::filter(!is.na(GADM_BIO)) %>%
+    dplyr::group_by(GADM_BIO) %>%
+    dplyr::summarise_all(sum, na.rm = T)
+  #Create columns showing individual GADM and BIOME values
+  output_df <- output_df %>% dplyr::mutate(GADM = substr(GADM_BIO, 1, 3),
+                                           BIO = substr(GADM_BIO, 5, nchar(paste0(GADM_BIO)))) %>%
+    dplyr::select(GADM, BIO, GADM_BIO, everything())
+  #Save as rds
+  saveRDS(output_df, file = file.path(workdir_dir, 'workdir/base_year/crop_harvarea_ha.rds'))
+  rm(list=ls())
+  gc()
+```
+
+## Livestock 
+
+The raster data we use to determine the spatial distribution of livestock production is from Robinson et al. (2014), available at https://doi.org/10.1371/journal.pone.0096084. The raw data contains rasters for 6 livestock species: cattle, goats, sheep, pigs, ducks, and chickens. The raster values indicate the density of animals in each grid cell in head of animals per km^2. We only make use of the data for cattle, goats, and sheep to construct the GTAP Land Use and Land Cover dataset. First, we load the rasters for the 3 species we need:
+
+```{r, eval = FALSE}
+  #Load in the Gridded Livestock density data
+  #First get a list of all the rasters
+  dir_paths <- dir(path = "C:/Users/Micah/Dropbox/CGE_BIOMES_Carbon_2024/GTAP_BIOMES/raw_data/Gridded livestock_FAO/2005",
+                   recursive = FALSE,
+                   full.names = TRUE)
+  dir_paths <- dir_paths[grepl("cattle|sheep|goats", dir_paths)]
+  livestock_rast_file_list <- lapply(dir_paths, FUN = list.files, pattern = ".tif$", full.names = T)
+  #Turn them into a stack of rasters, replace negative values with zeroes
+  lvstk_dens_rast_stack <- lapply(livestock_rast_file_list, FUN = terra::rast)
+```  
+  
+Next, we make use of the \link{neg_to_zero} function to replace areas with negative densities with zeroes. Then, we multiply the density value in each cell by the cell's area to get the total number of animals in each grid cell. 
+  
+```{r, eval = FALSE}
+  lvstk_dens_rast_stack <- lapply(lvstk_dens_rast_stack, neg_to_zero)
+  #Now multiply density by area of grid cells to get quantity of animals
+    lvstk_head_rast_stack <- lapply(lvstk_dens_rast_stack, function(livestock_rast) {
+      grid_cell_area <- terra::cellSize(livestock_rast, mask=FALSE, lyrs=FALSE, unit="km", transform=TRUE)
+      total_livestock_rast <-  livestock_rast * grid_cell_area
+      total_livestock_rast
+    })
+    rm(lvstk_dens_rast_stack)
+    gc()
+  #Check the resolution
+  livestock_res <-  terra::res(lvstk_head_rast_stack[[1]])
+  livestock_res
+```
+
+The livestock data are provided at a finer resolution than the 5 arc-minutes we use when constructing our database. So, we aggregate the livestock data such that the resolution matches. Then, we use the \link{na_to_zero} function to replace NA cell values with zeroes. Finally, we turn the list of rasters into a stack of rasters, assign each raster the appropriate species name, and save them.
+
+```{r, eval = FALSE}
+  #Now we need to aggregate the rasters because they're at a finer resolution
+  lvstk_head_rast_stack <- lapply(lvstk_head_rast_stack, terra::aggregate, fact = 10, fun = "sum")
+  #Replace NA values with zeroes
+  lvstk_head_rast_stack <- lapply(lvstk_head_rast_stack, na_to_zero)
+  #Make it into one single stack of rasters instead of a list of rasters
+  lvstk_head_rast_stack <- terra::rast(lvstk_head_rast_stack)
+  #Name the layers
+  species_names <- lapply(dir_paths, function(x) (gsub(livestock_density_rast_dir, "", x)))
+  species_names <- lapply(species_names, function(x) (substr(x, 2, regexpr("_", x) - 1)))
+  species_names <- unlist(species_names)
+  names(lvstk_head_rast_stack) <- species_names
+  terra::writeRaster(lvstk_head_rast_stack, filename = file.path(workdir_dir, 'workdir/rasters/lvstk_total_head.tif'), overwrite = TRUE)
+  rm(list=ls()[! ls() %in% c("GADM_BIOME_rast", "lvstk_head_rast_stack", "workdir_dir")])
+  gc()
+```
+
+The final step is to load in the raster containing country-subnational area combinations, add it to the stack of livestock quantity rasters, turn the raster stack into a dataframe, and export the total number of animals for each country-subnational area combination. 
+
+```{r, eval = FALSE}
+  #### Output livestock quantity by GADM and BIOME combinations
+  #Load in GADM-BIOME concatenation raster
+  GADM_BIOME_rast <- terra::rast(file.path(workdir_dir, 'workdir/rasters/GADM_BIOME_rast.tif'))
+  #Combine with the production rasters
+  output_rast <- c(GADM_BIOME_rast, lvstk_head_rast_stack)
+  #Turn into dataframe
+  output_df <- as.data.frame(output_rast)
+  #Summarize output at the GADM-BIOME level
+  output_df <- output_df %>% dplyr::filter(!is.na(GADM_BIO)) %>%
+    dplyr::group_by(GADM_BIO) %>%
+    dplyr::summarise_all(sum, na.rm = T)
+  #remove objects from environment
+  rm(lvstk_head_rast_stack, output_rast,GADM_BIOME_rast)
+  gc()
+  #Create columns showing individual GADM and BIOME values
+  output_df <- output_df %>% dplyr::mutate(GADM = substr(GADM_BIO, 1, 3),
+                                           BIO = substr(GADM_BIO, 5, nchar(paste0(GADM_BIO)))) %>%
+    dplyr::select(GADM, BIO, GADM_BIO, everything())
+  #Save as rds
+  saveRDS(output_df, file = file.path(workdir_dir, 'workdir/base_year/livestock_production_head.rds'))
+  rm(list=ls())
+  gc()
+}
+```
+
