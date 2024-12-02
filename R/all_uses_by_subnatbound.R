@@ -15,15 +15,21 @@
 #'     than x,y) aggregated to the countries and geographic boundaries
 #'     defined by GADM_subnatbound_df.
 #' @export
-all_uses_by_subnatbound <- function(GADM_subnatbound_df= NULL, gridded.use.file.names=NULL){
-    g <- lapply(gridded.use.file.names, function(.r){
-        s <- aggregate_gridded_df_to_subnatbound(GADM_subnatbound_df=GADM_subnatbound_df,
-                                                   path.file.to.aggregate=.r)
-        return(s)
-    })
-    g <- do.call(rbind,g)
-    return(g)
-    }
+all_uses_by_subnatbound <- function(GADM_subnatbound_df = NULL, gridded.use.file.names = NULL) {
+  # Pre-allocate the result list
+  n_files <- length(gridded.use.file.names)
+  result_list <- vector("list", n_files)
 
+  # Use a for loop instead of lapply
+  for (i in seq_len(n_files)) {
+    result_list[[i]] <- aggregate_gridded_df_to_subnatbound(
+      GADM_subnatbound_df = GADM_subnatbound_df,
+      path.file.to.aggregate = gridded.use.file.names[i]
+    )
+  }
 
+  # Combine results efficiently
+  g <- do.call(rbind, result_list)
 
+  return(g)
+}

@@ -21,7 +21,7 @@
 #'
 #' gadm_bio_crop_production.rds *
 #'
-#' gadm_bio_livestock_valprod_ctlrmkwol.rds
+#' gadm_bio_livestock_valprod_ctlrmkwol.rds *
 #'
 #' gadm_bio_livestock_valprod_4species.rds
 #'
@@ -31,7 +31,7 @@
 #'
 #' gadm_bio_land_cover.rds *
 #'
-#' gadm_bio_vallvstkprod_rmk_wol.rds *
+#' gadm_bio_vallvstkprod_rmk_wol.rds
 #'
 #' gadm_bio_val_crop_production.rds *
 #'

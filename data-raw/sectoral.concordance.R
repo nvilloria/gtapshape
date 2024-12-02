@@ -4,7 +4,6 @@ fao_production <- FAOSTAT::get_faostat_bulk(code = "QCL", data_folder =   tempdi
 
 require(dplyr)
 fao_production.0 <- fao_production %>%
-#    dplyr::filter(year_code == gtap_ref_year) %>%
     dplyr::rename(area_code_m49 = area_code__m49_,
                   item_code_cpc = item_code__cpc_) %>%
     dplyr::mutate(element_code = as.numeric(element_code),
@@ -49,7 +48,7 @@ gsc3_cpc_codes <- lapply(gsc3_list, function (x) {
 names(gsc3_cpc_codes) <- gsc3_list
 
 ##########################################################################################
-
+## Crops:
 crop.concordance <- fao.to.cpc %>%
     dplyr::mutate(## item_code_cpc_2 = substr(item_code_cpc, 1, 2),
                item_code_cpc_3 = substr(item_code_cpc, 1, 3),
@@ -69,12 +68,34 @@ crop.concordance <- fao.to.cpc %>%
 
 crop.concordance$gsc3[crop.concordance$crop=="rapeseed"] <- "osd"
 
-head(crop.concordance)
-
 crop.concordance <- crop.concordance[,c("crop", "item_code_fao", "item_code_cpc", "gsc3")]
 crop.concordance <- gdata::rename.vars(crop.concordance, from="crop",to="use")
-## crop.concordance %>% filter(item_code_cpc == "01243")
-## crop.concordance %>% filter(item_code_cpc == "0191")
+
+head(crop.concordance)
 
 usethis::use_data(crop.concordance, overwrite = TRUE)
 ## usethis::use_r("crop.concordance.R")
+
+## Livestock:
+livestock.concordance <- fao_production.0 %>%
+    filter(year_code==2017) %>%
+    select(item, item_code, item_code_cpc) %>%
+    unique() %>%
+    dplyr::mutate(## item_code_cpc_2 = substr(item_code_cpc, 1, 2),
+               item_code_cpc_3 = substr(item_code_cpc, 1, 3),
+               item_code_cpc_4 = substr(item_code_cpc, 1, 4),
+               item_code_cpc_5 = substr(item_code_cpc, 1, 5)
+           ) %>%
+    dplyr::mutate(gsc3 = ifelse(item_code_cpc_4 %in% c(unlist(gsc3_cpc_codes['ctl'])), 'ctl',
+                                ifelse(item_code_cpc_5 %in% c(unlist(gsc3_cpc_codes['ctl'])), 'ctl',
+                                       ifelse(item_code_cpc_3 %in% c(unlist(gsc3_cpc_codes['rmk'])), 'rmk',
+                                       ifelse(item_code_cpc_4 %in% c(unlist(gsc3_cpc_codes['wol'])), 'wol', NA))))) %>%
+    na.omit() %>%
+    dplyr::rename(item_code_fao=item_code,
+                  use=item) %>%
+    select(use, item_code_fao, item_code_cpc, gsc3)
+
+head(livestock.concordance)
+
+usethis::use_data(livestock.concordance, overwrite = TRUE)
+## usethis::use_r("livestock.concordance.R")

@@ -26,8 +26,8 @@ make_subnatbound_gridded_dataframe <- function(subnat_bound_file='aez18'){
     GADM_BIOME_rast <- make_subnatbound_raster(subnat_bound_file=subnat_bound_file)
     g <- as.data.frame(GADM_BIOME_rast, xy = TRUE)
     g <- round_up_coordinates(raster.df=g)
-    g$iso3 = with(g,substr(GADM_subnatbound, 1, 3))
-    g$subnatbound = with(g, substr(GADM_subnatbound, 5, nchar(paste0(GADM_subnatbound))))
+    g$iso3 = tolower(with(g,substr(GADM_subnatbound, 1, 3)))
+    g$subnatbound = tolower(with(g, substr(GADM_subnatbound, 5, nchar(paste0(GADM_subnatbound)))))
     return(g)
     }
 

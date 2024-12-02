@@ -67,7 +67,9 @@ gpack_txt <- function(workdir_dir=getwd(), cpc_gsc3_concordance_file) {
     unique()
 
   #### Land Cover ####
-  #Read in land cover data
+                                        #Read in land cover data
+    require(dplyr)
+    workdir_dir <- getwd()
   landcover <- readRDS(file.path(workdir_dir, 'workdir/output_data/reg_bio_land_cover.rds'))
   #Add in the REG and BIO numbers
   landcover <- dplyr::left_join(landcover, REG_set, by = c('REG'))

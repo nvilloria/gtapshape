@@ -39,13 +39,14 @@ make_subnatbound_raster <- function(subnat_bound_file='aez18'){
     ##Make a spatial vector of subnational bounds:
     subnat_bound_vect <- terra::vect(subnat_bound.sf)
     ## Define the levels for the raster
-    subnatbounds.set <- c(subnat_bound_vect$subnat_name, "ROW")
+    subnatbounds.set <- c(subnat_bound_vect$subnat_name)
     subnat_bound_cats <- data.frame(ID=1:length(subnatbounds.set), subnatbound=subnatbounds.set)
-    ## Make a rest of world category with value equal to the final number in specified biome list
-    restofworld_num <- as.numeric(length(subnatbounds.set))
-    subnat_bound_rast <- terra::rasterize(subnat_bound_vect, gr, 'subnat_num', background = restofworld_num)
+
+    subnat_bound_rast <- terra::rasterize(subnat_bound_vect, gr, 'subnat_num')
     ## Replace NA values with "7" for the rest of the world
     levels(subnat_bound_rast) <- subnat_bound_cats
+    subnat_bound_rast <- apply_global_raster_properties(
+        input.raster = subnat_bound_rast, global.raster = gr)
     ## Concatenate two categorical rasters to get one that shows the
     ## combinations of their levels REG and subnat_boundS
     GADM_subnat_bound_rast <- terra::concats(gadm_rast, subnat_bound_rast)

@@ -37,6 +37,3 @@ aggregate_gridded_df_to_subnatbound <- function(GADM_subnatbound_df, path.file.t
     m <- with(m, m[, c("use","iso3","subnatbound","subnatbound.value")])
     return(m)
 }
-
-
-
