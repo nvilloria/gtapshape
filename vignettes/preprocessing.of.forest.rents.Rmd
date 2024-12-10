@@ -45,9 +45,12 @@ timber.rents.by.iso.2000 <- left_join(
     group_by(ctry) %>%
     summarise(value = sum(trenttot, na.rm = TRUE)) %>%
     mutate(use="timber",
+           gsc3="Forest",
            unit = "USD.M",
            year=2000
-           )
+           ) %>%
+    dplyr::rename(iso3=ctry)
+
 
 usethis::use_data(timber.rents.by.iso.2000, overwrite = TRUE)
 ## usethis::use_r("timber.rents.by.iso.2000.R")

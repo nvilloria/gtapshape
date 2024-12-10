@@ -78,7 +78,8 @@ build.dbase.from.sf <- function(subnat_bound_file="aez18", year="2017", file = "
             iso.gsc3lstk.heads.2011.2022$year==year,],
         VLV3 =iso.gsc3lstk.outputvalue.2011.2022[
             iso.gsc3lstk.outputvalue.2011.2022$year==year,],
-        LAND = iso.land.cover.2011.2022[iso.land.cover.2011.2022$year==year,]
+        LAND = iso.land.cover.2011.2022[iso.land.cover.2011.2022$year==year,],
+        RTMB = timber.rents.by.iso.2000
     )
 
     ## Description of each dataset, used later when producing the har file:
@@ -88,10 +89,11 @@ build.dbase.from.sf <- function(subnat_bound_file="aez18", year="2017", file = "
     attr(iso.data$QLV3, 'description')= 'Livestock production (heads) for the 3 gtap livestock sectors'
     attr(iso.data$VLV3, 'description')= 'Livestock output value (1000 USD) for the 3 gtap livestock sectors'
     attr(iso.data$LAND, 'description')= 'Land cover areas (ha)'
+    attr(iso.data$RTMB, 'description')= 'Timber land rents (USD Million)'
 
     ## Dissagregates national data by subantional boundary and aggregates to GTAP regions
-    shares.o <- c(rep("crops",3), rep("lstck", 2), "cover")
-    gsc3.by.iso <- lapply(c(1:6), function(.n){
+    shares.o <- c(rep("crops",3), rep("lstck", 2), rep("cover",2) )
+    gsc3.by.iso <- lapply(c(1:length(iso.data)), function(.n){
         .i <- iso.data[[.n]]
         .s <- shares.o[[.n]]
         .l <- share.out.sectors.to.subnatbound(

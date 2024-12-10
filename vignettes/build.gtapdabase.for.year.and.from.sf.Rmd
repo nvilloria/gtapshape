@@ -205,7 +205,8 @@ iso.data <- list(
         iso.gsc3lstk.heads.2011.2022$year==year,],
     VLV3 =iso.gsc3lstk.outputvalue.2011.2022[
         iso.gsc3lstk.outputvalue.2011.2022$year==year,],
-    LAND = iso.land.cover.2011.2022[iso.land.cover.2011.2022$year==year,]
+    LAND = iso.land.cover.2011.2022[iso.land.cover.2011.2022$year==year,],
+    RTMB = timber.rents.by.iso.2000
 )
 
 ## Description of each dataset, used later when producing the har file:
@@ -215,12 +216,24 @@ attr(iso.data$HARV, 'description')= 'Harvested area (ha) for the 8 gtap crops'
 attr(iso.data$QLV3, 'description')= 'Livestock production (heads) for the 3 gtap livestock sectors'
 attr(iso.data$VLV3, 'description')= 'Livestock output value (1000 USD) for the 3 gtap livestock sectors'
 attr(iso.data$LAND, 'description')= 'Land cover areas (ha)'
+attr(iso.data$RTMB, 'description')= 'Timber land rents (USD Million)'
+##
+.i <- timber.rents.by.iso.2000
 
+f <- shares[['cover']] %>% filter(gsc3=="Forest")
 
+b <- share.out.sectors.to.subnatbound(
+            iso.data = .i,
+            shares = f,
+            units = unique(.i$unit),
+            sector = if(any(grepl("item_code_cpc", names(.i)))){"item_code_cpc"}else{"gsc3"}
+)
+
+##
 ## Dissagregates national data by subantional boundary and aggregates to GTAP regions
-shares.o <- c(rep("crops",3), rep("lstck", 2), "cover")
+shares.o <- c(rep("crops",3), rep("lstck", 2), rep("cover",2) ) ## Index to select subnational boundaries shares
 system.time( ## user: 5.27   system: 0.05   elapsed:  5.31
-    gsc3.by.iso <- lapply(c(1:6), function(.n){
+    gsc3.by.iso <- lapply(c(1:7), function(.n){
         .i <- iso.data[[.n]]
         .s <- shares.o[[.n]] 
         .l <- share.out.sectors.to.subnatbound(
