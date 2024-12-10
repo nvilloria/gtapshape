@@ -2,8 +2,8 @@
 % Please edit documentation in R/all_uses_by_subnatbound.R
 \name{all_uses_by_subnatbound}
 \alias{all_uses_by_subnatbound}
-\title{Aggregate gridded land use and land cover to countries and geographic
-boundaries of interest}
+\title{Passes the names of the files with gridded data to the function
+\code{\link[=aggregate_gridded_df_to_subnatbound]{aggregate_gridded_df_to_subnatbound()}}}
 \usage{
 all_uses_by_subnatbound(
   GADM_subnatbound_df = NULL,
@@ -29,6 +29,6 @@ than x,y) aggregated to the countries and geographic boundaries
 defined by GADM_subnatbound_df.
 }
 \description{
-Aggregate gridded land use and land cover to countries and geographic
-boundaries of interest
+Passes the names of the files with gridded data to the function
+\code{\link[=aggregate_gridded_df_to_subnatbound]{aggregate_gridded_df_to_subnatbound()}}
 }

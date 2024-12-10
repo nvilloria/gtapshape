@@ -1,5 +1,5 @@
-#' Aggregate gridded land use and land cover to countries and geographic
-#'     boundaries of interest
+#' Aggregate gridded land use and land cover to countries and
+#'     subnational boundaries of interest
 #'
 #'@param GADM_subnatbound_df Dataframe mapping the centroids of
 #'     (five-minute?) grid-cell coordinate to countries and geographic
@@ -20,11 +20,12 @@ aggregate_gridded_df_to_subnatbound <- function(GADM_subnatbound_df, path.file.t
     ## require(dplyr)
     ## Create a temporary environment within the function to hold the
     ## data to be aggregated:
+    require(dplyr)
     temp.env <- new.env()
     load(path.file.to.aggregate, envir = temp.env)
     loaded_name <- ls(temp.env)[1]
     data.to.aggregate <- temp.env[[loaded_name]]
-    j <- right_join(GADM_subnatbound_df, data.to.aggregate, by=c("x","y"))
+    j <- dplyr::right_join(GADM_subnatbound_df, data.to.aggregate, by=c("x","y"))
     m <- j %>%
         dplyr::filter(!is.na(GADM_subnatbound)) %>%
         dplyr::select(!c(GADM_subnatbound,x,y)) %>%

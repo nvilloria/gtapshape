@@ -1,5 +1,6 @@
-#' Aggregate gridded land use and land cover to countries and geographic
-#'     boundaries of interest
+#' Passes the names of the files with gridded data to the function
+#' [aggregate_gridded_df_to_subnatbound()]
+#'
 #'
 #'@param GADM_subnatbound_df Dataframe mapping the centroids of
 #'     (five-minute?) grid-cell coordinate to countries and geographic

@@ -2,8 +2,8 @@
 % Please edit documentation in R/aggregate_gridded_df_to_subnatbound.R
 \name{aggregate_gridded_df_to_subnatbound}
 \alias{aggregate_gridded_df_to_subnatbound}
-\title{Aggregate gridded land use and land cover to countries and geographic
-boundaries of interest}
+\title{Aggregate gridded land use and land cover to countries and
+subnational boundaries of interest}
 \usage{
 aggregate_gridded_df_to_subnatbound(
   GADM_subnatbound_df,
@@ -29,6 +29,6 @@ than x,y) aggregated to the countries and geographic boundaries
 defined by GADM_subnatbound_df.
 }
 \description{
-Aggregate gridded land use and land cover to countries and geographic
-boundaries of interest
+Aggregate gridded land use and land cover to countries and
+subnational boundaries of interest
 }

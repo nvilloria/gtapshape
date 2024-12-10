@@ -1,5 +1,21 @@
+#' Calculate the subnational boundary shares of land uses and covers `
+#'
+#' @param subnatbound.use Dataframe with the value of different uses
+#'     by country (iso3), subnational bound, and use (either crops,
+#'     livestock and land cover). This dataframe must have a target
+#'     sector to which the uses are aggregated.
+#'
+#' @param sector The sector to which the uses are aggregated: CPC for
+#'     the case of crops and GSC3 for livestock and land covers.
+#'
+#' @seealso [all_uses_by_subnatbound()] creates dataframes from
+#'     gridded data aggregate to subnational boundes. These dataframes
+#'     need to be merged with a sectoral concordance, eithr
+#'     `crop.concordance`, `gridded.livestock.concordance` or
+#'     land.cover.concordance in order to have a target sectors
+#'
 #' @export
-subnatbound.shares <- function(subnatbound.levels, sector) {
+subnatbound.shares <- function(subnatbound.use, sector) {
   # Create a formula dynamically
   formula_subnat <- as.formula(paste("subnatbound.value ~",
                                      paste("iso3", "subnatbound", sector, sep = " + ")))
@@ -8,7 +24,7 @@ subnatbound.shares <- function(subnatbound.levels, sector) {
 
   # Calculate subnatbound.value
   s <- aggregate(formula_subnat,
-                 data = subnatbound.levels,
+                 data = subnatbound.use,
                  FUN = sum,
                  na.rm = TRUE)
 

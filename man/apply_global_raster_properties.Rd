@@ -25,7 +25,7 @@ This function applies the properties of a global raster template to an input ras
 \examples{
 \dontrun{
 anyraster <- raster(matrix(runif(100), 10, 10))
-goodraster <- apply_raster_properties(anyraster)
+goodraster <- apply_raster_properties(anyraster, global.raster=make.global.raster())
 }
 }
 \seealso{

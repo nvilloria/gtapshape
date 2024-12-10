@@ -116,19 +116,3 @@ lapply( baseyr_lc_ha_file_names, function(.r){
          compression_level = 9)
 }
 )
-
-
-
-## ### Test aggregation:
-## GADM_BIOME_rast <- terra::rast("c:/Users/nvill/Dropbox/REPOS/workdir/rasters/GADM_BIOME_rast.tif")
-## GADM_BIOME_rast <- apply_global_raster_properties(input.raster=GADM_BIOME_rast,global.raster=gr)
-## g <- as.data.frame(GADM_BIOME_rast, xy = TRUE)
-## g <- round_up_coordinates(raster.df=g)
-## head(g)
-## gridded.livestock.file.names <- list.files(system.file("fao_lstck_2005",
-##                                                        package = "gtapshape"),
-##                                            pattern = "\\.rda$",
-##                                            full.names = TRUE)
-
-## test.agg <- aggregate_to_country_biome(GADM_BIOME_df=g, path.file.to.aggregate=gridded.livestock.file.names[[1]])
-## test.agg
