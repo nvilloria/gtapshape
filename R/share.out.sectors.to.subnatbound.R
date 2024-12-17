@@ -27,11 +27,25 @@ share.out.sectors.to.subnatbound <- function(iso.data, shares, units, sector) {
   merged_data <- merge(shares, iso.data, by = c('iso3', sector_sym), all.x = TRUE)
   merged_data$value <- merged_data$value * merged_data$subnatbound.share
 
-  merged_data <- merge(merged_data, regional.concordance, by = "iso3", all.x = TRUE)
+##  merged_data <- merge(merged_data, regional.concordance, by = "iso3", all.x = TRUE)
+    merged_data <- merge(merged_data, regional.concordance, by = "iso3", all.x = TRUE)
 
-  # Aggregate
-  agg_formula <- as.formula(paste("value ~", paste("reg", "subnatbound", sector_sym, sep = " + ")))
-  result <- aggregate(agg_formula, data = merged_data, sum, na.rm = TRUE)
+    m <- merged_data[,c("reg", "subnatbound", sector_sym, "value")]
+
+    p <- expand.grid(
+        reg= setdiff(regional.concordance$reg, unique(merged_data$reg) ) ,
+        subnatbound= unique(merged_data$subnatbound),
+        sector=unique( merged_data[[sector]] )
+    )
+
+    names(p)[3] <- sector_sym
+
+    p$value <- 0
+
+    m <- rbind(m,p)
+    ## Aggregate
+    agg_formula <- as.formula(paste("value ~", paste("reg", "subnatbound", sector_sym, sep = " + ")))
+    result <- aggregate(agg_formula, data = m, sum, na.rm = TRUE)
 
   # Add units
   result$units <- units
