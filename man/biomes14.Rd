@@ -3,21 +3,36 @@
 \docType{data}
 \name{biomes14}
 \alias{biomes14}
-\title{My Example Dataset}
+\title{World Wildlife Fund (WWF) Subnational Regions}
 \format{
-A data frame with 5 rows and 2 variables:
+A simple feature collection with 14 features and 2 fields:
 \describe{
-\item{id}{Integer ID}
-\item{name}{Character string of the person's name}
+\item{subnat_name}{character. The name of the subnational region.}
+\item{subnat_num}{numeric. The numeric identifier for the subnational region.}
+\item{geometry}{sfc_MULTIPOLYGON. The geometric representation of the region.}
 }
 }
 \source{
-Created for demonstration purposes
+World Wildlife Fund (WWF)
 }
 \usage{
 biomes14
 }
 \description{
-A dataset containing example data with IDs and names.
+A spatial dataset containing 14 subnational regions defined by the World Wildlife Fund (WWF).
+}
+\details{
+This dataset is a simple feature collection with the following properties:
+\itemize{
+\item Geometry type: MULTIPOLYGON
+\item Dimension: XY
+\item Bounding box: xmin: -180, ymin: -87.26008, xmax: 180, ymax: 83.62313
+\item Geodetic CRS: WGS 84
+}
+}
+\examples{
+data(wwf_subnational)
+plot(st_geometry(wwf_subnational))
+summary(wwf_subnational)
 }
 \keyword{datasets}
