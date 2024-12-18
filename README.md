@@ -22,7 +22,7 @@ For more detailed examples and use cases, please refer to the [vignettes](https:
 
 ## License
 
-This project is licensed under...
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## Acknowledgments
 
