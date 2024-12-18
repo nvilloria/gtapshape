@@ -1,6 +1,6 @@
 # gtapshape
 
-**gtapshape** is an R package designed for the flexible aggregation of land use and land cover data specifically tailored for use with the GTAP Agro-Ecological Zones (AEZ) model. This package provides tools to efficiently manipulate and aggregate spatial data.
+**gtapshape** is an R package designed for the flexible aggregation of land use and land cover data specifically tailored for use with the GTAP Agro-Ecological Zones (AEZ) model. This package provides tools to efficiently manipulate and aggregate spatial and country-level data on global land use and land cover to the GTAP regions and sectors.
 
 ## Key Features
 
