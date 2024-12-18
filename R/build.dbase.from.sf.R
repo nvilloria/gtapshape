@@ -2,7 +2,7 @@
 #'
 #' @param subnat_bound_file SF file with subnational
 #'     boundaries. Defaults to the 18 Agroecological Zones (Micah:
-#'     Version>?)#'
+#'     Version AND perhaps refer to vignette?)#'
 #' @param year Base year for the database. The FAOSTAT database
 #'     distributed with the package is preprocessed and available for
 #'     2011-2022

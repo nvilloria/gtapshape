@@ -3,19 +3,48 @@
 \docType{data}
 \name{aez18}
 \alias{aez18}
-\title{SF with 18 Agroecological Zones}
+\title{Agro-Ecological Zones (AEZ18) Dataset}
 \format{
-An object of class \code{sf} (inherits from \code{tbl_df}, \code{tbl}, \code{data.frame}) with 18 rows and 3 columns.
+A simple feature collection with 18 features and 2 fields:
+\describe{
+\item{subnat_name}{character. The name of the Agro-Ecological Zone.}
+\item{subnat_num}{numeric. The numeric identifier for the Agro-Ecological Zone.}
+\item{geometry}{sfc_MULTIPOLYGON. The geometric representation of the zone.}
+}
 }
 \source{
-[\link{Micah}]
+Global Agro-Ecological Zones (GAEZ) methodology, FAO/IIASA
 }
 \usage{
 aez18
 }
 \description{
-The 18 Agroecoological Zones are based on GAEZ version XX [\link[=Ask
-Micah for details and whether a vignette will be included how to
-create the AEZ 18 by Country raster]{Ask Micah for details and whether a vignette will be included how to create the AEZ 18 by Country raster}].
+A spatial dataset containing 18 Agro-Ecological Zones (AEZ) defined
+by the Global Agro-Ecological Zones (GAEZ) methodology--[\link[=Micah add
+more or less explanations if you see fit---and perhaps mention vignette]{Micah add more or less explanations if you see fit---and perhaps mention vignette}].
+}
+\details{
+This dataset is a simple feature collection with the following properties:
+\itemize{
+\item Geometry type: MULTIPOLYGON
+\item Dimension: XY
+\item Bounding box: xmin: -180, ymin: -56, xmax: 180, ymax: 83.66667
+\item Geodetic CRS: WGS 84
+}
+
+The AEZ methodology combines climatic parameters with soil and terrain conditions
+to define zones of similar agricultural potential\link{2}.
+}
+\examples{
+data(aez18)
+
+# Plot the AEZ zones
+plot(st_geometry(aez18))
+
+# Summarize the dataset
+summary(aez18)
+
+# Get information for a specific AEZ
+aez18[aez18$subnat_name == "AEZ1", ]
 }
 \keyword{datasets}

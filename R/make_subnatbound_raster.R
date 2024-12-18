@@ -18,8 +18,6 @@
 make_subnatbound_raster <- function(subnat_bound_file='aez18'){
     ## Global raster to enforce raster settings:
     gr <- make.global.raster()
-    ## Load the raster with countries (seems to me tha can come into
-    ## the data directory, ask Micah)
     country.raster.path <-
         system.file("GADM", "gadm_rast.tif", package = "gtapshape")
     gadm_rast <- terra::rast(country.raster.path)
