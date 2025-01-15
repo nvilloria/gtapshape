@@ -9,16 +9,29 @@
 #' @param file Name of the har file with the aggregated physical
 #'     data. Should have an extension. Defaults to "gtaplulc.har"
 #'
-build.dbase.from.sf <- function(subnat_bound_file="aez18", year="2017", file = "gtaplulc.har"){
+build.dbase.from.sf <- function(subnat_bound_file="aez18", year="2017", crop_rasters = "monfreda", file = "gtaplulc.har"){
     ## Make a gridded dataframe from the SF file with subnational boundaries:
     g <- make_subnatbound_gridded_dataframe(subnat_bound_file)
 
     ## Subnational bound shares of ag. production or and land cover used to share:
-
+      
+      ## ADDED BY MVCH 12/20
+      ## If using Monfreda crop rasters, or cropgrids
+      if (crop_rasters == "monfreda") {
+        crops = gridded.output.file.names <- list.files(system.file("monfreda", package = "gtapshape"),
+                                                        pattern = "\\Production.rda$", full.names = TRUE)
+      } else if (crop_rasters == "cropgrids") {
+        crops = gridded.output.file.names <- list.files(system.file("cropgrids", package = "gtapshape"),
+                                                        pattern = "\\CROPGRIDSv1.08", full.names = TRUE)
+      } else {
+        crops = gridded.output.file.names <- list.files(system.file("monfreda", package = "gtapshape"),
+                                                        pattern = "\\Production.rda$", full.names = TRUE)
+      }
+      ##END ADDED SECTION
+      
+    #Make one list combining crop production, livestock production, and land cover files
     file.names.list <- list(
-    crops = gridded.output.file.names <- list.files(system.file("monfreda", package = "gtapshape"),
-                                            pattern = "\\Production.rda$", full.names = TRUE
-                                            ),
+    crops = crops, ## Also edited this line - MVCH 12/20
     lstck = gridded.livestock.file.names <- c(
         system.file("fao_lstck_2005", "cattle.rda", package = "gtapshape"),
         system.file("fao_lstck_2005", "goats.rda", package = "gtapshape"),
@@ -66,7 +79,7 @@ build.dbase.from.sf <- function(subnat_bound_file="aez18", year="2017", file = "
     )
         ## Annual national data, from FAOSTAT (4-letters data labels are used
     ## later for compatibility with the har file):
-    year = "2017"
+    #year = "2017"
     iso.data <- list(
         QCR8 = iso.crop.production.2011.2022[
             iso.crop.production.2011.2022$year==year,],
