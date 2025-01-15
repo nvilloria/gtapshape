@@ -32,21 +32,25 @@ share.out.sectors.to.subnatbound <- function(iso.data, shares, units, sector) {
 
     m <- merged_data[,c("reg", "subnatbound", sector_sym, "value")]
 
-    p <- expand.grid(
-        reg= setdiff(regional.concordance$reg, unique(merged_data$reg) ) ,
-        subnatbound= unique(merged_data$subnatbound),
-        sector=unique( merged_data[[sector]] )
-    )
-
-    names(p)[3] <- sector_sym
-
-    p$value <- 0
-
-    m <- rbind(m,p)
     ## Aggregate
     agg_formula <- as.formula(paste("value ~", paste("reg", "subnatbound", sector_sym, sep = " + ")))
     result <- aggregate(agg_formula, data = m, sum, na.rm = TRUE)
 
+    ## ADDED BY MVCH 12/20
+    ## Handle missing regions without forest cover
+    p <- expand.grid(
+      reg= setdiff(regional.concordance$reg, unique(result$reg) ) ,
+      subnatbound= unique(merged_data$subnatbound),
+      sector=unique( merged_data[[sector]] )
+    )
+    
+    names(p)[3] <- sector_sym
+    
+    p$value <- 0
+    
+    result <- rbind(result,p)
+    ## END ADDED CODE
+    
   # Add units
   result$units <- units
 

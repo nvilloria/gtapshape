@@ -3,21 +3,40 @@
 \docType{data}
 \name{regional.concordance}
 \alias{regional.concordance}
-\title{My Example Dataset}
+\title{GTAP Regional Concordance}
 \format{
-A data frame with 5 rows and 2 variables:
+A data frame with 2 variables:
 \describe{
-\item{id}{Integer ID}
-\item{name}{Character string of the person's name}
+\item{iso3}{character. ISO 3166-1 alpha-3 country code.}
+\item{reg}{character. GTAP region code.}
 }
 }
 \source{
-Created for demonstration purposes
+Global Trade Analysis Project (GTAP), Purdue University
 }
 \usage{
 regional.concordance
 }
 \description{
-A dataset containing example data with IDs and names.
+A dataset providing concordance between ISO3 country codes and GTAP regions.
+}
+\details{
+This dataset maps ISO3 country codes to their corresponding GTAP regions.
+GTAP (Global Trade Analysis Project) uses a set of 160 regions in its economic modeling.
+This concordance allows for easy translation between standard country codes and GTAP's
+regional classification system.
+}
+\examples{
+data(regional.concordance)
+head(regional.concordance)
+
+# Find the GTAP region for a specific country
+regional.concordance[regional.concordance$iso3 == "afg", ]
+
+# List all countries in a specific GTAP region
+subset(regional.concordance, reg == "xcb")
+
+# Count the number of countries in each GTAP region
+table(regional.concordance$reg)
 }
 \keyword{datasets}
