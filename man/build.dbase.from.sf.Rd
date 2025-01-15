@@ -13,7 +13,7 @@ build.dbase.from.sf(
 \arguments{
 \item{subnat_bound_file}{SF file with subnational
 boundaries. Defaults to the 18 Agroecological Zones (Micah:
-Version>?)#'}
+Version AND perhaps refer to vignette?)#'}
 
 \item{year}{Base year for the database. The FAOSTAT database
 distributed with the package is preprocessed and available for

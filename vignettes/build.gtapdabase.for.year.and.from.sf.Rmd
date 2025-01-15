@@ -1,6 +1,6 @@
 ---
 title: "Build a GTAP database with land use split in subnational bounds"
-author: "Micah Cameron-Harp & Nelson B. Vileloria"
+author: "Micah Cameron-Harp & Nelson B. Villoria"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
@@ -10,7 +10,7 @@ vignette: >
 ---
 
 ```{r, eval = FALSE}
-devtools::document("gtapshape")
+devtools::document("../../gtapshape")
 require(dplyr)
 ```
 
