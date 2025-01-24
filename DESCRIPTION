@@ -2,11 +2,9 @@ Package: gtapshape
 Type: Package
 Title: Spatial disaggregation of GTAP LULC data
 Version: 0.0.1
-Authors@R: c(person("Micah", "Cameron-Harp", , "mcameronharp@ksu.edu", role = c("aut", "cre"), comment = c(ORCID = "0009-0008-8934-1923")),
-             person("Nelson", "Villoria", , "nvilloria@ksu.edu", role = c("aut", "ctb"), comment = c(ORCID = "0000-0003-1929-0725"))
-	     )	   
+Authors@R: c(person("Micah", "Cameron-Harp", , "mcameronharp@ksu.edu", role = c("aut", "cre"), comment = c(ORCID = "0009-0008-8934-1923")),person("Nelson", "Villoria", , "nvilloria@ksu.edu", role = c("aut", "ctb"), comment = c(ORCID = "0000-0003-1929-0725")))	   
 Description: Creates a land use and land cover GTAP database specific to the users
-    choice of spatial unit.
+    choice of spatial units.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
