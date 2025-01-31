@@ -39,7 +39,7 @@ write.gtaplulcsets.har <- function(gtap_basedatasets_file, subnat_bound_file="ae
 #Create the list that is output using the HARr package
 gtap.lulc.sets <- list(
   REG = reg_order$reg,
-  SBN = subnatbound_order$subnatbound,
+  SUBN = subnatbound_order$subnatbound,
   CRP8 = gsc3_order$gsc3[1:8],
   CRP9 = c(gsc3_order$gsc3[1:8], 'frs'),
   LCOV = lcov_order$gsc3)
