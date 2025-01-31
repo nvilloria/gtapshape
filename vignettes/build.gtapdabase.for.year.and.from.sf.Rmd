@@ -301,3 +301,10 @@ write.gtaplulcsets.har(gtap_basedatasets_file = "C:/Users/Micah/Dropbox/REPOS/re
                        subnat_bound_file="aez18",
                        file = 'C:/Users/Micah/Dropbox/REPOS/gtapshape/gtaplulcsets.har')
 ```
+
+## Write aggregation file as .txt file
+```{r, eval = FALSE}
+write.gtaplulcagg.txt(subnat_bound_file="aez18",
+                      base_aggr_file = "C:/Users/Micah/Dropbox/REPOS/BIOMEmod_base.txt",
+                      file = 'C:/Users/Micah/Dropbox/REPOS/gtapshape/gtaplulcagg.txt')
+```
