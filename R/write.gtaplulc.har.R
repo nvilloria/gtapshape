@@ -8,19 +8,20 @@
 #' @param file Name of the har file with the aggregated physical
 #'     data. Should have an extension. Defaults to "gtaplulc.har"
 #'
-write.gtaplulc.har <- function(gsc3.by.iso, file = "gtaplulc.har"){
-    ## Prepare data arrays (ordered following the GTAP convention) for
-    ## writing har files:
+#'
+write.gtaplulc.har <- function(gsc3.by.iso, file = "gtaplulc.har") {
+  ## Prepare data arrays (ordered following the GTAP convention) for
+  ## writing har files:
     tohar <- lapply( gsc3.by.iso , function (.i) {
-        require(reshape)
-        da <- cast( .i, reg ~ subnatbound ~  gsc3, value = 'value' )
-        da[is.na(da)] <- 0
-        ## Assign attributes for har files:
-        attr(da,'description') <- attr(.i,'description')
-        return(da)
+      require(reshape)
+      da <- cast( .i, reg ~ subnatbound ~  gsc3, value = 'value' )
+      da[is.na(da)] <- 0
+      ## Assign attributes for har files:
+      attr(da,'description') <- attr(.i,'description')
+      return(da)
     }
     )
-    ## devtools::install_git('https://github.com/USDA-ERS/MTED-HARr.git')
-    require(HARr)
-    write_har(tohar, file)
+  ## devtools::install_git('https://github.com/USDA-ERS/MTED-HARr.git')
+  require(HARr)
+  write_har(tohar, file)
 }

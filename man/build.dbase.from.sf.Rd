@@ -7,6 +7,7 @@
 build.dbase.from.sf(
   subnat_bound_file = "aez18",
   year = "2017",
+  crop_rasters = "monfreda",
   file = "gtaplulc.har"
 )
 }

@@ -280,8 +280,24 @@ lapply( gsc3.by.iso, function(.x){
 })
 ```
 
-## Write har file:
-
+## Order the data:
 ```{r, eval = FALSE}
-write.gtaplulc.har(gsc3.by.iso, file="test1.har")
+#Use command 'order.gsc3.by.iso' to assign ordered levels to the character
+#variables (like regions) so when they are output it is consistent with
+#the GTAP base dataset
+gsc3.by.iso.ordered <- order.gsc3.by.iso(gsc3.by.iso, 
+                              gtap_basedatasets_file = "C:/Users/Micah/Dropbox/REPOS/rentcalc/in/gsdgset.har",
+                              subnat_bound_file="aez18")
+```
+
+## Write har file containing shared out land use and land cover data:
+```{r, eval = FALSE}
+write.gtaplulc.har(gsc3.by.iso.ordered, file="C:/Users/Micah/Dropbox/REPOS/gtapshape/gtaplulc.har")
+```
+
+## Write a har file containing the necessary sets:
+```{r, eval = FALSE}
+write.gtaplulcsets.har(gtap_basedatasets_file = "C:/Users/Micah/Dropbox/REPOS/rentcalc/in/gsdgset.har",
+                       subnat_bound_file="aez18",
+                       file = 'C:/Users/Micah/Dropbox/REPOS/gtapshape/gtaplulcsets.har')
 ```
