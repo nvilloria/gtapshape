@@ -15,14 +15,14 @@ This vignette will go over how we generate data on the 7 land cover types presen
 The urban land cover data are from Schneider, Friedl, and Potere (2010). The raster is categorical in nature, indicating the raster cells which are urban at a 500 meter resolution. A complete description of the data can be found in the article at: https://doi.org/10.1016/j.rse.2010.03.003. 
 ```{r, eval = FALSE}
   #Read in the urban land cover raster
-    urban_rast <- terra::rast("urban_land_cover_modis/2002v5_urban_only_geog_mos.bip")
+    urban_rast <- terra::rast("./raw_data/urban_land_cover_modis/2002v5_urban_only_geog_mos.bip")
     #Check the header file
-    hdr_file <- "urban_land_cover_modis/2002v5_urban_only_geog_mos.hdr"
+    hdr_file <- "./raw_data/urban_land_cover_modis/2002v5_urban_only_geog_mos.hdr"
     hdr_file <- readLines(con = hdr_file)
     #Display information in header file
     hdr_file
     #Correct the extent
-    ext(urban_rast) <- c(-180, 180, -89.979167, 90)
+    terra::ext(urban_rast) <- c(-180, 180, -89.979167, 90)
 ```
 
 We modify the base urban cover raster in two ways to ensure it is compatible with the other spatial data used in later processes. First, we reclassify the values of the raster so that urban areas have a value of 1 and all other areas have a value of zero.

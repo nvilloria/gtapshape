@@ -25,7 +25,7 @@ First, we make a list of the rasters containing crop production from Monfreda, C
 ```{r, eval = FALSE}
  #### Crop production ####
   #Name the folder containing the crop output rasters (172 of them):
-    crop_production_rast_dir <- "C:/Users/nvill/Dropbox/papers/Current/GTAPBIOMES_shared/GTAP_BIOMES/raw_data/HarvestedAreaYield175Crops_Geotiff/GeoTiff"  
+    crop_production_rast_dir <- "./raw_data/HarvestedAreaYield175Crops_Geotiff/GeoTiff"  
   #Now list all the raster file names
     output.file.names <- list.files(crop_production_rast_dir,
                                     pattern = '_Production.tif$',
@@ -83,7 +83,7 @@ The raster data we use to determine the spatial distribution of livestock produc
 
 ```{r, eval = FALSE}
 ##Directory containing rasters for all species with 2005 as the reference year.
-livestock_density_rast_dir = "C:/Users/nvill/Dropbox/papers/Current/GTAPBIOMES_shared/GTAP_BIOMES/raw_data/Gridded livestock_FAO/2005"
+livestock_density_rast_dir = "./raw_data/Gridded livestock_FAO/2005"
 ##Paths to the species-specific folders
 dir_paths <- dir(path = livestock_density_rast_dir, recursive = FALSE, full.names = TRUE)
 ##Individual file names

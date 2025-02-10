@@ -11,10 +11,10 @@
 #'
 build.dbase.from.sf <- function(subnat_bound_file="aez18", year="2017", crop_rasters = "monfreda", file = "gtaplulc.har"){
     ## Make a gridded dataframe from the SF file with subnational boundaries:
-    g <- make_subnatbound_gridded_dataframe(subnat_bound_file)
+    g <- make_subnatbound_gridded_dataframe(subnat_bound_file=subnat_bound_file)
 
     ## Subnational bound shares of ag. production or and land cover used to share:
-      
+
       ## ADDED BY MVCH 12/20
       ## If using Monfreda crop rasters, or cropgrids
       if (crop_rasters == "monfreda") {
@@ -28,7 +28,7 @@ build.dbase.from.sf <- function(subnat_bound_file="aez18", year="2017", crop_ras
                                                         pattern = "\\Production.rda$", full.names = TRUE)
       }
       ##END ADDED SECTION
-      
+
     #Make one list combining crop production, livestock production, and land cover files
     file.names.list <- list(
     crops = crops, ## Also edited this line - MVCH 12/20
@@ -139,9 +139,32 @@ build.dbase.from.sf <- function(subnat_bound_file="aez18", year="2017", crop_ras
     )
     names(gsc3.by.iso) <- names(iso.data)
 
+    ## Order  regions and products:
+    gsc3.by.iso <- order.gsc3.by.iso(gsc3.by.iso,
+                                     gtap_basedatasets_file =
+                                         system.file("har", "gsdgset11cMV6.har", package = "gtapshape"),
+                                     subnat_bound_file=subnat_bound_file
+                                     )
+
     write.gtaplulc.har(gsc3.by.iso=gsc3.by.iso, file = file)
+
+    ## Name file with sets:
+    data.file.name <- strsplit(file, "\\.")[[1]]
+    set.file.name <- paste0(data.file.name[1], "-sets.", data.file.name[2])
+
+    ## Write sets:
+    write.gtaplulcsets.har(gtap_basedatasets_file =
+                               system.file("har", "gsdgset11cMV6.har", package = "gtapshape"),
+                           subnat_bound_file = subnat_bound_file,
+                           file = set.file.name)
+
+    ## Name file with endowment sets:
+    end.set.file.name <- paste0(data.file.name[1], "-sets.txt")
+
+    write.gtaplulcagg.txt(
+        subnat_bound_file=subnat_bound_file,
+        base_aggr_file = "./BIOMEmod_base.txt",
+        file = end.set.file.name)
 
     return(gsc3.by.iso)
 }
-
-

@@ -14,7 +14,7 @@ devtools::document("../../gtapshape")
 require(dplyr)
 ```
 
-A set of XX functions carry the work of combining the time-invariant
+A number of functions carries the work of combining the time-invariant
 gridded data on land use and land cover with the annual national data
 published by FAOSTAT in order to get a database of land use and land
 cover compatible with the theory behind the GTAP-AEZ model. These
@@ -55,18 +55,6 @@ functions, and then discuss the convenience wrapper
 ##  user  system elapsed 
 ## 24.51    2.92  103.28 
 system.time(aez18 <- build.dbase.from.sf())
-
-summary(aez18)
-
-lapply( aez18, function(.x){
-    length(unique(.x$reg))
-    setdiff(
-        regional.concordance$reg,
-        unique(.x$reg)
-    )
-})
-
-
 system.time(biomes14 <- build.dbase.from.sf(subnat_bound_file='biomes14', file="gtaplulc.biome14.har"))
 
 ```
@@ -76,11 +64,8 @@ system.time(biomes14 <- build.dbase.from.sf(subnat_bound_file='biomes14', file="
 ## Inputs:
 
 ```{r, eval = FALSE}
-subnat_bound_file = "C:/Users/nvill/Dropbox/papers/Current/GTAPBIOMES_shared/GTAP_BIOMES/raw_data/beefORsoy_75%_cutoff_sf.rds"
-
 ## Make a gridded dataframe from the SF file with subnational
 ## boundaries:
-##  g <- make_subnatbound_gridded_dataframe(subnat_bound_file)
 g <- make_subnatbound_gridded_dataframe() ## Default is aez18
 ```
 ## Subnational bound shares of ag. production or and land cover used to share:
@@ -286,25 +271,25 @@ lapply( gsc3.by.iso, function(.x){
 #variables (like regions) so when they are output it is consistent with
 #the GTAP base dataset
 gsc3.by.iso.ordered <- order.gsc3.by.iso(gsc3.by.iso, 
-                              gtap_basedatasets_file = "C:/Users/Micah/Dropbox/REPOS/rentcalc/in/gsdgset.har",
-                              subnat_bound_file="aez18")
+                                         gtap_basedatasets_file = system.file("har", "gsdgset11cMV6.har", package = "gtapshape")
+                                         )
 ```
 
 ## Write har file containing shared out land use and land cover data:
 ```{r, eval = FALSE}
-write.gtaplulc.har(gsc3.by.iso.ordered, file="C:/Users/Micah/Dropbox/REPOS/gtapshape/gtaplulc.har")
+write.gtaplulc.har(gsc3.by.iso.ordered, file="./gtaplulc.har")
 ```
 
 ## Write a har file containing the necessary sets:
 ```{r, eval = FALSE}
-write.gtaplulcsets.har(gtap_basedatasets_file = "C:/Users/Micah/Dropbox/REPOS/rentcalc/in/gsdgset.har",
-                       subnat_bound_file="aez18",
-                       file = 'C:/Users/Micah/Dropbox/REPOS/gtapshape/gtaplulcsets.har')
+write.gtaplulcsets.har(gtap_basedatasets_file =
+                           system.file("har", "gsdgset11cMV6.har", package = "gtapshape"),
+                       file = './gtaplulcsets.har')
 ```
 
 ## Write aggregation file as .txt file
 ```{r, eval = FALSE}
-write.gtaplulcagg.txt(subnat_bound_file="aez18",
-                      base_aggr_file = "C:/Users/Micah/Dropbox/REPOS/BIOMEmod_base.txt",
-                      file = 'C:/Users/Micah/Dropbox/REPOS/gtapshape/gtaplulcagg.txt')
+write.gtaplulcagg.txt(
+                      base_aggr_file = "./BIOMEmod_base.txt",
+                      file = './gtaplulcagg.txt')
 ```
