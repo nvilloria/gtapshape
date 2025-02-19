@@ -141,12 +141,12 @@ First, we load in the cropland and pastureland rasters. We then use the \link[gt
       global_rast <- make.global.raster()
 
     #Load cropland raster
-      cropland_rast <- terra::rast("C:/Users/Micah/Dropbox/CGE_BIOMES_Carbon_2024/GTAP_BIOMES/raw_data/CroplandPastureArea2000_Geotiff/Cropland2000_5m.tif")
+      cropland_rast <- terra::rast("./raw_data/CroplandPastureArea2000_Geotiff/Cropland2000_5m.tif")
       #Make sure the cropland raster CRS and resolution match other rasters
       cropland_rast <- apply_global_raster_properties(cropland_rast, global_rast)
     
     #Load pastureland raster
-      pasture_rast <- terra::rast("C:/Users/Micah/Dropbox/CGE_BIOMES_Carbon_2024/GTAP_BIOMES/raw_data/CroplandPastureArea2000_Geotiff/Pasture2000_5m.tif")
+      pasture_rast <- terra::rast("./raw_data/CroplandPastureArea2000_Geotiff/Pasture2000_5m.tif")
       #Make sure the pastureland raster CRS and resolution match other rasters
       pasture_rast <- apply_global_raster_properties(pasture_rast, global_rast)
 ```

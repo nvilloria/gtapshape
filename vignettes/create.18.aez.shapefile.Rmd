@@ -24,7 +24,7 @@ pacman::p_load(
 
 ```{r, eval = FALSE}
 #Load in length of growing season data
-    lgd <- terra::rast("C:/Users/Micah/Dropbox/CGE_BIOMES_Carbon_2024/Raw data/Total number of growing period days_1981 to 2010/lgd_CRUTS32_Hist_8110.tif")
+    lgd <- terra::rast("./raw_data/Total number of growing period days_1981 to 2010/lgd_CRUTS32_Hist_8110.tif")
     #Check RCS - WGS1984, EPSG 4326
     crs(lgd)  
     #Check resolution - It's 0.083 degrees which is equivalent to 5 arc minutes
@@ -61,7 +61,7 @@ pacman::p_load(
 
 ```{r, eval = FALSE}
   #Thermal Zones
-    mc2 <- terra::rast("C:/Users/Micah/Dropbox/CGE_BIOMES_Carbon_2024/Raw data/Thermal zones/mc2_CRUTS32_Hist_8110.tif")
+    mc2 <- terra::rast("./raw_data/Thermal zones/mc2_CRUTS32_Hist_8110.tif")
     #Make a key for the raster
     mc2_rast_values <- c(seq(from = 1, to = 13, by = 1))
     mc2_value_labels <- c("Tropics, warm", "Tropics, cool/cold/very cold", 

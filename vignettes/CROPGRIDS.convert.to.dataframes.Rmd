@@ -20,7 +20,7 @@ knitr::opts_chunk$set(
 
 ```{r, eval = FALSE}
 #Load in one crop to check .nc file types are effectively loaded by terra package.
-  abaca_2020 <- terra::rast("C:/Users/Micah/Dropbox/CGE_BIOMES_Carbon_2024/Raw data/CROPGRIDSv1.08_NC_maps/CROPGRIDSv1.08_abaca.nc")
+  abaca_2020 <- terra::rast("./raw_data/CROPGRIDSv1.08_NC_maps/CROPGRIDSv1.08_abaca.nc")
   abaca_2020
 ```
 There are multiple variables stored within the SpatRaster: harvested area, crop area, qual, set. We want harvested area. 
@@ -32,12 +32,11 @@ There are multiple variables stored within the SpatRaster: harvested area, crop 
 ```
 ```{r, eval = FALSE}
 #Load in 'gtapshape' commands
-setwd("C:/Users/Micah/Dropbox/REPOS/gtapshape")
-devtools::document()
+library(gtapshape)
 
 #Now make a list of all the files, make sure they have some properties as current data, and save as dataframes in .rda format. 
   #List files
-  CROPGRIDS.file.list <- list.files(path = "C:/Users/Micah/Dropbox/CGE_BIOMES_Carbon_2024/Raw data/CROPGRIDSv1.08_NC_maps/",
+  CROPGRIDS.file.list <- list.files(path = "./raw_data/CROPGRIDSv1.08_NC_maps/",
                                      pattern = ".nc",
                                      full.names = TRUE)
   
