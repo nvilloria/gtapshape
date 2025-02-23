@@ -47,4 +47,5 @@ getrawdata <- function(url) {
   # Remove the zip file after extraction
   file.remove(zip_file)
   cat("Zip file removed.\n")
+  cat("\n\nDone downloading and unzipping the necessary data.\n")
 }

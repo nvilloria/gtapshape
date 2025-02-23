@@ -9,7 +9,11 @@
 #' @param file Name of the har file with the aggregated physical
 #'     data. Should have an extension. Defaults to "gtaplulc.har"
 #'
-build.dbase.from.sf <- function(subnat_bound_file="aez18", year="2017", crop_rasters = "monfreda", file = "gtaplulc.har"){
+build.dbase.from.sf <- function(
+                                subnat_bound_file="aez18",
+                                year="2017",
+                                crop_rasters = "monfreda",
+                                file = "gtaplulc.har"){
     ## Make a gridded dataframe from the SF file with subnational boundaries:
     g <- make_subnatbound_gridded_dataframe(subnat_bound_file=subnat_bound_file)
 
@@ -148,7 +152,7 @@ build.dbase.from.sf <- function(subnat_bound_file="aez18", year="2017", crop_ras
 
     write.gtaplulc.har(gsc3.by.iso=gsc3.by.iso, file = file)
 
-    ## Name file with sets:
+    ## Name file with the sets suffix:
     data.file.name <- strsplit(file, "\\.")[[1]]
     set.file.name <- paste0(data.file.name[1], "-sets.", data.file.name[2])
 
@@ -158,13 +162,15 @@ build.dbase.from.sf <- function(subnat_bound_file="aez18", year="2017", crop_ras
                            subnat_bound_file = subnat_bound_file,
                            file = set.file.name)
 
-    ## Name file with endowment sets:
-    end.set.file.name <- paste0(data.file.name[1], "-sets.txt")
+    ## Name file with aggregation template:
+    map.file.name <- paste0(data.file.name[1], "-map.txt")
 
     write.gtaplulcagg.txt(
-        subnat_bound_file=subnat_bound_file,
-        base_aggr_file = "./BIOMEmod_base.txt",
-        file = end.set.file.name)
+        subnat_bound_file= subnat_bound_file,
+        base_aggr_file =
+            system.file("agg_templates", "gtapv11c_aggr_base_file.txt", package = "gtapshape")
+       ,
+        textfilename = map.file.name)
 
     return(gsc3.by.iso)
 }
