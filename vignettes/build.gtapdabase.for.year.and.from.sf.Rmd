@@ -4,7 +4,7 @@ author: "Micah Cameron-Harp & Nelson B. Villoria"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{raster_processing}
+  %\VignetteIndexEntry{Build a GTAP database with land use split in subnational bounds}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

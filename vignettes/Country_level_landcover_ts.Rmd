@@ -2,7 +2,7 @@
 title: "Country-level time series of land covers"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Process annual, country-level land cover data}
+  %\VignetteIndexEntry{Country-level time series of land covers}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

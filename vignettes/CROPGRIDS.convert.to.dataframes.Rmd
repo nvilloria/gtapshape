@@ -1,12 +1,12 @@
 ---
-title: "2020 CROPGRIDS Data"
+title: "CROPGRIDS Data (2020)"
 author: "Micah Cameron-Harp and Nelson Villoria"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %/VignetteIndexEntry{2020 CROPGRIDS Data}
-  %/VignetteEngine{knitr::rmarkdown}
-  %/VignetteEncoding{UTF-8}
+  %\VignetteIndexEntry{CROPGRIDS Data (2020)}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 ---
 
 ```{r setup, include = FALSE}

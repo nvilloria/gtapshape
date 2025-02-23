@@ -11,7 +11,7 @@ vignette: >
 
 This vignette walks through the creation of the raster data depicting 18 Agro-Ecological Zones (AEZ) included in this package. To define the 18 AEZs, we use publicly available spatial data on the length of the growing period (LGP) and the thermal climate. Both of these datasets are available as rasters at https://gaez.fao.org/pages/data-viewer. We use the LGP and thermal climate data from 1981 to 2010 to create the 18 AEZ map in our package. Both of these rasters will be downloaded when the \link[gtapshape]{getrawdata} function is executed. Note, the same procedure we describe below could be used to create maps using more recent data.
 
-```{r setup, include = FALSE}
+```{r load, include = FALSE}
 #Load in require packages 
 if (!require("pacman")) install.packages("pacman")
 pacman::p_load(
@@ -96,7 +96,7 @@ pacman::p_load(
 
 ## Create 18 Agro-Ecological Zones
 
-```{r setup, include = FALSE}
+```{r setup,  eval = FALSE}
 
 #Multiply the values for mc2_3cat by 100
   aez_108 <- mc2_3cat * 100 + lgd_36cat

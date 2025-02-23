@@ -2,7 +2,7 @@
 title: "Timber land rents"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{raster_processing}
+  %\VignetteIndexEntry{Timber land rents}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
