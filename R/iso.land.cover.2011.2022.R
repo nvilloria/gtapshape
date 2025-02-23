@@ -9,6 +9,6 @@
 #'   \item{gsc3}{cropland and pasture, both reported annually by FAOSTAT; urban is fixed over time;  forest, grassland, shrubland, and other are estimates obtained by sharing out unclassified land in FAOSTAT using gridded land cover data for 2000.
 #' }
 #'
-#' @source The step-by-step procedures to create this dataset can be found in the \link[=Country_level_landcover_ts]{vignette about process annual, country-level land cover data}.
+#' @source The step-by-step procedures to create this dataset can be found in the Country_level_landcover_ts vignette.
 #'
 "iso.land.cover.2011.2022"

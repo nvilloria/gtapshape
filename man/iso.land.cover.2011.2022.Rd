@@ -13,7 +13,7 @@ A data frame with 5 rows and 2 variables:
 }
 }
 \source{
-The step-by-step procedures to create this dataset can be found in the \link[=Country_level_landcover_ts]{vignette about process annual, country-level land cover data}.
+The step-by-step procedures to create this dataset can be found in the Country_level_landcover_ts vignette.
 }
 \usage{
 iso.land.cover.2011.2022
