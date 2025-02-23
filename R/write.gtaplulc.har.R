@@ -9,12 +9,12 @@
 #'     data. Should have an extension. Defaults to "gtaplulc.har"
 #'
 #'
+#' @export
 write.gtaplulc.har <- function(gsc3.by.iso, file = "gtaplulc.har") {
   ## Prepare data arrays (ordered following the GTAP convention) for
   ## writing har files:
     tohar <- lapply( gsc3.by.iso , function (.i) {
-      require(reshape)
-      da <- cast( .i, reg ~ subnatbound ~  gsc3, value = 'value' )
+      da <- reshape::cast( .i, reg ~ subnatbound ~  gsc3, value = 'value' )
       da[is.na(da)] <- 0
       ## Assign attributes for har files:
       attr(da,'description') <- attr(.i,'description')
@@ -22,6 +22,5 @@ write.gtaplulc.har <- function(gsc3.by.iso, file = "gtaplulc.har") {
     }
     )
   ## devtools::install_git('https://github.com/USDA-ERS/MTED-HARr.git')
-  require(HARr)
-  write_har(tohar, file)
+  HARr::write_har(tohar, file)
 }

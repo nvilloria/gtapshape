@@ -6,8 +6,8 @@
 #' @param base_aggr_file Text file containing how commodities will are mapped to
 #'    larger categories, how regions will be aggregated, etc. NOTE - This file
 #'    will be overwritten when this function runs.
-#' @param file Name of the output aggregation file. Defaults to 'gtaplulcagg.txt'.
-#'
+#' @param textfilename Name of the output aggregation file. Defaults to 'gtaplulcagg.txt'.
+#' @export
 write.gtaplulcagg.txt <- function(subnat_bound_file="aez18",
                                   base_aggr_file =
                                       system.file("agg_templates",

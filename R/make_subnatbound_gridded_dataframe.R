@@ -3,7 +3,7 @@
 #' The resulting dataframe is used to aggregated the gridded datasets
 #'     on land use and land cover to the country-geographies of
 #'     interest. The function is a wrapper of
-#'     \link{make_country_biome_raster} and
+#'     \link{make_subnatbound_raster} and
 #'     \link{round_up_coordinates}.
 #'
 #' @param subnat_bound_file Simple feature object containing the

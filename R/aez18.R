@@ -19,19 +19,8 @@
 #' }
 #'
 #' The AEZ methodology combines climatic parameters with soil and terrain conditions
-#' to define zones of similar agricultural potential[2].
+#' to define zones of similar agricultural potential.
 #'
 #' @source Global Agro-Ecological Zones (GAEZ) methodology, FAO/IIASA
 #'
-#' @examples
-#' data(aez18)
-#'
-#' # Plot the AEZ zones
-#' plot(st_geometry(aez18))
-#'
-#' # Summarize the dataset
-#' summary(aez18)
-#'
-#' # Get information for a specific AEZ
-#' aez18[aez18$subnat_name == "AEZ1", ]
 "aez18"

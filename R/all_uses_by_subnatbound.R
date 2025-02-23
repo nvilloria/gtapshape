@@ -4,8 +4,7 @@
 #'
 #'@param GADM_subnatbound_df Dataframe mapping the centroids of
 #'     (five-minute?) grid-cell coordinate to countries and geographic
-#'     boundaries of interest. This file is created by
-#'     \link{land_cover}
+#'     boundaries of interest.
 #'@param gridded.use.file.names a vector of character strings with
 #'     the path to the dataframes with gridded information on land use
 #'     (crop output and harvested area) or land cover. These

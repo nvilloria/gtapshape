@@ -3,8 +3,7 @@
 #'
 #'@param GADM_subnatbound_df Dataframe mapping the centroids of
 #'     (five-minute?) grid-cell coordinate to countries and geographic
-#'     boundaries of interest. This file is created by
-#'     \link{land_cover}
+#'     boundaries of interest.
 #'@param path.file.to.aggregate Character string with the path to a
 #'     dataframe with gridded information on land use (crop output and
 #'     harvested area) or land cover. These dataframes need to have
@@ -17,10 +16,8 @@
 #' @export
 aggregate_gridded_df_to_subnatbound <- function(GADM_subnatbound_df, path.file.to.aggregate){
     ## path.file.to.aggregate <- gridded.livestock.file.names[[1]]
-    ## require(dplyr)
     ## Create a temporary environment within the function to hold the
     ## data to be aggregated:
-    require(dplyr)
     temp.env <- new.env()
     load(path.file.to.aggregate, envir = temp.env)
     loaded_name <- ls(temp.env)[1]

@@ -21,7 +21,10 @@ Imports:
     tidyr,
     readxl,
     caTools,
-    magrittr
+    magrittr,
+    HARr,
+    httr,
+    reshape
 Suggests: 
     knitr,
     rmarkdown

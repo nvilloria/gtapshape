@@ -11,7 +11,7 @@
 #'     xmn = -180, xmx = 180, ymn = -90, ymx = 90: resolution =
 #'     c(0.08333333, 0.08333333), coordinate reference system: crs =
 #'     "+proj=longlat +datum=WGS84 +no_defs"
-#' @seealso \link{global.raster} for details on the global raster template used.
+#' @seealso \link{make.global.raster}
 #' @seealso \link{round_up_coordinates} to ensure that rasters can be merged with other rasters after converting them to dataframes.
 #'
 #' @examples

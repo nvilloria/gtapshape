@@ -29,7 +29,7 @@ goodraster <- apply_raster_properties(anyraster, global.raster=make.global.raste
 }
 }
 \seealso{
-\link{global.raster} for details on the global raster template used.
+\link{make.global.raster}
 
 \link{round_up_coordinates} to ensure that rasters can be merged with other rasters after converting them to dataframes.
 }

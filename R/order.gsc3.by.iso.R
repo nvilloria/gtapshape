@@ -2,7 +2,7 @@
 #' base data
 #'
 #' @param gsc3.by.iso List containing shared out land use and land cover data
-#' @param gtap_basedatasets_file Base GTAP database set file 
+#' @param gtap_basedatasets_file Base GTAP database set file
 #' @param subnat_bound_file SF file with subnational
 #'     boundaries. Defaults to the 18 Agroecological Zones (Micah:
 #'     Version AND perhaps refer to vignette?)#'
@@ -12,12 +12,12 @@ order.gsc3.by.iso <- function(gsc3.by.iso, gtap_basedatasets_file, subnat_bound_
   gtap_basedatasets <- HARr::read_har(gtap_basedatasets_file)
   reg_order <- data.frame(reg = gtap_basedatasets[['reg']], reg_num = seq(1:length(gtap_basedatasets[['reg']])))
   gsc3_order <- data.frame(gsc3 = gtap_basedatasets[['comm']], gsc3_num = seq(1:length(gtap_basedatasets[['comm']])))
-  
+
   #Add the order of the land cover types
   lcov_order <- data.frame(gsc3 = c('Forest', 'SavnGrasslnd', 'Shrubland', 'Cropland', 'Pastureland', 'Builtupland', 'Otherland'),
                            gsc3_num = c(seq(1, 7)))
   gsc3_order <- rbind(gsc3_order, lcov_order)
-  
+
   #Get the order of the subnational boundaries from the chosen subnatbound file
   if (subnat_bound_file %in% c('aez18', 'biomes14')) {
     # Load the lazy-loaded data
@@ -29,12 +29,12 @@ order.gsc3.by.iso <- function(gsc3.by.iso, gtap_basedatasets_file, subnat_bound_
   } else {
     stop("Invalid subnat_bound_file. Use 'aez18', 'biomes14', or a valid file path.")
   }
-  subnatbound_order <- subset(subnat_bound.sf %>% sf::st_drop_geometry(), select = c(subnat_name, subnat_num)) 
+  subnatbound_order <- subset(subnat_bound.sf %>% sf::st_drop_geometry(), select = c(subnat_name, subnat_num))
   subnatbound_order <- subnatbound_order %>%
     dplyr::mutate(subnatbound = tolower(subnat_name)) %>%
     dplyr::rename(subnatbound_num = subnat_num) %>%
     dplyr::select(-subnat_name)
-  
+
   #Go through the list of headers in the gsc3.by.iso object
     #Store header names
     hnames <- names(gsc3.by.iso)
@@ -44,7 +44,7 @@ order.gsc3.by.iso <- function(gsc3.by.iso, gtap_basedatasets_file, subnat_bound_
       levels(x$reg) <- reg_order$reg
       x$subnatbound <- as.ordered(x$subnatbound)
       levels(x$subnatbound) <- subnatbound_order$subnatbound
-      #Now assign the other levels based on 
+      #Now assign the other levels based on
       curname <- names(gsc3.by.iso)[i]
       if (curname == "QCR8" | curname == "VCR8" | curname =="HARV") {
         x$gsc3 <- as.ordered(x$gsc3)

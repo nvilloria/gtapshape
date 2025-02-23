@@ -9,6 +9,26 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
+```{r, eval =FALSE}
+## #' Create worning directories
+## #'
+## #' This function creates directories in the user-specified locations.
+## #'
+## #' @param tmp_dir Location of the tmp dir created using gtap_setup function. The default is the current working directory set by getwd()
+## #' @return Creates workdir directory along with its sub-directories
+## #' @export
+## make_workdir <- function(workdir_dir=getwd()) {
+##   #workdir directory
+##   dir.create(path = paste0(workdir_dir, '/workdir'))
+##     #workdir sub-directories
+##     dir.create(path = paste0(workdir_dir, '/workdir/rasters'))
+##     dir.create(path = paste0(workdir_dir, '/workdir/base_year'))
+##     dir.create(path = paste0(workdir_dir, '/workdir/sets'))
+##     dir.create(path = paste0(workdir_dir, '/workdir/gtap_ref_year'))
+##     dir.create(path = paste0(workdir_dir, '/workdir/output_data'))
+##     dir.create(path = paste0(workdir_dir, '/workdir/fao_data'))
+## }
+```
 This vignette will go over how we generate data on the 7 land cover types present in the GTAP Land Use and Land Cover datasets used in the *gtapshape* package. The data are created using publicly available raster data depicting the distribution of cropland and pastureland, potential vegetation classes, and urban areas. In each sub-section below, we detail how the underlying raster data was pre-processed. The raster data used in each sub-section are downloaded when the \link[gtapshape]{getrawdata} function is executed. Note, some of the pre-processing described here mirrors the processes described by Baldos (2017) in "Development of GTAP version 9 Land Use and Land Cover database for years 2004, 2007 and 2011."	(Available at https://doi.org/10.21642/GTAP.RM30)
 
 ## **Urban land cover**

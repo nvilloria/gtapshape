@@ -30,9 +30,4 @@ This dataset is a simple feature collection with the following properties:
 \item Geodetic CRS: WGS 84
 }
 }
-\examples{
-data(wwf_subnational)
-plot(st_geometry(wwf_subnational))
-summary(wwf_subnational)
-}
 \keyword{datasets}

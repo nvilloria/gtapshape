@@ -20,6 +20,8 @@ Version AND perhaps refer to vignette?)#'}
 distributed with the package is preprocessed and available for
 2011-2022}
 
+\item{crop_rasters}{Either \code{monfreda} (default) or \code{cropgrids} (included).}
+
 \item{file}{Name of the har file with the aggregated physical
 data. Should have an extension. Defaults to "gtaplulc.har"}
 }

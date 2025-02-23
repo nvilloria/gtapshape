@@ -3,7 +3,7 @@
 #'@param raster.df a dataframe with x,y coordinates
 #'@return a dataframe with coordinates rounded up to six digits
 #'
-#' @seealso \link{apply_raster_properties} which usually preceds the
+#' @seealso \link{apply_global_raster_properties} which usually preceds the
 #'     application of this function.
 #' @export
 #'

@@ -17,8 +17,4 @@
 #'   \item Geodetic CRS: WGS 84
 #' }
 #' @source World Wildlife Fund (WWF)
-#' @examples
-#' data(wwf_subnational)
-#' plot(st_geometry(wwf_subnational))
-#' summary(wwf_subnational)
 "biomes14"

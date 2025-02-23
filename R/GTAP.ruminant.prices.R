@@ -1,0 +1,1 @@
+"GTAP.ruminant.prices"

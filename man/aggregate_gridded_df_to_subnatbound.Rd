@@ -13,8 +13,7 @@ aggregate_gridded_df_to_subnatbound(
 \arguments{
 \item{GADM_subnatbound_df}{Dataframe mapping the centroids of
 (five-minute?) grid-cell coordinate to countries and geographic
-boundaries of interest. This file is created by
-\link{land_cover}}
+boundaries of interest.}
 
 \item{path.file.to.aggregate}{Character string with the path to a
 dataframe with gridded information on land use (crop output and

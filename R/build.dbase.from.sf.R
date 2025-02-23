@@ -6,9 +6,11 @@
 #' @param year Base year for the database. The FAOSTAT database
 #'     distributed with the package is preprocessed and available for
 #'     2011-2022
+#' @param crop_rasters Either `monfreda` (default) or `cropgrids` (included).
 #' @param file Name of the har file with the aggregated physical
 #'     data. Should have an extension. Defaults to "gtaplulc.har"
 #'
+#' @export
 build.dbase.from.sf <- function(
                                 subnat_bound_file="aez18",
                                 year="2017",

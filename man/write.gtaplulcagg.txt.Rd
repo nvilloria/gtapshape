@@ -20,7 +20,7 @@ Version AND perhaps refer to vignette?)#'}
 larger categories, how regions will be aggregated, etc. NOTE - This file
 will be overwritten when this function runs.}
 
-\item{file}{Name of the output aggregation file. Defaults to 'gtaplulcagg.txt'.}
+\item{textfilename}{Name of the output aggregation file. Defaults to 'gtaplulcagg.txt'.}
 }
 \description{
 Create aggregation textfile based on subnatbound choice

@@ -22,6 +22,6 @@ goodraster <- apply_raster_properties(anyraster)
 }
 }
 \seealso{
-\link{apply_raster_properties} which usually preceds the
+\link{apply_global_raster_properties} which usually preceds the
 application of this function.
 }
