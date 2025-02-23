@@ -9,11 +9,11 @@
 #' \describe{
 #'   \item{iso3}{3-digit ISO country code.}
 #'   \item{year}{Data is distributed for 2011-2022.}
-#'   \item{gsc3}{cropland and pasture, both reported annually by FAOSTAT; urban is fixed over time;  forest, grassland, shrubland, and other are estimates obtained by sharing out unclassified land in FAOSTAT using gridded land cover data for 2000.}
+#'   \item{gsc3}{cropland and pasture, both reported annually by FAOSTAT; urban is fixed over time; forest, grassland, shrubland, and other are estimates obtained by sharing out unclassified land in FAOSTAT using gridded land cover data for 2000.}
 #'   \item{unit}{Physical unit.}
 #'   \item{value}{Value.}
 #' }
 #'
-#'
 #' @source The step-by-step procedures to create this dataset can be found in the Country_level_landcover_ts vignette.
+#'
 "iso.land.cover.2011.2022"
