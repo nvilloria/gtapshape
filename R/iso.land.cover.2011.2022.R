@@ -1,6 +1,6 @@
 #' Annual Land Covers by Country (2011-2022)
 #'
-#' A dataframe containing annual cropland and pastures reported by FAOSTAT, and estimated annual forests, grasslands, shrublands, and other obtained by sharing out unclassified lands in faostat using the data on land cover for 2000 [[Micah: Add source for land cover data]].
+#' A dataframe containing annual cropland and pastures reported by FAOSTAT, and estimated annual forests, grasslands, shrublands, and other obtained by sharing out unclassified lands in faostat using the data on land cover for 2000 (Micah).
 #'
 #' @format A data frame with 5 rows and 2 variables:
 #' \describe{

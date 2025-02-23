@@ -1,8 +1,7 @@
 #' Agro-Ecological Zones (AEZ18) Dataset
 #'
 #' A spatial dataset containing 18 Agro-Ecological Zones (AEZ) defined
-#' by the Global Agro-Ecological Zones (GAEZ) methodology--[[Micah add
-#' more or less explanations if you see fit---and perhaps mention vignette]].
+#' by the Global Agro-Ecological Zones (GAEZ) methodology (Micah).
 #'
 #' @format A simple feature collection with 18 features and 2 fields:
 #' \describe{

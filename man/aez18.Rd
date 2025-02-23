@@ -20,8 +20,7 @@ aez18
 }
 \description{
 A spatial dataset containing 18 Agro-Ecological Zones (AEZ) defined
-by the Global Agro-Ecological Zones (GAEZ) methodology--[\link[=Micah add
-more or less explanations if you see fit---and perhaps mention vignette]{Micah add more or less explanations if you see fit---and perhaps mention vignette}].
+by the Global Agro-Ecological Zones (GAEZ) methodology (Micah).
 }
 \details{
 This dataset is a simple feature collection with the following properties:
