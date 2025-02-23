@@ -65,7 +65,7 @@ build.dbase.from.sf <- function(
                                              all.x = TRUE
                                              )
     ## Add concordances to map FAOSTAST livestock sectors to GSC3 sectors:
-    subnatbound.use.list[['lstck']] <- full_join(subnatbound.use.list[['lstck']],
+    subnatbound.use.list[['lstck']] <- dplyr::full_join(subnatbound.use.list[['lstck']],
                                                  gridded.livestock.concordance,
                                                  by = c("use"),
                                                  relationship="many-to-many")
