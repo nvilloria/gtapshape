@@ -14,6 +14,7 @@
 #'     than x,y) aggregated to the countries and geographic boundaries
 #'     defined by GADM_subnatbound_df.
 #' @export
+#' @importFrom magrittr %>%
 aggregate_gridded_df_to_subnatbound <- function(GADM_subnatbound_df, path.file.to.aggregate){
     ## path.file.to.aggregate <- gridded.livestock.file.names[[1]]
     ## Create a temporary environment within the function to hold the
