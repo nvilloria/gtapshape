@@ -51,5 +51,5 @@ attr(gtap.lulc.sets[[4]], 'description') <- "8 GTAP crop categories and forest r
 attr(gtap.lulc.sets[[5]], 'description') <- "Land cover categories"
 
 #Write the HAR file
-write_har(gtap.lulc.sets, filename = file)
+HARr::write_har(gtap.lulc.sets, filename = file)
 }
