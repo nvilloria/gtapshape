@@ -52,6 +52,6 @@ timber.rents.by.iso.2000 <- left_join(
     dplyr::rename(iso3=ctry)
 
 
-usethis::use_data(timber.rents.by.iso.2000, overwrite = TRUE)
+##usethis::use_data(timber.rents.by.iso.2000, overwrite = TRUE)
 ## usethis::use_r("timber.rents.by.iso.2000.R")
 ```

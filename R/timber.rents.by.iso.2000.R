@@ -1,1 +1,25 @@
+#' Timber rents by country for the year 2000
+#'
+#' This dataset provides timber rent values for countries worldwide in the year 2000.
+#'
+#' @format A tibble with 226 rows and 6 columns:
+#' \describe{
+#'   \item{iso3}{character. ISO 3166-1 alpha-3 country code}
+#'   \item{value}{double. Timber rent value}
+#'   \item{use}{character. Always "timber" in this dataset}
+#'   \item{gsc3}{character. Always "Forest" in this dataset}
+#'   \item{unit}{character. Unit of measurement (USD.M for millions of US dollars)}
+#'   \item{year}{double. Year of observation (always 2000 in this dataset)}
+#' }
+#'
+#' @source Derived from various sources as detailed in the "Timber land rents" vignette
+#'
+#' @details
+#' This dataset contains timber rent values for countries across the world for the year 2000.
+#' Timber rent represents the economic value derived from forest resources.
+#' A value of 0 may indicate either no timber production or no data available for that country.
+#'
+#' For full details on the methodology, data sources, and calculations used to derive these values,
+#' please refer to the "Timber land rents" vignette in the package documentation.
+#'
 "timber.rents.by.iso.2000"
