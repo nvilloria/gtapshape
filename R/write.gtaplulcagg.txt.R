@@ -1,8 +1,10 @@
 #' Create aggregation textfile based on subnatbound choice
 #'
 #' @param subnat_bound_file SF file with subnational
-#'     boundaries. Defaults to the 18 Agroecological Zones (Micah:
-#'     Version AND perhaps refer to vignette?)#'
+#'     boundaries. Defaults to the 18 Agro-ecological Zones created in the
+#'     "create.18.aez.shapefile" vignette. The user can also specify "biomes14"
+#'     to lazyload and use the shapefile of the 14 World Wildlife Fund Biomes 
+#'     included with the package. 
 #' @param base_aggr_file Text file containing how commodities will are mapped to
 #'    larger categories, how regions will be aggregated, etc. NOTE - This file
 #'    will be overwritten when this function runs.
@@ -10,8 +12,8 @@
 #' @export
 write.gtaplulcagg.txt <- function(subnat_bound_file="aez18",
                                   base_aggr_file =
-                                      system.file("agg_templates",
-                                                  "gtapv11c_aggr_base_file.txt",
+                                      system.file("mappings", 
+                                                  "gtapv11cY2017_aggr_base_file.txt",
                                                   package = "gtapshape") ,
                                   textfilename = 'gtaplulcagg.txt'){
 
@@ -131,5 +133,5 @@ write.gtaplulcagg.txt <- function(subnat_bound_file="aez18",
 
   #Rename the file
   file.rename(tempaggfile,
-              textfilename)
+              file.path(getwd(),textfilename))
 }

@@ -288,8 +288,22 @@ write.gtaplulcsets.har(gtap_basedatasets_file =
 ```
 
 ## Write aggregation file as .txt file
+##    The subnat_bound_file should be the same as the one specified when constructing the LULC
+##    database. If the user specifies "aez18" or "biomes14", the corresponding sf is lazyloaded
+##    from the package 'data' folder.
+
 ```{r, eval = FALSE}
-write.gtaplulcagg.txt(
-                      base_aggr_file = "./BIOMEmod_base.txt",
-                      file = './gtaplulcagg.txt')
+#Write aggregation file for 18 AEZs
+write.gtaplulcagg.txt(subnat_bound_file="aez18",
+                      base_aggr_file = system.file("mappings", 
+                                                  "gtapv11cY2017_aggr_base_file.txt",
+                                                  package = "gtapshape"),
+                      textfilename = 'gtaplulcagg.aez18.txt')
+
+#Write aggregation file for 14 WWF Biomes
+write.gtaplulcagg.txt(subnat_bound_file="biomes14",
+                      base_aggr_file = system.file("mappings", 
+                                                  "gtapv11cY2017_aggr_base_file.txt",
+                                                  package = "gtapshape"),
+                      textfilename = 'gtaplulcagg.biomes14.txt')
 ```
