@@ -1,0 +1,43 @@
+replace_subnational_boundaries <- function(input_file, output_file, new_boundaries) {
+  # Read the input file
+  lines <- readLines(input_file)
+  
+  # Function to replace AEZ entries with new boundaries
+  replace_entries <- function(section, new_entries) {
+    start_index <- which(grepl("STRINGS LENGTH 12", section))[1]
+    end_index <- start_index + length(new_entries)
+    
+    # Update the number of strings
+    section[start_index] <- sub("^\\d+", length(new_entries), section[start_index])
+    
+    # Replace AEZ entries with new boundaries
+    section[(start_index + 1):end_index] <- paste0(new_entries, "        ! ", new_entries)
+    
+    return(section[1:end_index])
+  }
+  
+  # Find and replace in the aggregated endowments section
+  agg_end_start <- which(grepl("AGGREGATED ENDOWMENTS", lines))[1]
+  agg_end_end <- which(grepl("AGGREGATED MOBILE ENDOWMENTS", lines))[1] - 1
+  lines[agg_end_start:agg_end_end] <- replace_entries(lines[agg_end_start:agg_end_end], 
+                                                      c(new_boundaries, "UnSkLab", "SkLab", "capital", "NatRes"))
+  
+  # Find and replace in the endowment aggregation mapping section
+  end_map_start <- which(grepl("ENDOWMENT AGGREGATION MAPPING", lines))[1]
+  end_map_end <- which(grepl("AGGREGATED MOBILE ENDOWMENTS", lines))[2] - 1
+  lines[end_map_start:end_map_end] <- replace_entries(lines[end_map_start:end_map_end], 
+                                                      c(new_boundaries, "SkLab", "UnSkLab", "UnSkLab", "SkLab", "UnSkLab", "Capital", "NatRes"))
+  
+  # Find and replace in the aggregate sluggish endowment section
+  slug_end_start <- which(grepl("ASEN Aggregate sluggish endowment", lines))[1]
+  slug_end_end <- slug_end_start + 18
+  lines[slug_end_start:slug_end_end] <- replace_entries(lines[slug_end_start:slug_end_end], new_boundaries)
+  
+  # Find and replace in the aggregate sluggish endowment mapping section
+  slug_map_start <- which(grepl("AMEN Aggregate sluggish endowment mapping", lines))[1]
+  slug_map_end <- slug_map_start + 18
+  lines[slug_map_start:slug_map_end] <- replace_entries(lines[slug_map_start:slug_map_end], new_boundaries)
+  
+  # Write the modified content to the output file
+  writeLines(lines, output_file)
+}
