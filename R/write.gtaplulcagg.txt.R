@@ -48,7 +48,7 @@ write.gtaplulcagg.txt <- function(subnat_bound_file="aez18",
   ##   dplyr::arrange(subnatbound_num)
     ## set_BIO_list <- subnatbound_order$subnatbound
 
-    ## Changed all this to base R:
+    ## (NV) Changed all this to base R:
     subnatbound_order <- subnat_bound.sf[, c("subnat_name", "subnat_num")]
     subnatbound_order <- as.data.frame(subnatbound_order)
     subnatbound_order$subnatbound <- tolower(subnatbound_order$subnat_name)
