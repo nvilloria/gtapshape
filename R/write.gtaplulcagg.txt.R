@@ -13,7 +13,7 @@
 write.gtaplulcagg.txt <- function(subnat_bound_file="aez18",
                                   base_aggr_file =
                                       system.file("mappings", 
-                                                  "gtapv11cY2017_aggr_base_file.txt",
+                                                  "gtapv11c_aggr_base_file.txt",
                                                   package = "gtapshape") ,
                                   textfilename = 'gtaplulcagg.txt'){
 
@@ -59,10 +59,10 @@ write.gtaplulcagg.txt <- function(subnat_bound_file="aez18",
     subnatbound_order <- subnatbound_order[order(subnatbound_order$subnatbound_num), ]
     set_BIO_list <- subnatbound_order$subnatbound
 
-  #AEND Header
+  #AEND header
   #Set has 4 plus number of elements in set_BIO_list
   set_AEND_list <- c(set_BIO_list, "UnSkLab", "SkLab", "Capital", "NatRes")
-  hmd <- c(paste0(length(set_AEND_list), ' Strings Length 12 Header "H6" LongName "AEND Aggregate endowment" ;'))
+  hmd <- c(paste0(length(set_AEND_list), ' Strings Length 12 header "H6" LongName "AEND Aggregate endowment" ;'))
   write.table(hmd, file=tempaggfile, row.names=FALSE, col.names=FALSE, quote = FALSE, append = TRUE)
   for (i in 1:length(set_AEND_list)) {
     write.table(set_AEND_list[[i]], file=tempaggfile, quote = FALSE, row.names=FALSE, col.names=FALSE, append = TRUE)
@@ -72,7 +72,7 @@ write.gtaplulcagg.txt <- function(subnat_bound_file="aez18",
   #ASEN header
   #Set has the sluggish endowments, meaning the land endowments
   set_ASEN_list <- c(set_BIO_list)
-  hmd <- c(paste0(length(set_ASEN_list), ' Strings Length 12 Header "ASEN" LongName "ASEN Aggregate sluggish endowment" ;'))
+  hmd <- c(paste0(length(set_ASEN_list), ' Strings Length 12 header "ASEN" LongName "ASEN Aggregate sluggish endowment" ;'))
   write.table(hmd, file=tempaggfile, row.names=FALSE, col.names=FALSE, quote = FALSE, append = TRUE)
   for (i in 1:length(set_ASEN_list)) {
     write.table(set_ASEN_list[[i]], file=tempaggfile, quote = FALSE, row.names=FALSE, col.names=FALSE, append = TRUE)
@@ -82,7 +82,7 @@ write.gtaplulcagg.txt <- function(subnat_bound_file="aez18",
   #DEND header
   #Set has the land endowments plus 7 others
   set_DEND_list <- c(set_BIO_list, "SkLab", "UnSkLab", "UnSkLab", "SkLab", "UnSkLab", "Capital", "NatRes")
-  hmd <- c(paste0(length(set_DEND_list), ' Strings Length 12 Header "DEND" LongName "Endowment aggregation mapping" ;'))
+  hmd <- c(paste0(length(set_DEND_list), ' Strings Length 12 header "DEND" LongName "Endowment aggregation mapping" ;'))
   write.table(hmd, file=tempaggfile, row.names=FALSE, col.names=FALSE, quote = FALSE, append = TRUE)
   for (i in 1:length(set_DEND_list)) {
     write.table(set_DEND_list[[i]], file=tempaggfile, quote = FALSE, row.names=FALSE, col.names=FALSE, append = TRUE)
@@ -92,14 +92,14 @@ write.gtaplulcagg.txt <- function(subnat_bound_file="aez18",
   #MSEN header
   #Set has the sluggish endowments, meaning the land endowments
   set_MSEN_list <- c(set_BIO_list)
-  hmd <- c(paste0(length(set_MSEN_list), ' Strings Length 12 Header "MSEN" LongName "AMEN Aggregate sluggish endowment mapping" ;'))
+  hmd <- c(paste0(length(set_MSEN_list), ' Strings Length 12 header "MSEN" LongName "AMEN Aggregate sluggish endowment mapping" ;'))
   write.table(hmd, file=tempaggfile, row.names=FALSE, col.names=FALSE, quote = FALSE, append = TRUE)
   for (i in 1:length(set_MSEN_list)) {
     write.table(set_MSEN_list[[i]], file=tempaggfile, quote = FALSE, row.names=FALSE, col.names=FALSE, append = TRUE)
   }
   write.table(eol, file=tempaggfile, row.names=FALSE, col.names=FALSE, quote = FALSE, append = TRUE)
 
-  #ETRE Header
+  #ETRE header
   #Set has 4 plus number of elements in set_BIO_list
   set_ETRE_list <- c(set_BIO_list, "UnSkLab", "SkLab", "Capital", "NatRes")
   set_ETRE_vals <- c(rep(-1, length(set_BIO_list)), -2, -2, -2, 0)
@@ -110,7 +110,7 @@ write.gtaplulcagg.txt <- function(subnat_bound_file="aez18",
   }
   write.table(eol, file=tempaggfile, row.names=FALSE, col.names=FALSE, quote = FALSE, append = TRUE)
 
-  #ESMS Header
+  #ESMS header
   #Set has 2 plus number of elements in set_BIO_list
   set_ESMS_list <- c("SkLab", "UnSkLab", set_BIO_list)
   set_ESMS_vals <- c(rep(0.5, length(set_ESMS_list)))
@@ -121,7 +121,7 @@ write.gtaplulcagg.txt <- function(subnat_bound_file="aez18",
   }
   write.table(eol, file=tempaggfile, row.names=FALSE, col.names=FALSE, quote = FALSE, append = TRUE)
 
-  #SLUG Header
+  #SLUG header
   #Set has 4 plus number of elements in set_BIO_list
   set_SLUG_list <- c(set_BIO_list, "UnSkLab", "SkLab", "Capital", "NatRes")
   set_SLUG_vals <- c(rep(1, length(set_BIO_list)), 0, 0, 0, 1)

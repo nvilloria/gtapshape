@@ -55,7 +55,7 @@ functions, and then discuss the convenience wrapper
 ##  user  system elapsed 
 ## 24.51    2.92  103.28 
 system.time(aez18 <- build.dbase.from.sf())
-system.time(biomes14 <- build.dbase.from.sf(subnat_bound_file='biomes14', file="gtaplulc.biome14.har"))
+system.time(biomes14 <- build.dbase.from.sf(subnat_bound_file='biomes14', file="gtaplulc_biomes14.har"))
 
 ```
 
@@ -296,14 +296,14 @@ write.gtaplulcsets.har(gtap_basedatasets_file =
 #Write aggregation file for 18 AEZs
 write.gtaplulcagg.txt(subnat_bound_file="aez18",
                       base_aggr_file = system.file("mappings", 
-                                                  "gtapv11cY2017_aggr_base_file.txt",
+                                                  "gtapv11c_aggr_base_file.txt",
                                                   package = "gtapshape"),
                       textfilename = 'gtaplulcagg.aez18.txt')
 
 #Write aggregation file for 14 WWF Biomes
 write.gtaplulcagg.txt(subnat_bound_file="biomes14",
                       base_aggr_file = system.file("mappings", 
-                                                  "gtapv11cY2017_aggr_base_file.txt",
+                                                  "gtapv11c_aggr_base_file.txt",
                                                   package = "gtapshape"),
                       textfilename = 'gtaplulcagg.biomes14.txt')
 ```

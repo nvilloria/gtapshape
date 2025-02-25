@@ -169,9 +169,9 @@ build.dbase.from.sf <- function(
 
     write.gtaplulcagg.txt(
         subnat_bound_file= subnat_bound_file,
-        base_aggr_file =
-            system.file("mappings", "gtapv11c-AEZ18-map.txt", package = "gtapshape")
-       ,
+        base_aggr_file = system.file("mappings", 
+                                     "gtapv11c_aggr_base_file.txt",
+                                     package = "gtapshape"),
         textfilename = map.file.name)
 
     return(gsc3.by.iso)
