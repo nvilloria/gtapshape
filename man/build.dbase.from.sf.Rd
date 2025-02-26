@@ -13,8 +13,13 @@ build.dbase.from.sf(
 }
 \arguments{
 \item{subnat_bound_file}{SF file with subnational
-boundaries. Defaults to the 18 Agroecological Zones (Micah:
-Version AND perhaps refer to vignette?)#'}
+boundaries. Defaults to the 18 Agroecological Zones from the version 11
+GTAP Land Use and Land Cover database described in
+\href{https://www.gtap.agecon.purdue.edu/resources/res_display.asp?RecordID=7407}{Baldoz and Corong (2025)}. The 18 AEZs are created using
+publicly available spatial data on the length of the growing period (LGP)
+and the thermal climate. Both of these datasets are available as rasters
+from the \href{https://gaez.fao.org/pages/data-viewer}{GAEZ data viewer}. The code creating the shapefile
+is provided in \code{vignette("create.18.aez.shapefile", package = "gtapshape")}}
 
 \item{year}{Base year for the database. The FAOSTAT database
 distributed with the package is preprocessed and available for

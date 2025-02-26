@@ -6,7 +6,7 @@
 \usage{
 write.gtaplulcagg.txt(
   subnat_bound_file = "aez18",
-  base_aggr_file = system.file("mappings", "gtapv11cY2017_aggr_base_file.txt", package =
+  base_aggr_file = system.file("mappings", "gtapv11c_aggr_base_file.txt", package =
     "gtapshape"),
   textfilename = "gtaplulcagg.txt"
 )
