@@ -24,6 +24,8 @@ iso.land.cover.2011.2022
 A dataframe containing annual cropland and pastures reported by
 FAOSTAT, and estimated annual forests, grasslands, shrublands, and
 other obtained by sharing out unclassified lands in faostat using
-the data on land cover for 2000 (Micah).
+the data on land cover for 2000. The code which creates this dataframe and
+a description of the underlying spatial data is available in the
+\code{vignette("land.cover", package = "gtapshape")}.
 }
 \keyword{datasets}

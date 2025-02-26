@@ -1,6 +1,12 @@
-## Micah, add a brief description of these prices including where they
-## are coming from, it seems to me they are coming from a GTAP
-## database, i am not sure which version/year. Please clarify.
+## These livestock prices are taken from the Land Use and Land Cover (LULC) Data
+## associated with the AEZ version 11c GTAP database. The construction of the
+## AEZ version 11 GTAP LULC database is described in Baldos and Corong (2025) at
+## https://doi.org/10.21642/RM39. To recover prices, we sum up the value of 
+## livestock production (in 1,000 USD) and quantity of livestock production
+## (in 1,000 head) from the AEZ v11 GTAP LULC database by GTAP region.
+## Then we divide the region-level value of production by the quantity of
+## production to recover the price. The .csv file loaded in contains the
+## resulting prices in $ USD/head. 
 require(tidyr)
 lvstk_prices_4spec_file = "./raw_data/gtaplulc18/lvstk_prices_4spec.csv"
 
@@ -14,7 +20,8 @@ GTAP.ruminant.prices <- read.csv(lvstk_prices_4spec_file, header = T) %>%
     pivot_longer(cols = c("Buffalo", "Cattle", "Goats","Sheep" ),
                  values_to='value',
                  names_to='use') %>%
-    ## Micah, check units here please---is this per head?:
+    ## Units are in USD/head as we divide total value of production in 1000USD
+    ## by the quantity of livestock in 1000 head.
     mutate(unit='USD.head',
            value=as.numeric(value)) %>%
     ## Use an average price (over all countries) when the prices are

@@ -4,8 +4,10 @@
 #' @param gsc3.by.iso List containing shared out land use and land cover data
 #' @param gtap_basedatasets_file Base GTAP database set file
 #' @param subnat_bound_file SF file with subnational
-#'     boundaries. Defaults to the 18 Agroecological Zones (Micah:
-#'     Version AND perhaps refer to vignette?)#'
+#'     boundaries. Defaults to the 18 Agroecological Zones used in version 11 
+#'     of the GTAP-AEZ LULC database by \href{https://www.gtap.agecon.purdue.edu/resources/res_display.asp?RecordID=7407}{Baldoz and Corong (2025)}.
+#'     The `vignette("create.18.aez.shapefile", package = "gtapshape")` contains
+#'     the code which creates the 18 AEZ shapefile. 
 #'
 order.gsc3.by.iso <- function(gsc3.by.iso, gtap_basedatasets_file, subnat_bound_file="aez18"){
   #Get the order of regions and commodities from the GTAP database set file

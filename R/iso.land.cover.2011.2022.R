@@ -3,7 +3,9 @@
 #' A dataframe containing annual cropland and pastures reported by
 #' FAOSTAT, and estimated annual forests, grasslands, shrublands, and
 #' other obtained by sharing out unclassified lands in faostat using
-#' the data on land cover for 2000 (Micah).
+#' the data on land cover for 2000. The code which creates this dataframe and 
+#' a description of the underlying spatial data is available in the 
+#' `vignette("land.cover", package = "gtapshape")`. 
 #'
 #' @format A data frame with 5 rows and 5 variables:
 #' \describe{
