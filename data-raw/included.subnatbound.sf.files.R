@@ -1,5 +1,5 @@
-biomes14 <- readRDS("C:/Users/nvill/Dropbox/papers/Current/GTAPBIOMES_shared/GTAP_BIOMES/raw_data/TerrestrialEcos/wwf14_subnatbound_sf.rds")
-aez18 <-    readRDS("C:/Users/nvill/Dropbox/papers/Current/GTAPBIOMES_shared/GTAP_BIOMES/raw_data/aez18_subnatbound_sf.rds")
+biomes14 <- readRDS("./raw_data/TerrestrialEcos/wwf14_subnatbound_sf.rds")
+aez18 <-    readRDS("./raw_data/aez18_subnatbound_sf.rds")
 
 
 usethis::use_data(biomes14, overwrite = TRUE)

@@ -1,10 +1,9 @@
 devtools::document("..")
 #devtools::load_all("gtapshape")
 
-crop_production_rast_dir = "C:/Users/nvill/Dropbox/papers/Current/GTAPBIOMES_shared/GTAP_BIOMES/raw_data/HarvestedAreaYield175Crops_Geotiff/GeoTiff"
-crop_area_rast_dir =       "C:/Users/nvill/Dropbox/papers/Current/GTAPBIOMES_shared/GTAP_BIOMES/raw_data/HarvestedAreaYield175Crops_Geotiff/GeoTiff"
-livestock_density_rast_dir = "C:/Users/nvill/Dropbox/papers/Current/GTAPBIOMES_shared/GTAP_BIOMES/raw_data/Gridded livestock_FAO/2005"
-workdir_dir <-  "c:/Users/nvill/Dropbox/REPOS/"
+crop_production_rast_dir = "./raw_data/HarvestedAreaYield175Crops_Geotiff/GeoTiff"
+crop_area_rast_dir =       "./raw_data/HarvestedAreaYield175Crops_Geotiff/GeoTiff"
+livestock_density_rast_dir = "./raw_data/Gridded livestock_FAO/2005"
 
 output.file.names <- list.files(crop_production_rast_dir,
                                         pattern = '_Production.tif$',

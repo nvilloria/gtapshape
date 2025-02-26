@@ -1,4 +1,4 @@
-regional.concordance_file = "C:/Users/nvill/Dropbox/papers/Current/GTAPBIOMES_shared/GTAP_BIOMES/raw_data/iso3_gtap160_concordance.csv"
+regional.concordance_file = "./raw_data/iso3_gtap160_concordance.csv"
 require(usethis)
 require(dplyr)
 

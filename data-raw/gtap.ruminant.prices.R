@@ -2,7 +2,7 @@
 ## are coming from, it seems to me they are coming from a GTAP
 ## database, i am not sure which version/year. Please clarify.
 require(tidyr)
-lvstk_prices_4spec_file = "C:/Users/nvill/Dropbox/papers/Current/GTAPBIOMES_shared/GTAP_BIOMES/raw_data/gtaplulc18/lvstk_prices_4spec.csv"
+lvstk_prices_4spec_file = "./raw_data/gtaplulc18/lvstk_prices_4spec.csv"
 
 GTAP.ruminant.prices <- read.csv(lvstk_prices_4spec_file, header = T) %>%
     dplyr::rename("reg" = "QLIVE_18",

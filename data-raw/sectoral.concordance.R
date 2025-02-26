@@ -16,7 +16,7 @@ head(fao_production.0)
 
 crop_fao_item_codes <- fao_production.0 %>% dplyr::select(item, item_code_fao, item_code_cpc) %>% unique
 
-fao.to.cpc_file = "C:/Users/nvill/Dropbox/papers/Current/GTAPBIOMES_shared/GTAP_BIOMES/raw_data/monfreda_fao_cropname_concordance.xlsx"
+fao.to.cpc_file = "./raw_data/monfreda_fao_cropname_concordance.xlsx"
 
 fao.to.cpc <- readxl::read_excel(fao.to.cpc_file)
 
@@ -32,7 +32,7 @@ fao.to.cpc <- fao.to.cpc %>%
                is.na(item_code_cpc), "0191", item_code_cpc))
 
 ##########################################################################################
-cpc.to.gsc3_file = "C:/Users/nvill/Dropbox/papers/Current/GTAPBIOMES_shared/GTAP_BIOMES/raw_data/gtap_GSC_CPC_concordance.csv"
+cpc.to.gsc3_file = "./raw_data/gtap_GSC_CPC_concordance.csv"
 
 cpc.to.gsc3 <- read.csv(cpc.to.gsc3_file,
                            header = T,
