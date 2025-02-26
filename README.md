@@ -119,13 +119,17 @@ to
 
 ## Data Preprocessing:
 
-Detail description of the procedures used to process the different
+Detailed description of the procedures used to process the different
 datasets needed to obtain the land use and land cover needed in the
 GTAP-AEZ framework is provided in the following vignettes:
 
-For more detailed examples and use cases, please refer to the
-[vignettes](https://github.com/nvilloria/gtapshape/tree/main/vignettes)
-included in this package.
+### Building the shapefile with 18 AEZs:
+
+``` r
+vignette('create.18.aez.shapefile.html')
+```
+
+(Micah)
 
 ## Authors
 
