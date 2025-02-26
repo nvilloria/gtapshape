@@ -1,0 +1,295 @@
+---
+title: "Build a GTAP database with land use split in subnational bounds"
+author: "Micah Cameron-Harp & Nelson B. Villoria"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Build a GTAP database with land use split in subnational bounds}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, eval = FALSE}
+devtools::document("../../gtapshape")
+require(dplyr)
+```
+
+A number of functions carries the work of combining the time-invariant
+gridded data on land use and land cover with the annual national data
+published by FAOSTAT in order to get a database of land use and land
+cover compatible with the theory behind the GTAP-AEZ model. These
+functions are used many times. For example, the function
+`all_uses_by_subnatbound()`, which allocates the gridded data to the
+country and subnational boundaries of interest, e.g., 18
+agroecological zones, is run 182 times (once for each of 172 crops, 7
+land covers, and 3 livestock species), creating 182 dataframes. These
+dataframes are then passed to `subnatbound.shares()` which estimates
+the shares. The resulting 182 dataframes with subnational bounds are
+then combined with the FAOSTAT data for each of the 182 uses
+(`share.out.sectors.to.subnatbound()`). Further aggregation is
+performed by additional functions, and finally, a har file with the
+following six headers is written:
+
+- Crop production (MT) for the 8 gtap crops
+- Value of crop production (1000 USD) for the 8 gtap crops
+- Harvested area (ha) for the 8 gtap crops
+- Livestock production (heads) for the 3 gtap livestock sectors
+- Livestock output value (1000 USD) for the 3 gtap livestock sectors
+- Land cover areas (ha)
+
+In principle, these functions can be used individually, and should
+accomodate new sources of data with a modest programing effort. In
+practice, most of the inputs to these functions remain fixed for most
+applications. For cases in which the user only needs to change the
+subnational boundaries, and or the base year of the database, we have
+wrapped all the workflow connecting the individual functions in a
+convenient wrapper function named `build.dbase.from.sf()`. The rest of
+this vignette first discusses the workflow connecting the individual
+functions, and then discuss the convenience wrapper
+`build.dbase.from.sf()`.
+
+# Building a land use GTAP-compatible land cover database from gridded and national data
+
+```{r, eval = FALSE}
+
+##  user  system elapsed 
+## 24.51    2.92  103.28 
+system.time(aez18 <- build.dbase.from.sf())
+system.time(biomes14 <- build.dbase.from.sf(subnat_bound_file='biomes14', file="gtaplulc.biome14.har"))
+
+```
+
+# Under the hood
+
+## Inputs:
+
+```{r, eval = FALSE}
+## Make a gridded dataframe from the SF file with subnational
+## boundaries:
+g <- make_subnatbound_gridded_dataframe() ## Default is aez18
+```
+## Subnational bound shares of ag. production or and land cover used to share:
+
+Gridded data on land use (crops annd livestock) and land cover are
+aggregated to the subnational boundaries to calculate the national
+shares of each land use or land cover that are then used to
+dissagregate the country-level data from FAOSTAT to subnational
+bounds. In what follows, The function `all_uses_by_subnatbound()`
+passes the file names of the gridded data to
+`aggregate_gridded_df_to_subnatbound()`, which aggregates them to the
+subnational bounds.
+
+
+```{r, eval = FALSE}
+file.names.list <- list(
+    crops = gridded.output.file.names <- list.files(system.file("monfreda", package = "gtapshape"),
+                                            pattern = "\\Production.rda$", full.names = TRUE
+                                            ),
+    lstck = gridded.livestock.file.names <- c(
+        system.file("fao_lstck_2005", "cattle.rda", package = "gtapshape"),
+        system.file("fao_lstck_2005", "goats.rda", package = "gtapshape"),
+        system.file("fao_lstck_2005", "sheep.rda", package = "gtapshape")),
+    cover = gridded.landcover.file.names <- list.files(
+        system.file("land_cover_2000", package = "gtapshape"),
+        pattern = "\\.rda$", full.names = TRUE)
+)
+
+## Aggregate gridded land use and land cover to countries and subnational boundaries of interest
+
+system.time( ## user: 78.25   system: 7.35  elapsed 85.84
+    subnatbound.use.list <- lapply( file.names.list, function(.f){
+        ha.by.iso.subnatbound.6covers <- all_uses_by_subnatbound(
+            GADM_subnatbound_df= g,
+            gridded.use.file.names= .f)
+    }
+    )
+)
+```
+An important step in the construction of the shares is to map the
+original uses in FAOSTAT into the GTAP sectors. The way in which this
+aggregation needs to occur is specific to each type of data:
+
+- For crops, the starting point are gridded data on crop production
+  and harvested area fro the 172 crops covered by FAOSTAT. These data
+  are taken from Monfreda et al. and are representative of year
+  circa 2000.  These 172 crops are then aggregated to CPC sectors, so
+  the subnational shares of each land use are at the CPC level. The
+  country-level, annual FAOSTAT data is also aggregated to the CPC
+  level before being shared out using the aggregated gridded
+  data. After the annual, national FAOSTAT data has been assigned to
+  each subnational bound, we aggregate them to the eight GTAP crop
+  sectors.
+- For livestock, both national (FAOSTAT) and gridded (Micah: Source)
+  data are aggregated from three species (cattle, goats, and sheep)
+  into the three livestock GTAP sectors: 'ctl', 'rmk', and 'wol'. As
+  indicates in the `gridded.livestock.concordance`, this is a
+  many-to-many mapping as the individual species are counted in more
+  than one sector.
+- For land covers, the national data (from FAOSTAT, updated as
+  explained in the vignette where the updating process is explained)
+  and the gridded data, from Ramankutty et al. (circa 2000), are given
+  for the same number of sectors in the GTAP database, and therefore
+  there is no need to map various sectors into aggregated GTAP
+  categories as in the cases of crops and livestock. 
+  
+The following code first adds the mapping from 'uses' to the target
+sectors (CPC sectors in the case of crops and GSC3 for livestock and
+land covers) to the respective datasets, and then uses the function
+`subnatbound.shares()` to calculate the subnational boundary shares of
+the target sectors:
+
+```{r, eval = FALSE}
+
+## Add concordances to map FAOSTAST crops into CPC codes (aggregation
+## to GSC3 sectors occurs after sharing out the national anual FAOSTAT
+## data):
+subnatbound.use.list[['crops']] <- merge(subnatbound.use.list[['crops']],
+                                         unique(crop.concordance[, c("use", "item_code_cpc")]),
+                                         by = "use",
+                                         all.x = TRUE
+                                         )
+
+## Add concordances to map FAOSTAST livestock sectors to GSC3 sectors:
+subnatbound.use.list[['lstck']] <- full_join(subnatbound.use.list[['lstck']],
+                                            gridded.livestock.concordance,
+                                            by = c("use"),
+                                            relationship="many-to-many")
+
+
+## Add concordances to rename land cover uses to the names use by the
+## GTAP Center, labeled here as GSC3 sectors:
+subnatbound.use.list[['cover']] <- merge(subnatbound.use.list[['cover']],
+                                         land.cover.concordance,
+                                         by = "use",
+                                         all.x = TRUE)
+
+system.time(
+    shares <- lapply( subnatbound.use.list, function(.f){
+        s <- subnatbound.shares(
+            subnatbound.use= .f,
+            sector=if(any(grepl("item_code_cpc", names(.f)))){"item_code_cpc"}else{"gsc3"}
+        )
+    }
+    )
+)
+```
+
+## Share out national data and aggregate to GTAP sectors:
+
+The function `share.out.sectors.to.subnatbound()` combines the data at
+the country level (stored below in the list object `iso.data`, with
+attributes used to populate the HAR file written at the end) with the
+subnational shares in order to distribute the national aggregates
+across the subnational units. The data on crops requires a further
+aggregation step, as the CPC sectors need to be aggregated to GSC3 sectors:
+
+```{r, eval = FALSE}
+## Annual national data, from FAOSTAT (4-letters data labels are used
+## later for compatibility with the har file):
+year = "2017"
+iso.data <- list(
+    QCR8 = iso.crop.production.2011.2022[
+        iso.crop.production.2011.2022$year==year,],
+    VCR8 = iso.crop.outputvalue.2011.2022[
+        iso.crop.outputvalue.2011.2022$year==year,],
+    HARV = iso.crop.harea.2011.2022[
+        iso.crop.harea.2011.2022$year==year,],
+    QLV3 = iso.gsc3lstk.heads.2011.2022[
+        iso.gsc3lstk.heads.2011.2022$year==year,],
+    VLV3 =iso.gsc3lstk.outputvalue.2011.2022[
+        iso.gsc3lstk.outputvalue.2011.2022$year==year,],
+    LAND = iso.land.cover.2011.2022[iso.land.cover.2011.2022$year==year,],
+    RTMB = timber.rents.by.iso.2000
+)
+
+## Description of each dataset, used later when producing the har file:
+attr(iso.data$QCR8, 'description')= 'Crop production (MT) for the 8 gtap crops'
+attr(iso.data$VCR8, 'description')= 'Value of crop production (1000 USD) for the 8 gtap crops'
+attr(iso.data$HARV, 'description')= 'Harvested area (ha) for the 8 gtap crops'
+attr(iso.data$QLV3, 'description')= 'Livestock production (heads) for the 3 gtap livestock sectors'
+attr(iso.data$VLV3, 'description')= 'Livestock output value (1000 USD) for the 3 gtap livestock sectors'
+attr(iso.data$LAND, 'description')= 'Land cover areas (ha)'
+attr(iso.data$RTMB, 'description')= 'Timber land rents (USD Million)'
+
+## Dissagregates national data by subantional boundary and aggregates to GTAP regions
+shares.o <- c(rep("crops",3), rep("lstck", 2), rep("cover",2) ) ## Index to select subnational boundaries shares
+system.time( ## user: 5.27   system: 0.05   elapsed:  5.31
+    gsc3.by.iso <- lapply(c(1:7), function(.n){
+        ## .n <- 1
+        .i <- iso.data[[.n]]
+        .s <- shares.o[[.n]] 
+        .l <- share.out.sectors.to.subnatbound(
+            iso.data = .i,
+            shares = shares[[.s]],
+            units = unique(.i$unit),
+            sector = if(any(grepl("item_code_cpc", names(.i)))){"item_code_cpc"}else{"gsc3"}
+        )
+        ## For the crop variables (production, output value and area
+        ## harvested), further aggregation from CPC to GSC3 is needed:
+        if( grepl('crops', .s ) ){
+            ## Merge and aggregate
+            merged <- merge(.l,
+                        unique(crop.concordance[, c("item_code_cpc", "gsc3")]),
+                        by = "item_code_cpc", all.x = TRUE
+                        )
+            result <- aggregate(value ~ reg + subnatbound + gsc3,
+                                data = merged, sum, na.rm = TRUE)
+            ## Add unit
+            result$unit <- unique(.l$unit)
+            ## Sort the result
+            result <- result[order(result$reg, result$subnatbound, result$gsc3), ]
+            rownames(result) <- NULL
+            .l <- result
+        }
+        ## Assign attributes for har files:
+        attr(.l,'description') <- attr(.i,'description')
+        return(.l)
+    }
+    )
+)
+
+names(gsc3.by.iso) <- names(iso.data)
+```
+
+```{r, eval = FALSE}
+lapply(gsc3.by.iso, function(x) attr(x,'description'))
+
+## Verify number of regions, not tackled.
+lapply( gsc3.by.iso, function(.x){
+    length(unique(.x$reg))
+    setdiff(regional.concordance$reg,unique(.x$reg))
+})
+
+lapply( gsc3.by.iso, function(.x){
+    length(unique(.x$subnatbound))
+})
+```
+
+## Order the data:
+```{r, eval = FALSE}
+#Use command 'order.gsc3.by.iso' to assign ordered levels to the character
+#variables (like regions) so when they are output it is consistent with
+#the GTAP base dataset
+gsc3.by.iso.ordered <- order.gsc3.by.iso(gsc3.by.iso, 
+                                         gtap_basedatasets_file = system.file("har", "gsdgset11cMV6.har", package = "gtapshape")
+                                         )
+```
+
+## Write har file containing shared out land use and land cover data:
+```{r, eval = FALSE}
+write.gtaplulc.har(gsc3.by.iso.ordered, file="./gtaplulc.har")
+```
+
+## Write a har file containing the necessary sets:
+```{r, eval = FALSE}
+write.gtaplulcsets.har(gtap_basedatasets_file =
+                           system.file("har", "gsdgset11cMV6.har", package = "gtapshape"),
+                       file = './gtaplulcsets.har')
+```
+
+## Write aggregation file as .txt file
+```{r, eval = FALSE}
+write.gtaplulcagg.txt(
+                      base_aggr_file = "./BIOMEmod_base.txt",
+                      file = './gtaplulcagg.txt')
+```

@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Micah Cameron-Harp &amp; Nelson B. Villoria" />
+
+<meta name="date" content="2025-02-23" />
+
+<title>Build a GTAP database with land use split in subnational bounds</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Build a GTAP database with land use split
+in subnational bounds</h1>
+<h4 class="author">Micah Cameron-Harp &amp; Nelson B. Villoria</h4>
+<h4 class="date">2025-02-23</h4>
+
+
+
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>devtools<span class="sc">::</span><span class="fu">document</span>(<span class="st">&quot;../../gtapshape&quot;</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">require</span>(dplyr)</span></code></pre></div>
+<p>A number of functions carries the work of combining the
+time-invariant gridded data on land use and land cover with the annual
+national data published by FAOSTAT in order to get a database of land
+use and land cover compatible with the theory behind the GTAP-AEZ model.
+These functions are used many times. For example, the function
+<code>all_uses_by_subnatbound()</code>, which allocates the gridded data
+to the country and subnational boundaries of interest, e.g., 18
+agroecological zones, is run 182 times (once for each of 172 crops, 7
+land covers, and 3 livestock species), creating 182 dataframes. These
+dataframes are then passed to <code>subnatbound.shares()</code> which
+estimates the shares. The resulting 182 dataframes with subnational
+bounds are then combined with the FAOSTAT data for each of the 182 uses
+(<code>share.out.sectors.to.subnatbound()</code>). Further aggregation
+is performed by additional functions, and finally, a har file with the
+following six headers is written:</p>
+<ul>
+<li>Crop production (MT) for the 8 gtap crops</li>
+<li>Value of crop production (1000 USD) for the 8 gtap crops</li>
+<li>Harvested area (ha) for the 8 gtap crops</li>
+<li>Livestock production (heads) for the 3 gtap livestock sectors</li>
+<li>Livestock output value (1000 USD) for the 3 gtap livestock
+sectors</li>
+<li>Land cover areas (ha)</li>
+</ul>
+<p>In principle, these functions can be used individually, and should
+accomodate new sources of data with a modest programing effort. In
+practice, most of the inputs to these functions remain fixed for most
+applications. For cases in which the user only needs to change the
+subnational boundaries, and or the base year of the database, we have
+wrapped all the workflow connecting the individual functions in a
+convenient wrapper function named <code>build.dbase.from.sf()</code>.
+The rest of this vignette first discusses the workflow connecting the
+individual functions, and then discuss the convenience wrapper
+<code>build.dbase.from.sf()</code>.</p>
+<div id="building-a-land-use-gtap-compatible-land-cover-database-from-gridded-and-national-data" class="section level1">
+<h1>Building a land use GTAP-compatible land cover database from gridded
+and national data</h1>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="do">##  user  system elapsed </span></span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a><span class="do">## 24.51    2.92  103.28 </span></span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a><span class="fu">system.time</span>(aez18 <span class="ot">&lt;-</span> <span class="fu">build.dbase.from.sf</span>())</span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a><span class="fu">system.time</span>(biomes14 <span class="ot">&lt;-</span> <span class="fu">build.dbase.from.sf</span>(<span class="at">subnat_bound_file=</span><span class="st">&#39;biomes14&#39;</span>, <span class="at">file=</span><span class="st">&quot;gtaplulc.biome14.har&quot;</span>))</span></code></pre></div>
+</div>
+<div id="under-the-hood" class="section level1">
+<h1>Under the hood</h1>
+<div id="inputs" class="section level2">
+<h2>Inputs:</h2>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="do">## Make a gridded dataframe from the SF file with subnational</span></span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a><span class="do">## boundaries:</span></span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>g <span class="ot">&lt;-</span> <span class="fu">make_subnatbound_gridded_dataframe</span>() <span class="do">## Default is aez18</span></span></code></pre></div>
+</div>
+<div id="subnational-bound-shares-of-ag.-production-or-and-land-cover-used-to-share" class="section level2">
+<h2>Subnational bound shares of ag. production or and land cover used to
+share:</h2>
+<p>Gridded data on land use (crops annd livestock) and land cover are
+aggregated to the subnational boundaries to calculate the national
+shares of each land use or land cover that are then used to dissagregate
+the country-level data from FAOSTAT to subnational bounds. In what
+follows, The function <code>all_uses_by_subnatbound()</code> passes the
+file names of the gridded data to
+<code>aggregate_gridded_df_to_subnatbound()</code>, which aggregates
+them to the subnational bounds.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>file.names.list <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>    <span class="at">crops =</span> gridded.output.file.names <span class="ot">&lt;-</span> <span class="fu">list.files</span>(<span class="fu">system.file</span>(<span class="st">&quot;monfreda&quot;</span>, <span class="at">package =</span> <span class="st">&quot;gtapshape&quot;</span>),</span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>                                            <span class="at">pattern =</span> <span class="st">&quot;</span><span class="sc">\\</span><span class="st">Production.rda$&quot;</span>, <span class="at">full.names =</span> <span class="cn">TRUE</span></span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>                                            ),</span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>    <span class="at">lstck =</span> gridded.livestock.file.names <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a>        <span class="fu">system.file</span>(<span class="st">&quot;fao_lstck_2005&quot;</span>, <span class="st">&quot;cattle.rda&quot;</span>, <span class="at">package =</span> <span class="st">&quot;gtapshape&quot;</span>),</span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a>        <span class="fu">system.file</span>(<span class="st">&quot;fao_lstck_2005&quot;</span>, <span class="st">&quot;goats.rda&quot;</span>, <span class="at">package =</span> <span class="st">&quot;gtapshape&quot;</span>),</span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a>        <span class="fu">system.file</span>(<span class="st">&quot;fao_lstck_2005&quot;</span>, <span class="st">&quot;sheep.rda&quot;</span>, <span class="at">package =</span> <span class="st">&quot;gtapshape&quot;</span>)),</span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a>    <span class="at">cover =</span> gridded.landcover.file.names <span class="ot">&lt;-</span> <span class="fu">list.files</span>(</span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a>        <span class="fu">system.file</span>(<span class="st">&quot;land_cover_2000&quot;</span>, <span class="at">package =</span> <span class="st">&quot;gtapshape&quot;</span>),</span>
+<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a>        <span class="at">pattern =</span> <span class="st">&quot;</span><span class="sc">\\</span><span class="st">.rda$&quot;</span>, <span class="at">full.names =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a>)</span>
+<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a></span>
+<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a><span class="do">## Aggregate gridded land use and land cover to countries and subnational boundaries of interest</span></span>
+<span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a></span>
+<span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a><span class="fu">system.time</span>( <span class="do">## user: 78.25   system: 7.35  elapsed 85.84</span></span>
+<span id="cb4-17"><a href="#cb4-17" tabindex="-1"></a>    subnatbound.use.list <span class="ot">&lt;-</span> <span class="fu">lapply</span>( file.names.list, <span class="cf">function</span>(.f){</span>
+<span id="cb4-18"><a href="#cb4-18" tabindex="-1"></a>        ha.by.iso.subnatbound<span class="fl">.6</span>covers <span class="ot">&lt;-</span> <span class="fu">all_uses_by_subnatbound</span>(</span>
+<span id="cb4-19"><a href="#cb4-19" tabindex="-1"></a>            <span class="at">GADM_subnatbound_df=</span> g,</span>
+<span id="cb4-20"><a href="#cb4-20" tabindex="-1"></a>            <span class="at">gridded.use.file.names=</span> .f)</span>
+<span id="cb4-21"><a href="#cb4-21" tabindex="-1"></a>    }</span>
+<span id="cb4-22"><a href="#cb4-22" tabindex="-1"></a>    )</span>
+<span id="cb4-23"><a href="#cb4-23" tabindex="-1"></a>)</span></code></pre></div>
+<p>An important step in the construction of the shares is to map the
+original uses in FAOSTAT into the GTAP sectors. The way in which this
+aggregation needs to occur is specific to each type of data:</p>
+<ul>
+<li>For crops, the starting point are gridded data on crop production
+and harvested area fro the 172 crops covered by FAOSTAT. These data are
+taken from Monfreda et al. and are representative of year circa 2000.
+These 172 crops are then aggregated to CPC sectors, so the subnational
+shares of each land use are at the CPC level. The country-level, annual
+FAOSTAT data is also aggregated to the CPC level before being shared out
+using the aggregated gridded data. After the annual, national FAOSTAT
+data has been assigned to each subnational bound, we aggregate them to
+the eight GTAP crop sectors.</li>
+<li>For livestock, both national (FAOSTAT) and gridded (Micah: Source)
+data are aggregated from three species (cattle, goats, and sheep) into
+the three livestock GTAP sectors: ‘ctl’, ‘rmk’, and ‘wol’. As indicates
+in the <code>gridded.livestock.concordance</code>, this is a
+many-to-many mapping as the individual species are counted in more than
+one sector.</li>
+<li>For land covers, the national data (from FAOSTAT, updated as
+explained in the vignette where the updating process is explained) and
+the gridded data, from Ramankutty et al. (circa 2000), are given for the
+same number of sectors in the GTAP database, and therefore there is no
+need to map various sectors into aggregated GTAP categories as in the
+cases of crops and livestock.</li>
+</ul>
+<p>The following code first adds the mapping from ‘uses’ to the target
+sectors (CPC sectors in the case of crops and GSC3 for livestock and
+land covers) to the respective datasets, and then uses the function
+<code>subnatbound.shares()</code> to calculate the subnational boundary
+shares of the target sectors:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="do">## Add concordances to map FAOSTAST crops into CPC codes (aggregation</span></span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a><span class="do">## to GSC3 sectors occurs after sharing out the national anual FAOSTAT</span></span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a><span class="do">## data):</span></span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>subnatbound.use.list[[<span class="st">&#39;crops&#39;</span>]] <span class="ot">&lt;-</span> <span class="fu">merge</span>(subnatbound.use.list[[<span class="st">&#39;crops&#39;</span>]],</span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>                                         <span class="fu">unique</span>(crop.concordance[, <span class="fu">c</span>(<span class="st">&quot;use&quot;</span>, <span class="st">&quot;item_code_cpc&quot;</span>)]),</span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a>                                         <span class="at">by =</span> <span class="st">&quot;use&quot;</span>,</span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a>                                         <span class="at">all.x =</span> <span class="cn">TRUE</span></span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a>                                         )</span>
+<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a></span>
+<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a><span class="do">## Add concordances to map FAOSTAST livestock sectors to GSC3 sectors:</span></span>
+<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a>subnatbound.use.list[[<span class="st">&#39;lstck&#39;</span>]] <span class="ot">&lt;-</span> <span class="fu">full_join</span>(subnatbound.use.list[[<span class="st">&#39;lstck&#39;</span>]],</span>
+<span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a>                                            gridded.livestock.concordance,</span>
+<span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a>                                            <span class="at">by =</span> <span class="fu">c</span>(<span class="st">&quot;use&quot;</span>),</span>
+<span id="cb5-14"><a href="#cb5-14" tabindex="-1"></a>                                            <span class="at">relationship=</span><span class="st">&quot;many-to-many&quot;</span>)</span>
+<span id="cb5-15"><a href="#cb5-15" tabindex="-1"></a></span>
+<span id="cb5-16"><a href="#cb5-16" tabindex="-1"></a></span>
+<span id="cb5-17"><a href="#cb5-17" tabindex="-1"></a><span class="do">## Add concordances to rename land cover uses to the names use by the</span></span>
+<span id="cb5-18"><a href="#cb5-18" tabindex="-1"></a><span class="do">## GTAP Center, labeled here as GSC3 sectors:</span></span>
+<span id="cb5-19"><a href="#cb5-19" tabindex="-1"></a>subnatbound.use.list[[<span class="st">&#39;cover&#39;</span>]] <span class="ot">&lt;-</span> <span class="fu">merge</span>(subnatbound.use.list[[<span class="st">&#39;cover&#39;</span>]],</span>
+<span id="cb5-20"><a href="#cb5-20" tabindex="-1"></a>                                         land.cover.concordance,</span>
+<span id="cb5-21"><a href="#cb5-21" tabindex="-1"></a>                                         <span class="at">by =</span> <span class="st">&quot;use&quot;</span>,</span>
+<span id="cb5-22"><a href="#cb5-22" tabindex="-1"></a>                                         <span class="at">all.x =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb5-23"><a href="#cb5-23" tabindex="-1"></a></span>
+<span id="cb5-24"><a href="#cb5-24" tabindex="-1"></a><span class="fu">system.time</span>(</span>
+<span id="cb5-25"><a href="#cb5-25" tabindex="-1"></a>    shares <span class="ot">&lt;-</span> <span class="fu">lapply</span>( subnatbound.use.list, <span class="cf">function</span>(.f){</span>
+<span id="cb5-26"><a href="#cb5-26" tabindex="-1"></a>        s <span class="ot">&lt;-</span> <span class="fu">subnatbound.shares</span>(</span>
+<span id="cb5-27"><a href="#cb5-27" tabindex="-1"></a>            <span class="at">subnatbound.use=</span> .f,</span>
+<span id="cb5-28"><a href="#cb5-28" tabindex="-1"></a>            <span class="at">sector=</span><span class="cf">if</span>(<span class="fu">any</span>(<span class="fu">grepl</span>(<span class="st">&quot;item_code_cpc&quot;</span>, <span class="fu">names</span>(.f)))){<span class="st">&quot;item_code_cpc&quot;</span>}<span class="cf">else</span>{<span class="st">&quot;gsc3&quot;</span>}</span>
+<span id="cb5-29"><a href="#cb5-29" tabindex="-1"></a>        )</span>
+<span id="cb5-30"><a href="#cb5-30" tabindex="-1"></a>    }</span>
+<span id="cb5-31"><a href="#cb5-31" tabindex="-1"></a>    )</span>
+<span id="cb5-32"><a href="#cb5-32" tabindex="-1"></a>)</span></code></pre></div>
+</div>
+<div id="share-out-national-data-and-aggregate-to-gtap-sectors" class="section level2">
+<h2>Share out national data and aggregate to GTAP sectors:</h2>
+<p>The function <code>share.out.sectors.to.subnatbound()</code> combines
+the data at the country level (stored below in the list object
+<code>iso.data</code>, with attributes used to populate the HAR file
+written at the end) with the subnational shares in order to distribute
+the national aggregates across the subnational units. The data on crops
+requires a further aggregation step, as the CPC sectors need to be
+aggregated to GSC3 sectors:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="do">## Annual national data, from FAOSTAT (4-letters data labels are used</span></span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a><span class="do">## later for compatibility with the har file):</span></span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>year <span class="ot">=</span> <span class="st">&quot;2017&quot;</span></span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a>iso.data <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a>    <span class="at">QCR8 =</span> iso.crop.production.<span class="fl">2011.2022</span>[</span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a>        iso.crop.production.<span class="fl">2011.2022</span><span class="sc">$</span>year<span class="sc">==</span>year,],</span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a>    <span class="at">VCR8 =</span> iso.crop.outputvalue.<span class="fl">2011.2022</span>[</span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a>        iso.crop.outputvalue.<span class="fl">2011.2022</span><span class="sc">$</span>year<span class="sc">==</span>year,],</span>
+<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a>    <span class="at">HARV =</span> iso.crop.harea.<span class="fl">2011.2022</span>[</span>
+<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a>        iso.crop.harea.<span class="fl">2011.2022</span><span class="sc">$</span>year<span class="sc">==</span>year,],</span>
+<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a>    <span class="at">QLV3 =</span> iso.gsc3lstk.heads.<span class="fl">2011.2022</span>[</span>
+<span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a>        iso.gsc3lstk.heads.<span class="fl">2011.2022</span><span class="sc">$</span>year<span class="sc">==</span>year,],</span>
+<span id="cb6-13"><a href="#cb6-13" tabindex="-1"></a>    <span class="at">VLV3 =</span>iso.gsc3lstk.outputvalue.<span class="fl">2011.2022</span>[</span>
+<span id="cb6-14"><a href="#cb6-14" tabindex="-1"></a>        iso.gsc3lstk.outputvalue.<span class="fl">2011.2022</span><span class="sc">$</span>year<span class="sc">==</span>year,],</span>
+<span id="cb6-15"><a href="#cb6-15" tabindex="-1"></a>    <span class="at">LAND =</span> iso.land.cover.<span class="fl">2011.2022</span>[iso.land.cover.<span class="fl">2011.2022</span><span class="sc">$</span>year<span class="sc">==</span>year,],</span>
+<span id="cb6-16"><a href="#cb6-16" tabindex="-1"></a>    <span class="at">RTMB =</span> timber.rents.by.iso<span class="fl">.2000</span></span>
+<span id="cb6-17"><a href="#cb6-17" tabindex="-1"></a>)</span>
+<span id="cb6-18"><a href="#cb6-18" tabindex="-1"></a></span>
+<span id="cb6-19"><a href="#cb6-19" tabindex="-1"></a><span class="do">## Description of each dataset, used later when producing the har file:</span></span>
+<span id="cb6-20"><a href="#cb6-20" tabindex="-1"></a><span class="fu">attr</span>(iso.data<span class="sc">$</span>QCR8, <span class="st">&#39;description&#39;</span>)<span class="ot">=</span> <span class="st">&#39;Crop production (MT) for the 8 gtap crops&#39;</span></span>
+<span id="cb6-21"><a href="#cb6-21" tabindex="-1"></a><span class="fu">attr</span>(iso.data<span class="sc">$</span>VCR8, <span class="st">&#39;description&#39;</span>)<span class="ot">=</span> <span class="st">&#39;Value of crop production (1000 USD) for the 8 gtap crops&#39;</span></span>
+<span id="cb6-22"><a href="#cb6-22" tabindex="-1"></a><span class="fu">attr</span>(iso.data<span class="sc">$</span>HARV, <span class="st">&#39;description&#39;</span>)<span class="ot">=</span> <span class="st">&#39;Harvested area (ha) for the 8 gtap crops&#39;</span></span>
+<span id="cb6-23"><a href="#cb6-23" tabindex="-1"></a><span class="fu">attr</span>(iso.data<span class="sc">$</span>QLV3, <span class="st">&#39;description&#39;</span>)<span class="ot">=</span> <span class="st">&#39;Livestock production (heads) for the 3 gtap livestock sectors&#39;</span></span>
+<span id="cb6-24"><a href="#cb6-24" tabindex="-1"></a><span class="fu">attr</span>(iso.data<span class="sc">$</span>VLV3, <span class="st">&#39;description&#39;</span>)<span class="ot">=</span> <span class="st">&#39;Livestock output value (1000 USD) for the 3 gtap livestock sectors&#39;</span></span>
+<span id="cb6-25"><a href="#cb6-25" tabindex="-1"></a><span class="fu">attr</span>(iso.data<span class="sc">$</span>LAND, <span class="st">&#39;description&#39;</span>)<span class="ot">=</span> <span class="st">&#39;Land cover areas (ha)&#39;</span></span>
+<span id="cb6-26"><a href="#cb6-26" tabindex="-1"></a><span class="fu">attr</span>(iso.data<span class="sc">$</span>RTMB, <span class="st">&#39;description&#39;</span>)<span class="ot">=</span> <span class="st">&#39;Timber land rents (USD Million)&#39;</span></span>
+<span id="cb6-27"><a href="#cb6-27" tabindex="-1"></a></span>
+<span id="cb6-28"><a href="#cb6-28" tabindex="-1"></a><span class="do">## Dissagregates national data by subantional boundary and aggregates to GTAP regions</span></span>
+<span id="cb6-29"><a href="#cb6-29" tabindex="-1"></a>shares.o <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fu">rep</span>(<span class="st">&quot;crops&quot;</span>,<span class="dv">3</span>), <span class="fu">rep</span>(<span class="st">&quot;lstck&quot;</span>, <span class="dv">2</span>), <span class="fu">rep</span>(<span class="st">&quot;cover&quot;</span>,<span class="dv">2</span>) ) <span class="do">## Index to select subnational boundaries shares</span></span>
+<span id="cb6-30"><a href="#cb6-30" tabindex="-1"></a><span class="fu">system.time</span>( <span class="do">## user: 5.27   system: 0.05   elapsed:  5.31</span></span>
+<span id="cb6-31"><a href="#cb6-31" tabindex="-1"></a>    gsc3.by.iso <span class="ot">&lt;-</span> <span class="fu">lapply</span>(<span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">7</span>), <span class="cf">function</span>(.n){</span>
+<span id="cb6-32"><a href="#cb6-32" tabindex="-1"></a>        <span class="do">## .n &lt;- 1</span></span>
+<span id="cb6-33"><a href="#cb6-33" tabindex="-1"></a>        .i <span class="ot">&lt;-</span> iso.data[[.n]]</span>
+<span id="cb6-34"><a href="#cb6-34" tabindex="-1"></a>        .s <span class="ot">&lt;-</span> shares.o[[.n]] </span>
+<span id="cb6-35"><a href="#cb6-35" tabindex="-1"></a>        .l <span class="ot">&lt;-</span> <span class="fu">share.out.sectors.to.subnatbound</span>(</span>
+<span id="cb6-36"><a href="#cb6-36" tabindex="-1"></a>            <span class="at">iso.data =</span> .i,</span>
+<span id="cb6-37"><a href="#cb6-37" tabindex="-1"></a>            <span class="at">shares =</span> shares[[.s]],</span>
+<span id="cb6-38"><a href="#cb6-38" tabindex="-1"></a>            <span class="at">units =</span> <span class="fu">unique</span>(.i<span class="sc">$</span>unit),</span>
+<span id="cb6-39"><a href="#cb6-39" tabindex="-1"></a>            <span class="at">sector =</span> <span class="cf">if</span>(<span class="fu">any</span>(<span class="fu">grepl</span>(<span class="st">&quot;item_code_cpc&quot;</span>, <span class="fu">names</span>(.i)))){<span class="st">&quot;item_code_cpc&quot;</span>}<span class="cf">else</span>{<span class="st">&quot;gsc3&quot;</span>}</span>
+<span id="cb6-40"><a href="#cb6-40" tabindex="-1"></a>        )</span>
+<span id="cb6-41"><a href="#cb6-41" tabindex="-1"></a>        <span class="do">## For the crop variables (production, output value and area</span></span>
+<span id="cb6-42"><a href="#cb6-42" tabindex="-1"></a>        <span class="do">## harvested), further aggregation from CPC to GSC3 is needed:</span></span>
+<span id="cb6-43"><a href="#cb6-43" tabindex="-1"></a>        <span class="cf">if</span>( <span class="fu">grepl</span>(<span class="st">&#39;crops&#39;</span>, .s ) ){</span>
+<span id="cb6-44"><a href="#cb6-44" tabindex="-1"></a>            <span class="do">## Merge and aggregate</span></span>
+<span id="cb6-45"><a href="#cb6-45" tabindex="-1"></a>            merged <span class="ot">&lt;-</span> <span class="fu">merge</span>(.l,</span>
+<span id="cb6-46"><a href="#cb6-46" tabindex="-1"></a>                        <span class="fu">unique</span>(crop.concordance[, <span class="fu">c</span>(<span class="st">&quot;item_code_cpc&quot;</span>, <span class="st">&quot;gsc3&quot;</span>)]),</span>
+<span id="cb6-47"><a href="#cb6-47" tabindex="-1"></a>                        <span class="at">by =</span> <span class="st">&quot;item_code_cpc&quot;</span>, <span class="at">all.x =</span> <span class="cn">TRUE</span></span>
+<span id="cb6-48"><a href="#cb6-48" tabindex="-1"></a>                        )</span>
+<span id="cb6-49"><a href="#cb6-49" tabindex="-1"></a>            result <span class="ot">&lt;-</span> <span class="fu">aggregate</span>(value <span class="sc">~</span> reg <span class="sc">+</span> subnatbound <span class="sc">+</span> gsc3,</span>
+<span id="cb6-50"><a href="#cb6-50" tabindex="-1"></a>                                <span class="at">data =</span> merged, sum, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb6-51"><a href="#cb6-51" tabindex="-1"></a>            <span class="do">## Add unit</span></span>
+<span id="cb6-52"><a href="#cb6-52" tabindex="-1"></a>            result<span class="sc">$</span>unit <span class="ot">&lt;-</span> <span class="fu">unique</span>(.l<span class="sc">$</span>unit)</span>
+<span id="cb6-53"><a href="#cb6-53" tabindex="-1"></a>            <span class="do">## Sort the result</span></span>
+<span id="cb6-54"><a href="#cb6-54" tabindex="-1"></a>            result <span class="ot">&lt;-</span> result[<span class="fu">order</span>(result<span class="sc">$</span>reg, result<span class="sc">$</span>subnatbound, result<span class="sc">$</span>gsc3), ]</span>
+<span id="cb6-55"><a href="#cb6-55" tabindex="-1"></a>            <span class="fu">rownames</span>(result) <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
+<span id="cb6-56"><a href="#cb6-56" tabindex="-1"></a>            .l <span class="ot">&lt;-</span> result</span>
+<span id="cb6-57"><a href="#cb6-57" tabindex="-1"></a>        }</span>
+<span id="cb6-58"><a href="#cb6-58" tabindex="-1"></a>        <span class="do">## Assign attributes for har files:</span></span>
+<span id="cb6-59"><a href="#cb6-59" tabindex="-1"></a>        <span class="fu">attr</span>(.l,<span class="st">&#39;description&#39;</span>) <span class="ot">&lt;-</span> <span class="fu">attr</span>(.i,<span class="st">&#39;description&#39;</span>)</span>
+<span id="cb6-60"><a href="#cb6-60" tabindex="-1"></a>        <span class="fu">return</span>(.l)</span>
+<span id="cb6-61"><a href="#cb6-61" tabindex="-1"></a>    }</span>
+<span id="cb6-62"><a href="#cb6-62" tabindex="-1"></a>    )</span>
+<span id="cb6-63"><a href="#cb6-63" tabindex="-1"></a>)</span>
+<span id="cb6-64"><a href="#cb6-64" tabindex="-1"></a></span>
+<span id="cb6-65"><a href="#cb6-65" tabindex="-1"></a><span class="fu">names</span>(gsc3.by.iso) <span class="ot">&lt;-</span> <span class="fu">names</span>(iso.data)</span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="fu">lapply</span>(gsc3.by.iso, <span class="cf">function</span>(x) <span class="fu">attr</span>(x,<span class="st">&#39;description&#39;</span>))</span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a><span class="do">## Verify number of regions, not tackled.</span></span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a><span class="fu">lapply</span>( gsc3.by.iso, <span class="cf">function</span>(.x){</span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a>    <span class="fu">length</span>(<span class="fu">unique</span>(.x<span class="sc">$</span>reg))</span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a>    <span class="fu">setdiff</span>(regional.concordance<span class="sc">$</span>reg,<span class="fu">unique</span>(.x<span class="sc">$</span>reg))</span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a>})</span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a></span>
+<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a><span class="fu">lapply</span>( gsc3.by.iso, <span class="cf">function</span>(.x){</span>
+<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a>    <span class="fu">length</span>(<span class="fu">unique</span>(.x<span class="sc">$</span>subnatbound))</span>
+<span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a>})</span></code></pre></div>
+</div>
+<div id="order-the-data" class="section level2">
+<h2>Order the data:</h2>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="co">#Use command &#39;order.gsc3.by.iso&#39; to assign ordered levels to the character</span></span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a><span class="co">#variables (like regions) so when they are output it is consistent with</span></span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a><span class="co">#the GTAP base dataset</span></span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a>gsc3.by.iso.ordered <span class="ot">&lt;-</span> <span class="fu">order.gsc3.by.iso</span>(gsc3.by.iso, </span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a>                                         <span class="at">gtap_basedatasets_file =</span> <span class="fu">system.file</span>(<span class="st">&quot;har&quot;</span>, <span class="st">&quot;gsdgset11cMV6.har&quot;</span>, <span class="at">package =</span> <span class="st">&quot;gtapshape&quot;</span>)</span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a>                                         )</span></code></pre></div>
+</div>
+<div id="write-har-file-containing-shared-out-land-use-and-land-cover-data" class="section level2">
+<h2>Write har file containing shared out land use and land cover
+data:</h2>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="fu">write.gtaplulc.har</span>(gsc3.by.iso.ordered, <span class="at">file=</span><span class="st">&quot;./gtaplulc.har&quot;</span>)</span></code></pre></div>
+</div>
+<div id="write-a-har-file-containing-the-necessary-sets" class="section level2">
+<h2>Write a har file containing the necessary sets:</h2>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="fu">write.gtaplulcsets.har</span>(<span class="at">gtap_basedatasets_file =</span></span>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a>                           <span class="fu">system.file</span>(<span class="st">&quot;har&quot;</span>, <span class="st">&quot;gsdgset11cMV6.har&quot;</span>, <span class="at">package =</span> <span class="st">&quot;gtapshape&quot;</span>),</span>
+<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a>                       <span class="at">file =</span> <span class="st">&#39;./gtaplulcsets.har&#39;</span>)</span></code></pre></div>
+</div>
+<div id="write-aggregation-file-as-.txt-file" class="section level2">
+<h2>Write aggregation file as .txt file</h2>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a><span class="fu">write.gtaplulcagg.txt</span>(</span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a>                      <span class="at">base_aggr_file =</span> <span class="st">&quot;./BIOMEmod_base.txt&quot;</span>,</span>
+<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a>                      <span class="at">file =</span> <span class="st">&#39;./gtaplulcagg.txt&#39;</span>)</span></code></pre></div>
+</div>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

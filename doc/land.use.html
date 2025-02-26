@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Micah Cameron-Harp and Nelson Villoria" />
+
+<meta name="date" content="2025-02-23" />
+
+<title>Process global land use data</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Process global land use data</h1>
+<h4 class="author">Micah Cameron-Harp and Nelson Villoria</h4>
+<h4 class="date">2025-02-23</h4>
+
+
+
+<p>This vignette will go over how we generate land use data in the GTAP
+Land Use and Land Cover datasets used in the <em>gtapshape</em> package.
+The data are created using publicly available raster data depicting
+global crop yields and harvested area for 172 crops and 4 livestock
+species. In each sub-section below, we detail how the underlying raster
+data was pre-processed. The raster data used in each sub-section are
+downloaded when the function is executed. Note, some of the
+pre-processing described here mirrors the processes described by Baldos
+(2017) in “Development of GTAP version 9 Land Use and Land Cover
+database for years 2004, 2007 and 2011.” (Available at <a href="https://doi.org/10.21642/GTAP.RM30" class="uri">https://doi.org/10.21642/GTAP.RM30</a>)</p>
+<div id="crop-production" class="section level2">
+<h2>Crop production</h2>
+<p>First, we make a list of the rasters containing crop production from
+Monfreda, C., N. Ramankutty, and J. A. Foley (2008), available at <a href="https://doi.org/10.1029/2007GB002947" class="uri">https://doi.org/10.1029/2007GB002947</a>. We use the
+“Production” rasters which indicate the average total crop production in
+metric tons on the land-area of a grid cell during the years
+1997-2003.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a> <span class="do">#### Crop production ####</span></span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>  <span class="co">#Name the folder containing the crop output rasters (172 of them):</span></span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>    crop_production_rast_dir <span class="ot">&lt;-</span> <span class="st">&quot;./raw_data/HarvestedAreaYield175Crops_Geotiff/GeoTiff&quot;</span>  </span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a>  <span class="co">#Now list all the raster file names</span></span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>    output.file.names <span class="ot">&lt;-</span> <span class="fu">list.files</span>(crop_production_rast_dir,</span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a>                                    <span class="at">pattern =</span> <span class="st">&#39;_Production.tif$&#39;</span>,</span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a>                                    <span class="at">recursive =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a>                                    <span class="at">full.names =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+<p>Next, we load in each crop production raster, format it, and save it
+in compressed file format (.rda). The formatting for the crop production
+rasters includes several steps:</p>
+<ol style="list-style-type: decimal">
+<li>Assign the crop names to the raster data.</li>
+<li>Check raster data has the desired Coordinate Reference System (CRS),
+resolution, and extent. Note, the crop production rasters serve as the
+standard for all other spatial data in our analyses. By this, we mean
+that they have the desired Coordinate Reference System (EPSG 4326),
+spatial resolution (5 arc-minutes), and are of global extent. We use the
+functions and to ensure this is the case. The function creates an empty
+raster with the desired CRS, resolution, and extent. The function
+transforms other rasters to ensure they have the desired CRS,
+resolution, and extent.</li>
+<li>Convert the raster to a dataframe and keep only positive
+values.</li>
+<li>Round up the latitude and longitude coordinates in the resulting
+dataframe to six digits. This uses the function.</li>
+<li>Save the dataframe as a .rda compressed file within the
+<em>gtapshape</em> package data.</li>
+</ol>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="do">## Read the rasters, convert them to dataframes and store the files to inst/monfreda:</span></span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a><span class="do">## First create an empty raster used to ensure that all the rasters have</span></span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a><span class="do">## the same resolution, extent, and geographic coordinate system</span></span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a><span class="do">## before converting them to dataframes:</span></span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a>gr <span class="ot">&lt;-</span> <span class="fu">make.global.raster</span>()</span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a></span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a><span class="do">## </span></span>
+<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a><span class="fu">lapply</span>( monfreda.file.names, <span class="cf">function</span>(.r){</span>
+<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a>    <span class="do">## (.r &lt;- monfreda.file.names[[1]])</span></span>
+<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a>    r <span class="ot">&lt;-</span> terra<span class="sc">::</span><span class="fu">rast</span>(.r)</span>
+<span id="cb2-12"><a href="#cb2-12" tabindex="-1"></a>    <span class="fu">names</span>(r) <span class="ot">&lt;-</span> <span class="fu">gsub</span>(<span class="at">pattern =</span> <span class="st">&#39;_Production&#39;</span>, <span class="at">replacement =</span> <span class="st">&#39;&#39;</span>, <span class="fu">names</span>(r))</span>
+<span id="cb2-13"><a href="#cb2-13" tabindex="-1"></a>    <span class="do">## Ensure raster has the default resolution, extent, and</span></span>
+<span id="cb2-14"><a href="#cb2-14" tabindex="-1"></a>    <span class="do">## coordinate reference system:</span></span>
+<span id="cb2-15"><a href="#cb2-15" tabindex="-1"></a>    r <span class="ot">&lt;-</span> <span class="fu">apply_global_raster_properties</span>(<span class="at">input.raster =</span> r, <span class="at">global.raster =</span> gr)</span>
+<span id="cb2-16"><a href="#cb2-16" tabindex="-1"></a>    r <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(r, <span class="at">xy=</span><span class="cn">TRUE</span>)</span>
+<span id="cb2-17"><a href="#cb2-17" tabindex="-1"></a>    <span class="do">## Keep only positive values to decrease file size:</span></span>
+<span id="cb2-18"><a href="#cb2-18" tabindex="-1"></a>    c <span class="ot">&lt;-</span> <span class="fu">colnames</span>(r)[<span class="dv">3</span>]</span>
+<span id="cb2-19"><a href="#cb2-19" tabindex="-1"></a>    r1 <span class="ot">&lt;-</span> r <span class="sc">%&gt;%</span> dplyr<span class="sc">::</span><span class="fu">filter</span>(<span class="sc">!!</span><span class="fu">sym</span>(c)<span class="sc">&gt;</span><span class="dv">0</span>)</span>
+<span id="cb2-20"><a href="#cb2-20" tabindex="-1"></a>    <span class="do">## Round up geographic coordinates to ensure compatibility with</span></span>
+<span id="cb2-21"><a href="#cb2-21" tabindex="-1"></a>    <span class="do">## the country-geography raster used for aggregation:</span></span>
+<span id="cb2-22"><a href="#cb2-22" tabindex="-1"></a>    r1 <span class="ot">&lt;-</span> <span class="fu">round_up_coordinates</span>(<span class="at">raster.df=</span>r1)</span>
+<span id="cb2-23"><a href="#cb2-23" tabindex="-1"></a>    filename <span class="ot">&lt;-</span> tools<span class="sc">::</span><span class="fu">file_path_sans_ext</span>(<span class="fu">basename</span>(.r))</span>
+<span id="cb2-24"><a href="#cb2-24" tabindex="-1"></a>    <span class="fu">assign</span>(filename,r1)</span>
+<span id="cb2-25"><a href="#cb2-25" tabindex="-1"></a>    supplementary.data.path <span class="ot">&lt;-</span> <span class="fu">system.file</span>(<span class="st">&quot;monfreda&quot;</span>, <span class="at">package =</span> <span class="st">&quot;gtapshape&quot;</span>)</span>
+<span id="cb2-26"><a href="#cb2-26" tabindex="-1"></a>    <span class="fu">save</span>(<span class="at">list=</span>filename, <span class="at">file=</span> <span class="fu">file.path</span>(supplementary.data.path, <span class="fu">paste</span>(filename,<span class="st">&quot;.rda&quot;</span>,<span class="at">sep=</span><span class="st">&quot;&quot;</span>)), <span class="at">compress =</span> <span class="st">&quot;xz&quot;</span>,</span>
+<span id="cb2-27"><a href="#cb2-27" tabindex="-1"></a>         <span class="at">compression_level =</span> <span class="dv">9</span>)</span>
+<span id="cb2-28"><a href="#cb2-28" tabindex="-1"></a>}</span>
+<span id="cb2-29"><a href="#cb2-29" tabindex="-1"></a>)</span>
+<span id="cb2-30"><a href="#cb2-30" tabindex="-1"></a></span>
+<span id="cb2-31"><a href="#cb2-31" tabindex="-1"></a><span class="do">##Clean-up environment</span></span>
+<span id="cb2-32"><a href="#cb2-32" tabindex="-1"></a><span class="fu">rm</span>(<span class="at">list=</span><span class="fu">ls</span>()[<span class="sc">!</span> <span class="fu">ls</span>() <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">&quot;gr&quot;</span>)])</span>
+<span id="cb2-33"><a href="#cb2-33" tabindex="-1"></a><span class="fu">gc</span>()</span></code></pre></div>
+</div>
+<div id="livestock" class="section level2">
+<h2>Livestock</h2>
+<p>The raster data we use to determine the spatial distribution of
+livestock production is from Robinson et al. (2014), available at <a href="https://doi.org/10.1371/journal.pone.0096084" class="uri">https://doi.org/10.1371/journal.pone.0096084</a>. The raw
+data contains rasters for 6 livestock species: cattle, goats, sheep,
+pigs, ducks, and chickens. The raster values indicate the density of
+animals in each grid cell in head of animals per km^2. We only make use
+of the data for cattle, goats, and sheep to construct the GTAP Land Use
+and Land Cover dataset. First, we list the species-specific folders
+containing the rasters as well as the individual raster files within
+them for the 3 species we need.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="do">##Directory containing rasters for all species with 2005 as the reference year.</span></span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>livestock_density_rast_dir <span class="ot">=</span> <span class="st">&quot;./raw_data/Gridded livestock_FAO/2005&quot;</span></span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a><span class="do">##Paths to the species-specific folders</span></span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>dir_paths <span class="ot">&lt;-</span> <span class="fu">dir</span>(<span class="at">path =</span> livestock_density_rast_dir, <span class="at">recursive =</span> <span class="cn">FALSE</span>, <span class="at">full.names =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a><span class="do">##Individual file names</span></span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a>livestock_rast_file_names <span class="ot">&lt;-</span> <span class="fu">lapply</span>(dir_paths, <span class="at">FUN =</span> list.files,</span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a>                                   <span class="at">pattern =</span> <span class="st">&quot;.tif$&quot;</span>, <span class="at">full.names =</span> T)</span></code></pre></div>
+<p>Next, we load each of the rasters, process them, and save them as
+compressed .rds files. Processing these files involves:</p>
+<ol style="list-style-type: decimal">
+<li>Replacing negative densities with zeroes using the function.</li>
+<li>Multiplying the density in each grid cell by its area to get the
+total quantity of animals in each raster cell. This makes use of the
+function from the <em>terra</em> package.</li>
+<li>Aggregating the data to the 5 acr-minute resolution. Note, the 2005
+Gridded Livestock of the World data are provided at a finer resolution
+than the 5 arc-minutes we use when constructing our database. This step
+makes use of the function. If other data are used, this step may not be
+necessary.</li>
+<li>Transform raster to ensure it has the correct CRS and extent using
+the function.</li>
+<li>Convert the raster to a dataframe, extract species names to use for
+filenames, and keep only positive values.</li>
+<li>Round up the latitude and longitude coordinates in the resulting
+dataframe to six digits. This uses the function.</li>
+<li>Save the dataframe as a .rda compressed file within the
+<em>gtapshape</em> package data.</li>
+</ol>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>  <span class="fu">lapply</span>( livestock_rast_file_names, <span class="cf">function</span>(.r){</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>    <span class="fu">require</span>(dplyr)</span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>    <span class="do">## (.r &lt;- livestock_rast_file_names[[6]])</span></span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>    r <span class="ot">&lt;-</span> terra<span class="sc">::</span><span class="fu">rast</span>(.r)</span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>    r <span class="ot">&lt;-</span> <span class="fu">neg_to_zero</span>(r)</span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a>    <span class="do">## multiply density by area of grid cells to get quantity of animals</span></span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a>    grid_cell_area <span class="ot">&lt;-</span> terra<span class="sc">::</span><span class="fu">cellSize</span>(r, <span class="at">mask=</span><span class="cn">FALSE</span>, <span class="at">lyrs=</span><span class="cn">FALSE</span>, <span class="at">unit=</span><span class="st">&quot;km&quot;</span>, <span class="at">transform=</span><span class="cn">TRUE</span>)</span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a>    r <span class="ot">&lt;-</span>  r <span class="sc">*</span> grid_cell_area</span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a>    <span class="do">## Aggregate the rasters because they&#39;re at a finer resolution (specific to 2005 global livestock of the world.)</span></span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a>    r <span class="ot">&lt;-</span> terra<span class="sc">::</span><span class="fu">aggregate</span>(r, <span class="at">fact =</span> <span class="dv">10</span>, <span class="at">fun =</span> <span class="st">&quot;sum&quot;</span>)</span>
+<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a>    r <span class="ot">&lt;-</span> <span class="fu">na_to_zero</span>(r)</span>
+<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a>    <span class="do">## Ensure raster has the default resolution, extent, and</span></span>
+<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a>    <span class="do">## coordinate reference system:</span></span>
+<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a>    r <span class="ot">&lt;-</span> <span class="fu">apply_global_raster_properties</span>(<span class="at">input.raster=</span>r, <span class="at">global.raster =</span> gr)</span>
+<span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a>    <span class="do">## Convert to data-frame</span></span>
+<span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a>    rdf <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(r, <span class="at">xy=</span><span class="cn">TRUE</span>)</span>
+<span id="cb4-17"><a href="#cb4-17" tabindex="-1"></a>    <span class="fu">rm</span>(<span class="st">&quot;r&quot;</span>,<span class="st">&quot;grid_cell_area&quot;</span>)</span>
+<span id="cb4-18"><a href="#cb4-18" tabindex="-1"></a>    <span class="fu">gc</span>()</span>
+<span id="cb4-19"><a href="#cb4-19" tabindex="-1"></a>    <span class="do">## Extract species names:</span></span>
+<span id="cb4-20"><a href="#cb4-20" tabindex="-1"></a>    species_names <span class="ot">&lt;-</span> <span class="fu">gsub</span>(livestock_density_rast_dir, <span class="st">&quot;&quot;</span>, .r)</span>
+<span id="cb4-21"><a href="#cb4-21" tabindex="-1"></a>    species_names <span class="ot">&lt;-</span> <span class="fu">substr</span>(species_names, <span class="dv">2</span>, <span class="fu">regexpr</span>(<span class="st">&quot;_&quot;</span>, species_names) <span class="sc">-</span> <span class="dv">1</span>)</span>
+<span id="cb4-22"><a href="#cb4-22" tabindex="-1"></a>    <span class="fu">colnames</span>(rdf)[<span class="dv">3</span>] <span class="ot">&lt;-</span> species_names</span>
+<span id="cb4-23"><a href="#cb4-23" tabindex="-1"></a>    <span class="do">## Eliminate zero-valued gridcells to reduce file size</span></span>
+<span id="cb4-24"><a href="#cb4-24" tabindex="-1"></a>    rdf1  <span class="ot">&lt;-</span> rdf <span class="sc">%&gt;%</span> <span class="fu">filter</span>(<span class="sc">!!</span><span class="fu">sym</span>(species_names)<span class="sc">&gt;</span><span class="dv">0</span>)</span>
+<span id="cb4-25"><a href="#cb4-25" tabindex="-1"></a></span>
+<span id="cb4-26"><a href="#cb4-26" tabindex="-1"></a>    <span class="co">#rdf1 &lt;- rdf</span></span>
+<span id="cb4-27"><a href="#cb4-27" tabindex="-1"></a>    <span class="do">## Round up geographic coordinates to ensure compatibility with</span></span>
+<span id="cb4-28"><a href="#cb4-28" tabindex="-1"></a>    <span class="do">## the country-geography raster used for aggregation:</span></span>
+<span id="cb4-29"><a href="#cb4-29" tabindex="-1"></a>    rdf1 <span class="ot">&lt;-</span> <span class="fu">round_up_coordinates</span>(<span class="at">raster.df=</span>rdf1)</span>
+<span id="cb4-30"><a href="#cb4-30" tabindex="-1"></a>    filename <span class="ot">&lt;-</span> species_names</span>
+<span id="cb4-31"><a href="#cb4-31" tabindex="-1"></a>    <span class="fu">assign</span>(filename,rdf1)</span>
+<span id="cb4-32"><a href="#cb4-32" tabindex="-1"></a>    supplementary.data.path <span class="ot">&lt;-</span> <span class="fu">system.file</span>(<span class="st">&quot;fao_lstck_2005&quot;</span>, <span class="at">package =</span> <span class="st">&quot;gtapshape&quot;</span>)</span>
+<span id="cb4-33"><a href="#cb4-33" tabindex="-1"></a>    <span class="fu">save</span>(<span class="at">list=</span>filename,<span class="at">file=</span> <span class="fu">file.path</span>(supplementary.data.path, <span class="fu">paste</span>(filename,<span class="st">&quot;.rda&quot;</span>,<span class="at">sep=</span><span class="st">&quot;&quot;</span>)), <span class="at">compress =</span> <span class="st">&quot;xz&quot;</span>,</span>
+<span id="cb4-34"><a href="#cb4-34" tabindex="-1"></a>         <span class="at">compression_level =</span> <span class="dv">9</span>)</span>
+<span id="cb4-35"><a href="#cb4-35" tabindex="-1"></a>}</span>
+<span id="cb4-36"><a href="#cb4-36" tabindex="-1"></a>)</span></code></pre></div>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,141 @@
+---
+title: "Process global land use data"
+author: "Micah Cameron-Harp and Nelson Villoria"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Process global land use data}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+This vignette will go over how we generate land use data in the GTAP Land Use and Land Cover datasets used in the *gtapshape* package. The data are created using publicly available raster data depicting global crop yields and harvested area for 172 crops and 4 livestock species. In each sub-section below, we detail how the underlying raster data was pre-processed. The raster data used in each sub-section are downloaded when the \link[gtapshape]{getrawdata} function is executed. Note, some of the pre-processing described here mirrors the processes described by Baldos (2017) in "Development of GTAP version 9 Land Use and Land Cover database for years 2004, 2007 and 2011."	(Available at https://doi.org/10.21642/GTAP.RM30)
+
+## Crop production 
+
+First, we make a list of the rasters containing crop production from Monfreda, C., N. Ramankutty, and J. A. Foley (2008), available at https://doi.org/10.1029/2007GB002947. We use the "Production" rasters which indicate the average total crop production in metric tons on the land-area of a grid cell during the years 1997-2003.
+        
+```{r, eval = FALSE}
+ #### Crop production ####
+  #Name the folder containing the crop output rasters (172 of them):
+    crop_production_rast_dir <- "./raw_data/HarvestedAreaYield175Crops_Geotiff/GeoTiff"  
+  #Now list all the raster file names
+    output.file.names <- list.files(crop_production_rast_dir,
+                                    pattern = '_Production.tif$',
+                                    recursive = TRUE,
+                                    full.names = TRUE)
+```
+
+Next, we load in each crop production raster, format it, and save it in compressed file format (.rda). The formatting for the crop production rasters includes several steps:
+
+1. Assign the crop names to the raster data.
+2. Check raster data has the desired Coordinate Reference System (CRS), resolution, and extent. Note, the crop production rasters serve as the standard for all other spatial data in our analyses. By this, we mean that they have the desired Coordinate Reference System (EPSG 4326), spatial resolution (5 arc-minutes), and are of global extent. We use the functions \link[gtapshape]{apply_global_raster_properties} and \link[gtapshape]{make.global.raster} to ensure this is the case. The \link[gtapshape]{make.global.raster} function creates an empty raster with the desired CRS, resolution, and extent. The \link[gtapshape]{apply_global_raster_properties} function transforms other rasters to ensure they have the desired CRS, resolution, and extent.
+3. Convert the raster to a dataframe and keep only positive values.
+4. Round up the latitude and longitude coordinates in the resulting dataframe to six digits. This uses the \link[gtapshape]{round_up_coordinates} function.
+5. Save the dataframe as a .rda compressed file within the *gtapshape* package data.
+
+```{r, eval = FALSE}
+## Read the rasters, convert them to dataframes and store the files to inst/monfreda:
+
+## First create an empty raster used to ensure that all the rasters have
+## the same resolution, extent, and geographic coordinate system
+## before converting them to dataframes:
+gr <- make.global.raster()
+
+## 
+lapply( monfreda.file.names, function(.r){
+    ## (.r <- monfreda.file.names[[1]])
+    r <- terra::rast(.r)
+    names(r) <- gsub(pattern = '_Production', replacement = '', names(r))
+    ## Ensure raster has the default resolution, extent, and
+    ## coordinate reference system:
+    r <- apply_global_raster_properties(input.raster = r, global.raster = gr)
+    r <- as.data.frame(r, xy=TRUE)
+    ## Keep only positive values to decrease file size:
+    c <- colnames(r)[3]
+    r1 <- r %>% dplyr::filter(!!sym(c)>0)
+    ## Round up geographic coordinates to ensure compatibility with
+    ## the country-geography raster used for aggregation:
+    r1 <- round_up_coordinates(raster.df=r1)
+    filename <- tools::file_path_sans_ext(basename(.r))
+    assign(filename,r1)
+    supplementary.data.path <- system.file("monfreda", package = "gtapshape")
+    save(list=filename, file= file.path(supplementary.data.path, paste(filename,".rda",sep="")), compress = "xz",
+         compression_level = 9)
+}
+)
+
+##Clean-up environment
+rm(list=ls()[! ls() %in% c("gr")])
+gc()
+```
+
+## Livestock 
+
+The raster data we use to determine the spatial distribution of livestock production is from Robinson et al. (2014), available at https://doi.org/10.1371/journal.pone.0096084. The raw data contains rasters for 6 livestock species: cattle, goats, sheep, pigs, ducks, and chickens. The raster values indicate the density of animals in each grid cell in head of animals per km^2. We only make use of the data for cattle, goats, and sheep to construct the GTAP Land Use and Land Cover dataset. First, we list the species-specific folders containing the rasters as well as the individual raster files within them for the 3 species we need.
+
+```{r, eval = FALSE}
+##Directory containing rasters for all species with 2005 as the reference year.
+livestock_density_rast_dir = "./raw_data/Gridded livestock_FAO/2005"
+##Paths to the species-specific folders
+dir_paths <- dir(path = livestock_density_rast_dir, recursive = FALSE, full.names = TRUE)
+##Individual file names
+livestock_rast_file_names <- lapply(dir_paths, FUN = list.files,
+                                   pattern = ".tif$", full.names = T)
+```
+
+Next, we load each of the rasters, process them, and save them as compressed .rds files. Processing these files involves:
+
+1. Replacing negative densities with zeroes using the \link[gtapshape]{neg_to_zero} function.
+2. Multiplying the density in each grid cell by its area to get the total quantity of animals in each raster cell. This makes use of the \link[terra]{cellSize} function from the *terra* package.
+3. Aggregating the data to the 5 acr-minute resolution. Note, the 2005 Gridded Livestock of the World data are provided at a finer resolution than the 5 arc-minutes we use when constructing our database. This step makes use of the \link[terra]{aggregate} function. If other data are used, this step may not be necessary. 
+4. Transform raster to ensure it has the correct CRS and extent using the \link[gtapshape]{apply_global_raster_properties} function.
+5. Convert the raster to a dataframe, extract species names to use for filenames, and keep only positive values.
+6. Round up the latitude and longitude coordinates in the resulting dataframe to six digits. This uses the \link[gtapshape]{round_up_coordinates} function.
+7. Save the dataframe as a .rda compressed file within the *gtapshape* package data.
+
+```{r, eval = FALSE}
+  lapply( livestock_rast_file_names, function(.r){
+    require(dplyr)
+    ## (.r <- livestock_rast_file_names[[6]])
+    r <- terra::rast(.r)
+    r <- neg_to_zero(r)
+    ## multiply density by area of grid cells to get quantity of animals
+    grid_cell_area <- terra::cellSize(r, mask=FALSE, lyrs=FALSE, unit="km", transform=TRUE)
+    r <-  r * grid_cell_area
+    ## Aggregate the rasters because they're at a finer resolution (specific to 2005 global livestock of the world.)
+    r <- terra::aggregate(r, fact = 10, fun = "sum")
+    r <- na_to_zero(r)
+    ## Ensure raster has the default resolution, extent, and
+    ## coordinate reference system:
+    r <- apply_global_raster_properties(input.raster=r, global.raster = gr)
+    ## Convert to data-frame
+    rdf <- as.data.frame(r, xy=TRUE)
+    rm("r","grid_cell_area")
+    gc()
+    ## Extract species names:
+    species_names <- gsub(livestock_density_rast_dir, "", .r)
+    species_names <- substr(species_names, 2, regexpr("_", species_names) - 1)
+    colnames(rdf)[3] <- species_names
+    ## Eliminate zero-valued gridcells to reduce file size
+    rdf1  <- rdf %>% filter(!!sym(species_names)>0)
+
+    #rdf1 <- rdf
+    ## Round up geographic coordinates to ensure compatibility with
+    ## the country-geography raster used for aggregation:
+    rdf1 <- round_up_coordinates(raster.df=rdf1)
+    filename <- species_names
+    assign(filename,rdf1)
+    supplementary.data.path <- system.file("fao_lstck_2005", package = "gtapshape")
+    save(list=filename,file= file.path(supplementary.data.path, paste(filename,".rda",sep="")), compress = "xz",
+         compression_level = 9)
+}
+)
+```  

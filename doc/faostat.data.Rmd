@@ -1,0 +1,244 @@
+---
+title: "Download FAO data"
+author: "Micah Cameron-Harp and Nelson Villoria"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Download FAO data}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+This vignette explains how the data used to update the GTAP database is downloaded from FAO and processed. 
+
+## **Bulk download FAOSTAT data on agricultural production and area**
+We use the \link[FAOSTAT]{get_faostat_bulk} function from the *FAOSTAT* package to download the raw data on agricultural production and harvested area. We do this by selecting the "QCL" domain which includes data on crop and livestock products. The data are saved to a temporary directory to conserve memory.  
+
+```{r, eval = FALSE}
+#Load required packages
+require(dplyr)
+devtools::document('..') ## This must be replaced with
+                                ## 'library("gtapshape")' before
+                                ## distribution!
+#Download data from FAO
+fao_production.bulk <- FAOSTAT::get_faostat_bulk(code = "QCL", data_folder =   tempdir())
+```
+
+## Clean FAOSTAT data on production and area:
+Next, we filter the data to only include years after 2010 and reformat columns. In addition, we filter the data so we only retain production, harvested area, and animal stocks. Finally, we create a new variable indicating the International Organization for Standardization (ISO) three letter country code. The bulk download includes aggregated data for regions. We drop this data by removing areas without ISO3 codes.
+
+```{r, eval = FALSE}
+## Rename and reformat columns
+fao_production <- fao_production.bulk %>%
+  dplyr::filter(year_code > 2010) %>%
+  dplyr::rename(area_code_m49 = area_code__m49_,
+                item_code_cpc = item_code__cpc_) %>%
+  dplyr::mutate(element_code = as.numeric(element_code),
+                area_code_m49 = substr(area_code_m49, 2, 4),
+                area_code_m49 = as.numeric(area_code_m49),
+                item_code_cpc = gsub("'", "", item_code_cpc),
+                item_code_fao = item_code) %>%
+    ## Select only production (5510), harvested area (5312), and
+    ## animal stocks (5111):
+    dplyr::filter(element_code %in% c(5510, 5111, 5312))  %>%
+    ## Add iso3 codes
+    dplyr::mutate(iso3 = tolower(countrycode::countrycode(area_code_m49, 'iso3n', 'iso3c'))) %>%
+    ## The bulk download includes total for the world and various regions,
+    ## so we drop all areas where the ISO3 code is missing
+    dplyr::filter(!is.na(iso3)) %>%
+    dplyr::select(iso3, year_code, item, item_code_cpc, item_code_fao, element, unit, value) %>%
+    dplyr::rename(year=year_code)
+```
+
+## Save crop production and harvested area data
+
+The bulk download contains data on both crops and livestock. We separate these and save just the crop production and harvested area data separately. The \link[usethis]{use_data} function from the *usethis* package creates a dataset in the *gtapshape* package and an accompanying description file. 
+
+```{r, eval = FALSE}
+iso.crop.production.2011.2022 <- fao_production %>%
+    dplyr::filter(element == 'production')
+
+usethis::use_data(iso.crop.production.2011.2022, overwrite = TRUE)
+##usethis::use_r("iso.crop.production.2011.2022.R")
+
+iso.crop.harea.2011.2022 <- fao_production %>%
+    dplyr::filter(element == 'area_harvested')
+
+usethis::use_data(iso.crop.harea.2011.2022, overwrite = TRUE)
+##usethis::use_r("iso.crop.harea.2011.2022.R")
+```
+
+## Download and clean FAOSTAT data on producer prices
+
+We use the same \link[FAOSTAT]{get_faostat_bulk} function to download producer prices from FAOSTAT. We use these producer prices to generate value of production data. As with the production data, we reformat columns and filter the data to only include prices in USD/tonne recorded at the annual time scale. We also create an 3 letter ISO code and drop regional data by removing areas without ISO3 codes.
+
+```{r, eval = FALSE}
+producer_prices.bulk <- FAOSTAT::get_faostat_bulk(code = "PP", data_folder = tempdir())
+## Format columns, select price in USD/tonne, choose years
+producer_prices <- producer_prices.bulk %>%
+      dplyr::filter(year_code > 2010) %>%
+  dplyr::rename(area_code_m49 = area_code__m49_,
+                item_code_cpc = item_code__cpc_) %>%
+  dplyr::mutate(element_code = as.numeric(element_code),
+                area_code_m49 = substr(area_code_m49, 2, 4),
+                area_code_m49 = as.numeric(area_code_m49),
+                item_code_cpc = gsub("'", "", item_code_cpc),
+                item_code_fao = item_code) %>%
+  dplyr::filter(element_code == 5532)
+
+##Make a new column showing the iso3 code
+producer_prices <- producer_prices %>%
+  dplyr::mutate(iso3 = tolower(countrycode::countrycode(area_code_m49, 'iso3n', 'iso3c')))
+#The bulk download includes total for the world and regions, so we
+#drop all areas where the ISO3 code is missing
+producer_prices <- producer_prices %>%
+  dplyr::filter(!is.na(iso3))
+#Select necessary columns
+producer_prices <- producer_prices %>%
+  dplyr::select(iso3, year_code, item, item_code_cpc, item_code_fao, element, unit, value)
+#Save
+producer_prices <- producer_prices %>%
+    dplyr::rename(year=year_code)  %>%
+    mutate(element="price",
+           unit="USD.t") %>%
+    select(iso3, year, item_code_cpc, item_code_fao, element, unit, value)
+```
+
+## Crop value of production 
+
+We combine the producer prices with the data on crop production to generate value of production data. When a country is missing a price for a given crop, we use the world price instead. The world price is created by taking an average of all non-missing prices for a given year. The value of output variable is created by multiplying the price in USD/ton by the quantity of output in tons, and then dividing by 1000. The resulting values indicate the value of production in thousands of USD. Last, we use the \link[usethis]{use_data} function to save the dataset in the *gtapshape* package and create an accompanying description file. 
+
+```{r, eval = FALSE}
+iso.crop.outputvalue.2011.2022 <- left_join(iso.crop.production.2011.2022 %>%
+                                 dplyr::rename(qty=value),
+                                 producer_prices[,c("iso3", "year", "item_code_cpc", "value")] %>%
+                                 dplyr::rename(iso3_price=value),
+                                 by = c('iso3', 'year', 'item_code_cpc')
+                                 ) %>%
+    ## Make a world price (country-average) for when the prices are missing
+    group_by(year, item_code_cpc) %>%
+    mutate(price = ifelse(is.na(iso3_price), mean(iso3_price, na.rm=TRUE), iso3_price),
+           unit="USD1000",
+           value=price*qty/1000
+           ) %>%
+    select("iso3",
+           "year",
+           "item",
+           "item_code_cpc",
+           "item_code_fao",
+           "unit",
+           "value")
+
+usethis::use_data(iso.crop.outputvalue.2011.2022, overwrite = TRUE)
+##usethis::use_r("iso.crop.outputvalue.2011.2022.R")
+```
+
+## Livestock production - Standing animals (head), aggregated to GTAP sectors
+
+The livestock data from FAOSTAT require cleaning as well. First, we need to drop data that represents aggregate quantities across species. Then, we create a mapping from the species in the FAO data to the GTAP livestock categories and aggregate the FAOSTAT data to these categories. Last, we use the \link[usethis]{use_data} function to save the dataset in the *gtapshape* package and create an accompanying description file. 
+
+```{r, eval = FALSE}
+## Number of livestock animals data - just need ruminants (ctl, rmk, wol GTAP categories)
+fao_livestock_numanimals <- fao_production %>%
+    dplyr::filter(element == "stocks") %>%
+    ## Drop categories with multiple items and ones we don't need
+    dplyr::filter(item != "Cattle and Buffaloes" &
+                  item != "Sheep and Goats" &
+                  item != "Swine / pigs")
+
+## Define the list of animals in each RUMINANT GSC3 Category
+ctl <- c('Cattle', 'Buffalo', 'Camels', 'Other camelids', 'Sheep', 'Goats',
+         'Horses', 'Asses', 'Mules and hinnies')
+rmk <- c('Cattle', 'Buffalo', 'Camels', 'Other camelids', 'Sheep', 'Goats')
+wol <- c('Sheep', 'Goats')
+
+## Mapping of FAO items to GTAP sectors:
+gsc3.to.item <- as.data.frame(
+    rbind(
+        cbind(gsc3='ctl',item=ctl),
+        cbind(gsc3='rmk',item=rmk),
+        cbind(gsc3='wol',item=wol)
+    ))
+
+## Aggregate to GTAP sectors:
+iso.gsc3lstk.heads.2011.2022 <- full_join(fao_livestock_numanimals,
+                gsc3.to.item,
+                by = c("item"),
+                relationship="many-to-many") %>%
+    group_by(iso3,year,gsc3) %>%
+    summarise(value = sum(value, na.rm = TRUE)/1000) %>%
+    mutate(unit="1000heads")
+
+usethis::use_data(iso.gsc3lstk.heads.2011.2022, overwrite = TRUE)
+## usethis::use_r("iso.gsc3lstk.heads.2011.2022.R")
+```
+
+## Livestock value of production
+
+Creating the livestock value of production data involves two steps. The FAOSTAT data contains prices for items in the wool (wol) and raw milk (rmk) GTAP categories, but it does not contain prices for the live animals in the cattle (ctl) GTAP category. Instead, it contains prices for individual products derived from live animals, such as "Meat of cattle with the bone, fresh or chilled" in USD/tonne. We cannot use these as it would require converting number of animals into pounds of each product. So, we use the FAOSTAT data to calculate value of production data for the "wol" and "rmk" categories, and then calculate the value of production for the "ctl" category separately. 
+
+### Raw milk (rmk) and wool (wol) value of production
+
+To calculate the value of production for the raw milk and wool categories, we first filter the production data to only include CPC codes corresponding to the "wol" and "rmk" categories in the livestock.concordance object. This concordance is installed with the package and can be called using "livestock.condcordance". We then rename the quantity variable and join the wool and raw milk production data to the producer price data by the 3 letter country code, year, and CPC code. For countries without a price in a given year, we take the average of all countries with a price and use this "world price" instead. We multiply the prices with the quantities and divide by 1000 to get the value of production in 1000 USD. Finally, we sum up these values within the raw milk (rmk) and wool (wol) GTAP commodity categories.
+
+```{r, eval = FALSE}
+iso.rmk.and.wol.outputvalue.2011.2022 <-  fao_production %>%
+    ## Use the livestock.concordance to select animal products for
+    ## which prices are available (these do not include standing
+    ## animal heads, which are considered below):
+    filter(item_code_cpc %in%
+           livestock.concordance$item_code_cpc[livestock.concordance$gsc3 %in% c("wol","rmk")]) %>%
+    dplyr::rename(qty=value) %>%
+    left_join(.,
+              producer_prices[, c("iso3", "year", "item_code_cpc", "value")] %>%
+              dplyr::rename(iso3_price=value),
+              by = c('iso3', 'year', 'item_code_cpc')
+              ) %>%
+    ## Make a world price (country-average) for when the prices are missing
+    group_by(year, item_code_cpc) %>%
+    mutate( price = ifelse(is.na(iso3_price), mean(iso3_price, na.rm=TRUE), iso3_price),
+           unit="USD1000",
+           value=price*qty/1000) %>%
+    select("iso3", "year", "item", "item_code_cpc", "item_code_fao", "unit", "value") %>%
+    left_join(.,
+              livestock.concordance[,c("item_code_cpc", "gsc3")],
+              by = "item_code_cpc") %>%
+    group_by(iso3, year, gsc3, unit ) %>%
+    summarise(value=sum(value, na.rm=TRUE)) %>%
+    ungroup()
+```
+
+### Cattle sector value of production
+For the cattle (ctl) GTAP category, we need prices per animal. We use the prices from the GTAP version 11 database for buffalo, cattle, goats, and sheep. These are stored in the "GTAP.ruminant.prices" object installed with the package. After multiplying the quantity of animals by these prices and dividing by 1000, we have value of livestock production data in 1,000 USD.  
+
+```{r, eval = FALSE}
+## For the CTL sector, value is taken over the heads of ruminants
+## (buffalo, cattle, goats and sheep) using prices from the GTAP
+## database:
+iso.ctl.outputvalue.2011.2022 <- fao_livestock_numanimals %>%
+    filter( item %in% c('Buffalo', 'Cattle', 'Goats', 'Sheep') ) %>%
+    group_by(iso3, year, item) %>%
+    summarise( value = sum(value, na.rm=TRUE)) %>%
+    dplyr::rename( use = item)  %>%
+    mutate(unit="heads") %>%
+    left_join(.,GTAP.ruminant.prices %>%
+             dplyr::rename(price = value),
+             by=c("iso3","use")) %>%
+    group_by(iso3, year) %>%
+    summarise(value = sum(price*value/1000),
+              gsc3='ctl',
+              unit='USD1000') %>%
+    dplyr::select(iso3, year,gsc3, unit, value)
+```
+
+### Join crop and livestock value of production data
+Now we join the crop and livestock value of production data so the resulting dataframe has data for all three GTAP categories (ctl, rmk, and wol). Last, we use the \link[usethis]{use_data} function to save the dataset in the *gtapshape* package and create an accompanying description file. 
+
+```{r, eval = FALSE}
+iso.gsc3lstk.outputvalue.2011.2022 <- rbind(
+    iso.rmk.and.wol.outputvalue.2011.2022,
+    iso.ctl.outputvalue.2011.2022)
+
+usethis::use_data(iso.gsc3lstk.outputvalue.2011.2022, overwrite = TRUE)
+## usethis::use_r("iso.gsc3lstk.outputvalue.2011.2022.R")
+```

@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Micah Cameron-Harp and Nelson Villoria" />
+
+<meta name="date" content="2025-02-23" />
+
+<title>CROPGRIDS Data (2020)</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">CROPGRIDS Data (2020)</h1>
+<h4 class="author">Micah Cameron-Harp and Nelson Villoria</h4>
+<h4 class="date">2025-02-23</h4>
+
+
+
+<p>“CROPGRIDS is a comprehensive global, geo-referenced dataset
+providing area information for 173 crops circa the year 2020, at a
+resolution of 0.05˚ (~5.6 km at the equator). It represents a major
+update of the Monfreda et al. (2008) dataset (hereafter MRF), the most
+widely used geospatial dataset previously available, covering 175 crops
+with reference year 2000 at 10 km spatial resolution. CROPGRIDS builds
+on information originally provided in MRF and expands it using 28
+selected published gridded datasets, providing more recent crop
+information at regional, national, and global levels, largely covering
+the period 2015 – 2020. By combining the gridded information and the
+2020 national-level statistics from FAOSTAT, CROPGRIDS reports the 2020
+updated maps of harvested and crop (physical) area for 173 crops. The
+new CROPGRIDS data represent a useful input into modelling studies and
+sustainability analyses including in support of the 2030 Sustainable
+Development Agenda.” (<a href="https://figshare.com/articles/dataset/CROPGRIDS/22491997" class="uri">https://figshare.com/articles/dataset/CROPGRIDS/22491997</a>)</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="co">#Load in one crop to check .nc file types are effectively loaded by terra package.</span></span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>  abaca_2020 <span class="ot">&lt;-</span> terra<span class="sc">::</span><span class="fu">rast</span>(<span class="st">&quot;./raw_data/CROPGRIDSv1.08_NC_maps/CROPGRIDSv1.08_abaca.nc&quot;</span>)</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>  abaca_2020</span></code></pre></div>
+<p>There are multiple variables stored within the SpatRaster: harvested
+area, crop area, qual, set. We want harvested area.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="co">#plot just the harvested area variable</span></span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>  abaca_2020[<span class="fu">names</span>(abaca_2020)[<span class="dv">2</span>]]</span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>  terra<span class="sc">::</span><span class="fu">plot</span>(abaca_2020[[<span class="dv">2</span>]])</span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="co">#Load in &#39;gtapshape&#39; commands</span></span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a><span class="fu">library</span>(gtapshape)</span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a><span class="co">#Now make a list of all the files, make sure they have some properties as current data, and save as dataframes in .rda format. </span></span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>  <span class="co">#List files</span></span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a>  CROPGRIDS.file.list <span class="ot">&lt;-</span> <span class="fu">list.files</span>(<span class="at">path =</span> <span class="st">&quot;./raw_data/CROPGRIDSv1.08_NC_maps/&quot;</span>,</span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a>                                     <span class="at">pattern =</span> <span class="st">&quot;.nc&quot;</span>,</span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a>                                     <span class="at">full.names =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a>  </span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a>  <span class="co">#Make sure we just do the ones for individual crops</span></span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a>  CROPGRIDS.file.list</span>
+<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a>  </span>
+<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a>  <span class="co">#Make a global raster with the intended CRS, resolution, and extent</span></span>
+<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a>  gr <span class="ot">&lt;-</span> <span class="fu">make.global.raster</span>()</span>
+<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a></span>
+<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a>  <span class="co">#Use lapply to work through all of them</span></span>
+<span id="cb3-17"><a href="#cb3-17" tabindex="-1"></a>  <span class="fu">lapply</span>( CROPGRIDS.file.list, <span class="cf">function</span>(.r){</span>
+<span id="cb3-18"><a href="#cb3-18" tabindex="-1"></a>    <span class="co"># (.r &lt;- CROPGRIDS.file.list[[1]]) #REMOVE BEFORE RUNNING FUNCTION</span></span>
+<span id="cb3-19"><a href="#cb3-19" tabindex="-1"></a>    r <span class="ot">&lt;-</span> terra<span class="sc">::</span><span class="fu">rast</span>(.r)</span>
+<span id="cb3-20"><a href="#cb3-20" tabindex="-1"></a>    r <span class="ot">&lt;-</span> r[[<span class="st">&quot;harvarea&quot;</span>]]</span>
+<span id="cb3-21"><a href="#cb3-21" tabindex="-1"></a>    <span class="co">#Get the file name without the directory so we can store the crop name</span></span>
+<span id="cb3-22"><a href="#cb3-22" tabindex="-1"></a>    cropname <span class="ot">&lt;-</span> <span class="fu">gsub</span>(<span class="at">pattern =</span> <span class="st">&#39;CROPGRIDSv1.08_&#39;</span>, <span class="at">replacement =</span> <span class="st">&#39;&#39;</span>, <span class="fu">basename</span>(.r))</span>
+<span id="cb3-23"><a href="#cb3-23" tabindex="-1"></a>    cropname <span class="ot">&lt;-</span> <span class="fu">gsub</span>(<span class="at">pattern =</span> <span class="st">&#39;.nc&#39;</span>, <span class="at">replacement =</span> <span class="st">&#39;&#39;</span>, cropname)</span>
+<span id="cb3-24"><a href="#cb3-24" tabindex="-1"></a>    <span class="fu">names</span>(r) <span class="ot">&lt;-</span> cropname</span>
+<span id="cb3-25"><a href="#cb3-25" tabindex="-1"></a>    <span class="do">## Ensure raster has the default resolution, extent, and</span></span>
+<span id="cb3-26"><a href="#cb3-26" tabindex="-1"></a>    <span class="do">## coordinate reference system:</span></span>
+<span id="cb3-27"><a href="#cb3-27" tabindex="-1"></a>    r <span class="ot">&lt;-</span> <span class="fu">apply_global_raster_properties</span>(<span class="at">input.raster =</span> r, <span class="at">global.raster =</span> gr)</span>
+<span id="cb3-28"><a href="#cb3-28" tabindex="-1"></a>    r <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(r, <span class="at">xy=</span><span class="cn">TRUE</span>)</span>
+<span id="cb3-29"><a href="#cb3-29" tabindex="-1"></a>    <span class="do">## Keep only positive values to decrease file size:</span></span>
+<span id="cb3-30"><a href="#cb3-30" tabindex="-1"></a>    c <span class="ot">&lt;-</span> <span class="fu">colnames</span>(r)[<span class="dv">3</span>]</span>
+<span id="cb3-31"><a href="#cb3-31" tabindex="-1"></a>    r1 <span class="ot">&lt;-</span> r <span class="sc">%&gt;%</span> dplyr<span class="sc">::</span><span class="fu">filter</span>(<span class="sc">!!</span><span class="fu">sym</span>(c)<span class="sc">&gt;</span><span class="dv">0</span>)</span>
+<span id="cb3-32"><a href="#cb3-32" tabindex="-1"></a>    <span class="do">## Round up geographic coordinates to ensure compatibility with</span></span>
+<span id="cb3-33"><a href="#cb3-33" tabindex="-1"></a>    <span class="do">## the country-geography raster used for aggregation:</span></span>
+<span id="cb3-34"><a href="#cb3-34" tabindex="-1"></a>    r1 <span class="ot">&lt;-</span> <span class="fu">round_up_coordinates</span>(<span class="at">raster.df=</span>r1)</span>
+<span id="cb3-35"><a href="#cb3-35" tabindex="-1"></a>    filename <span class="ot">&lt;-</span> tools<span class="sc">::</span><span class="fu">file_path_sans_ext</span>(<span class="fu">basename</span>(.r))</span>
+<span id="cb3-36"><a href="#cb3-36" tabindex="-1"></a>    <span class="fu">assign</span>(filename,r1)</span>
+<span id="cb3-37"><a href="#cb3-37" tabindex="-1"></a>    supplementary.data.path <span class="ot">&lt;-</span> <span class="fu">system.file</span>(<span class="st">&quot;cropgrids&quot;</span>, <span class="at">package =</span> <span class="st">&quot;gtapshape&quot;</span>)</span>
+<span id="cb3-38"><a href="#cb3-38" tabindex="-1"></a>    <span class="fu">save</span>(<span class="at">list=</span>filename, <span class="at">file=</span> <span class="fu">file.path</span>(supplementary.data.path, <span class="fu">paste</span>(filename,<span class="st">&quot;.rda&quot;</span>,<span class="at">sep=</span><span class="st">&quot;&quot;</span>)), <span class="at">compress =</span> <span class="st">&quot;xz&quot;</span>,</span>
+<span id="cb3-39"><a href="#cb3-39" tabindex="-1"></a>         <span class="at">compression_level =</span> <span class="dv">9</span>)</span>
+<span id="cb3-40"><a href="#cb3-40" tabindex="-1"></a>}</span>
+<span id="cb3-41"><a href="#cb3-41" tabindex="-1"></a>)</span>
+<span id="cb3-42"><a href="#cb3-42" tabindex="-1"></a></span>
+<span id="cb3-43"><a href="#cb3-43" tabindex="-1"></a><span class="do">##Clean-up environment</span></span>
+<span id="cb3-44"><a href="#cb3-44" tabindex="-1"></a><span class="fu">rm</span>(<span class="at">list=</span><span class="fu">ls</span>()[<span class="sc">!</span> <span class="fu">ls</span>() <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">&quot;gr&quot;</span>)])</span>
+<span id="cb3-45"><a href="#cb3-45" tabindex="-1"></a><span class="fu">gc</span>()</span></code></pre></div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
