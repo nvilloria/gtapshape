@@ -16,11 +16,11 @@ knitr::opts_chunk$set(
 )
 ```
 
-This vignette will go over how we generate land use data in the GTAP Land Use and Land Cover datasets used in the *gtapshape* package. The data are created using publicly available raster data depicting global crop yields and harvested area for 172 crops and 4 livestock species. In each sub-section below, we detail how the underlying raster data was pre-processed. The raster data used in each sub-section are downloaded when the \link[gtapshape]{getrawdata} function is executed. Note, some of the pre-processing described here mirrors the processes described by Baldos (2017) in "Development of GTAP version 9 Land Use and Land Cover database for years 2004, 2007 and 2011."	(Available at https://doi.org/10.21642/GTAP.RM30)
+This vignette will go over how we generate land use data in the GTAP Land Use and Land Cover datasets used in the *gtapshape* package. The data are created using publicly available raster data depicting global crop yields and harvested area for 172 crops and 4 livestock species. In each sub-section below, we detail how the underlying raster data was pre-processed. The raster data used in each sub-section are downloaded when the \link[gtapshape]{getrawdata} function is executed. Note, some of the pre-processing described here mirrors the processes described by [Baldos (2017)](https://doi.org/10.21642/GTAP.RM30) in "Development of GTAP version 9 Land Use and Land Cover database for years 2004, 2007 and 2011."	
 
 ## Crop production 
 
-First, we make a list of the rasters containing crop production from Monfreda, C., N. Ramankutty, and J. A. Foley (2008), available at https://doi.org/10.1029/2007GB002947. We use the "Production" rasters which indicate the average total crop production in metric tons on the land-area of a grid cell during the years 1997-2003.
+First, we make a list of the rasters containing crop production from [Monfreda, C., N. Ramankutty, and J. A. Foley (2008)](https://doi.org/10.1029/2007GB002947). We use the "Production" rasters which indicate the average total crop production in metric tons on the land-area of a grid cell during the years 1997-2003.
         
 ```{r, eval = FALSE}
  #### Crop production ####
@@ -79,7 +79,7 @@ gc()
 
 ## Livestock 
 
-The raster data we use to determine the spatial distribution of livestock production is from Robinson et al. (2014), available at https://doi.org/10.1371/journal.pone.0096084. The raw data contains rasters for 6 livestock species: cattle, goats, sheep, pigs, ducks, and chickens. The raster values indicate the density of animals in each grid cell in head of animals per km^2. We only make use of the data for cattle, goats, and sheep to construct the GTAP Land Use and Land Cover dataset. First, we list the species-specific folders containing the rasters as well as the individual raster files within them for the 3 species we need.
+The raster data we use to determine the spatial distribution of livestock production is from [Robinson et al. (2014)](https://doi.org/10.1371/journal.pone.0096084). The raw data contains rasters for 6 livestock species: cattle, goats, sheep, pigs, ducks, and chickens. The raster values indicate the density of animals in each grid cell in head of animals per km^2 circa 2005. We only make use of the data for cattle, goats, and sheep to construct the GTAP Land Use and Land Cover dataset. First, we list the species-specific folders containing the rasters as well as the individual raster files within them for the 3 species we need.
 
 ```{r, eval = FALSE}
 ##Directory containing rasters for all species with 2005 as the reference year.

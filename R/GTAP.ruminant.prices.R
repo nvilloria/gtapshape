@@ -1,5 +1,12 @@
 #' @title GTAP Ruminant Prices
-#' @description This dataset contains GTAP ruminant prices.
+#' @description This dataset contains GTAP ruminant prices. These livestock 
+#' prices are taken from the Land Use and Land Cover (LULC) Data associated with
+#' the version 11c GTAP-AEZ database. The construction of the version 11
+#' GTAP-AEZ LULC database is described in \href{https://www.gtap.agecon.purdue.edu/resources/res_display.asp?RecordID=7407}{Baldoz and Corong (2025)}.
+#' To recover prices, we sum up the value of livestock production (in 1,000 USD)
+#' and quantity of livestock production (in 1,000 head) from the v11 GTAP-AEZ 
+#' LULC database by GTAP region. Then we divide the region-level value of 
+#' production by the quantity of production to recover the price.
 #' @format A data frame with the following columns:
 #'   \describe{
 #'     \item{iso3}{Country}

@@ -29,10 +29,10 @@ vignette: >
 ##     dir.create(path = paste0(workdir_dir, '/workdir/fao_data'))
 ## }
 ```
-This vignette will go over how we generate data on the 7 land cover types present in the GTAP Land Use and Land Cover datasets used in the *gtapshape* package. The data are created using publicly available raster data depicting the distribution of cropland and pastureland, potential vegetation classes, and urban areas. In each sub-section below, we detail how the underlying raster data was pre-processed. The raster data used in each sub-section are downloaded when the \link[gtapshape]{getrawdata} function is executed. Note, some of the pre-processing described here mirrors the processes described by  \href{https://gtap.agecon.purdue.edu/resources/res_display.asp?RecordID=5424}{Baldoz (2017)}. in "Development of GTAP version 9 Land Use and Land Cover database for years 2004, 2007 and 2011."
+This vignette will go over how we generate data on the 7 land cover types present in the GTAP Land Use and Land Cover datasets used in the *gtapshape* package. The data are created using publicly available raster data depicting the distribution of cropland and pastureland, potential vegetation classes, and urban areas. In each sub-section below, we detail how the underlying raster data was pre-processed. The raster data used in each sub-section are downloaded when the \link[gtapshape]{getrawdata} function is executed. Note, some of the pre-processing described here mirrors the processes described by [Baldoz (2017)](https://gtap.agecon.purdue.edu/resources/res_display.asp?RecordID=5424). in "Development of GTAP version 9 Land Use and Land Cover database for years 2004, 2007 and 2011."
 
 ## **Urban land cover**
-The urban land cover data are from \href{https://doi.org/10.1016/j.rse.2010.03.003}{Schneider, Friedl, and Potere (2010)}. The raster is categorical in nature, indicating the raster cells which are urban at a 500 meter resolution.
+The urban land cover data are from [Schneider, Friedl, and Potere (2010)](https://doi.org/10.1016/j.rse.2010.03.003). The raster is categorical in nature, indicating the raster cells which are urban at a 500 meter resolution.
 ```{r, eval = FALSE}
   #Read in the urban land cover raster
     urban_rast <- terra::rast("./raw_data/urban_land_cover_modis/2002v5_urban_only_geog_mos.bip")
@@ -76,9 +76,9 @@ Second, we reproject the raster so it has the same Coordinate Reference System (
 ```
 
 ## **Potential vegetation**
-The potential vegetation data are from \href{https://doi.org/10.1029/1999GB900046}{Ramankutty and Foley (1999)}. The original raster data is categorical, displaying 13 different potential vegetation classes. The specific raster used in this vignette was downloaded in ASCII format from:\href{https://sage.nelson.wisc.edu/data-and-models/datasets/global-potential-vegetation-dataset/}{https://sage.nelson.wisc.edu/data-and-models/datasets/global-potential-vegetation-dataset/}. 
+The potential vegetation data are from [Ramankutty and Foley (1999)](https://doi.org/10.1029/1999GB900046). The original raster data is categorical, displaying 13 different potential vegetation classes. The specific raster used in this vignette was downloaded in ASCII format from: [https://sage.nelson.wisc.edu/data-and-models/datasets/global-potential-vegetation-dataset/](https://sage.nelson.wisc.edu/data-and-models/datasets/global-potential-vegetation-dataset/}. 
 
-For our analyses, we collapse the original 13 classes into 4 categories: "Forests", "Shrubland", "Savanna + Grassland", and "Other Lands" as in \href{https://gtap.agecon.purdue.edu/resources/res_display.asp?RecordID=5424}{Baldoz (2017)}.  
+For our analyses, we collapse the original 13 classes into 4 categories: "Forests", "Shrubland", "Savanna + Grassland", and "Other Lands" as in [Baldoz (2017)](https://gtap.agecon.purdue.edu/resources/res_display.asp?RecordID=5424).  
 ```{r, eval = FALSE}
 #Load in the Potential Vegetation Data from Ramankutty and Foley
   pot_veg_rast <- terra::rast("glpotveg_5min_orig.asc")
@@ -152,7 +152,7 @@ Next, we save each of these four potential vegetation classes as individual rast
 ```
 
 ## **Cropland and pastureland**
-The cropland and pastureland data are described in the paper by \href{https://doi.org/10.1029/2007GB002952}{Ramankutty et al. (2008)}, titled "Farming the planet: 1. Geographic distribution of global agricultural lands in the year 2000." The cropland and pastureland raster data are categorical in nature, with cell values indicating whether the fraction of cell area categorized as cropland or pastureland at a 5 minute resolution. The two rasters used in this vignette, one for cropland and the other for pastureland, were downloaded from \href{http://www.earthstat.org/cropland-pasture-area-2000/}{http://www.earthstat.org/cropland-pasture-area-2000/}. 
+The cropland and pastureland data are described in the paper by [Ramankutty et al. (2008)](https://doi.org/10.1029/2007GB002952), titled "Farming the planet: 1. Geographic distribution of global agricultural lands in the year 2000." The cropland and pastureland raster data are categorical in nature, with cell values indicating whether the fraction of cell area categorized as cropland or pastureland at a 5 minute resolution. The two rasters used in this vignette, one for cropland and the other for pastureland, were downloaded from [http://www.earthstat.org/cropland-pasture-area-2000/](http://www.earthstat.org/cropland-pasture-area-2000/). 
 
 First, we load in the cropland and pastureland rasters. We then use the \link[gtapshape]{make.global.raster} and \link[gtapshape]{apply_global_raster_properties} to ensure the resulting data have the target CRS (EPSG 4326) and resolution. 
 ```{r, eval = FALSE}

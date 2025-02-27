@@ -111,7 +111,7 @@ aggregation needs to occur is specific to each type of data:
 
 - For crops, the starting point are gridded data on crop production
   and harvested area fro the 172 crops covered by FAOSTAT. These data
-  are taken from Monfreda et al. and are representative of year
+  are taken from [Monfreda, C., N. Ramankutty, and J. A. Foley (2008)](https://doi.org/10.1029/2007GB002947) and are representative of year
   circa 2000.  These 172 crops are then aggregated to CPC sectors, so
   the subnational shares of each land use are at the CPC level. The
   country-level, annual FAOSTAT data is also aggregated to the CPC
@@ -119,15 +119,15 @@ aggregation needs to occur is specific to each type of data:
   data. After the annual, national FAOSTAT data has been assigned to
   each subnational bound, we aggregate them to the eight GTAP crop
   sectors.
-- For livestock, both national (FAOSTAT) and gridded (Micah: Source)
-  data are aggregated from three species (cattle, goats, and sheep)
+- For livestock, both national (FAOSTAT) and gridded data from 
+  [Robinson et al. (2014)](https://doi.org/10.1371/journal.pone.0096084) are aggregated from three species (cattle, goats, and sheep)
   into the three livestock GTAP sectors: 'ctl', 'rmk', and 'wol'. As
-  indicates in the `gridded.livestock.concordance`, this is a
+  indicated in the `gridded.livestock.concordance`, this is a
   many-to-many mapping as the individual species are counted in more
   than one sector.
 - For land covers, the national data (from FAOSTAT, updated as
-  explained in the vignette where the updating process is explained)
-  and the gridded data, from Ramankutty et al. (circa 2000), are given
+  explained in the [vignette where the updating process is explained](land.cover.html)
+  and the gridded data, from [Ramankutty et al.](https://doi.org/10.1029/2007GB002947) (circa 2000), are given
   for the same number of sectors in the GTAP database, and therefore
   there is no need to map various sectors into aggregated GTAP
   categories as in the cases of crops and livestock. 

@@ -7,19 +7,19 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-FAOSTAT provides annual data on cropland and pasture areas. The
+\href{https://www.fao.org/faostat/en/#data}{FAOSTAT} provides annual data on cropland and pasture areas. The
 standard GTAP-AEZ model and database also include forests, which are
 not provide by FAOSTAT on an annual basis (In addition, the GTAP AEZ
 database includes shrublands, grasslands, urban and other covers,
 although these are not use in modeling).  
 
 This vignette explains how the gridded data on land cover for year
-2000 documented HERE is used to estimate the shares of land covers
+2000 (explained \href{../doc/land.cover.html}{here}) is used to estimate the shares of land covers
 other than FAOSTAT's reported croplands and pastures. The vignette
 covers all the steps, starting from the data available in bulk
-download from FAOSTAT. The resulting dataset is included in gtapshape,
-documented [[here]] and available using lazy load gtapshape for easy
-load.
+download from FAOSTAT. The resulting dataset is included in gtapshape 
+(documented here \link[gtapshape]{iso.land.cover.2011.2022}), and available
+using lazy load gtapshape for easy load.
 
 ## **Download and prepare annual cropland, pasture land, and total land area from FAOSTAT**
 
