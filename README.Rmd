@@ -20,8 +20,7 @@ knitr::opts_chunk$set(
 
 **gtapshape** is an R package designed for the flexible aggregation of
 land use and land cover data specifically tailored for use with the
-[GTAP Agro-Ecological Zones (AEZ)
-model](https://www.gtap.agecon.purdue.edu/resources/res_display.asp?RecordID=2605). This
+[GTAP Agro-Ecological Zones (AEZ) model](https://www.gtap.agecon.purdue.edu/resources/res_display.asp?RecordID=2605). This
 package provides tools to efficiently manipulate and aggregate spatial
 and country-level data on global land use and land cover to the GTAP
 regions and sectors.
@@ -47,17 +46,15 @@ national land rents into subnational land rents. The function takes
 four inputs: 
 * An R special features file with the subnational
 boundaries (SF files for the 18 standard agroecological zones used in
-the GTAP-AEZ model and the [14 WWF
-biomes](https://en.wikipedia.org/wiki/List_of_terrestrial_ecoregions_(WWF))
+the GTAP-AEZ model and the [14 WWF biomes](https://en.wikipedia.org/wiki/List_of_terrestrial_ecoregions_(WWF))
 are included in the package), 
-* The yeare for which the FAO data on production, prices and area harvested should
+* The year for which the FAO data on production, prices and area harvested should
 be processed (2011-2022 are included in the package).
-* The source of the gridded data on global crop produuction (either
-[Monfreda et
-al.](https://agupubs.onlinelibrary.wiley.com/doi/full/10.1029/2007GB002947)
+* The source of the gridded data on global crop production (either
+[Monfreda et al.](https://agupubs.onlinelibrary.wiley.com/doi/full/10.1029/2007GB002947)
 or [CROPGRIDS](https://www.nature.com/articles/s41597-024-03247-7),
 both provided in the package).
-* The name of the har file with the
+* The name of the har file that will be generated with the
 physical data on land use and land cover needed by the GTAP AEZ
 mode. 
 
@@ -87,9 +84,9 @@ Finally, `build.dbase.from.sf` writes a GTAP Aggregation Template text
 file based on the GTAP Database V11c, that can be used to aggregate
 the GTAP database.
 
-The function defaults to the data split into 18 AEZs with production,
-area, and prices for year 2017, using the Monfreda et al. data on
-global gridded produuction, and produces three data files:
+The function defaults to splitting the data into 18 AEZs based on production,
+area, and price data for year 2017, using the [Monfreda et al. (2008)](https://doi.org/10.1029/2007GB002947) data on
+global gridded production, and produces three data files with the default names:
 'gtaplulc.har', 'gtaplulc-sets.har', and 'gtaplulc-map.har':
 
 ```{r example, eval=FALSE}
@@ -105,7 +102,7 @@ production and area from CROPGRIDS (the resulting files are saved as
 "gtaplulc-cropgrid-2022.har", "gtaplulc-cropgrid-2022-sets.har", and
 "gtaplulc-cropgrid-2022-map.txt"):
 ```{r example2, eval=FALSE}
-system.time(biome14 <- build.dbase.from.sf(subnat_bound_file="aez18",
+system.time(aez18_cropgrid_2022 <- build.dbase.from.sf(subnat_bound_file="aez18",
                                            crop_rasters = "cropgrids",
                                            year=2022,
                                            file="gtaplulc-cropgrid-2022.har"))
@@ -121,14 +118,18 @@ system.time(biome14 <- build.dbase.from.sf(subnat_bound_file="biomes14",
 ```
 
 The user has flexibility in changing these defaults. Users with
-knowledge of R can adapt the functions and workflow to their needs.
-
+knowledge of R can adapt the functions and workflow to their needs. 
+Please refer to the following vignette for a more in-depth explanation 
+of the functions built into the `build.dbase.from.sf` command:
+```{r v1, eval=FALSE}
+vignette('Country_level_landcover_ts.html')
+```
 
 In the companion package
 [`gtapshapeagg`](https://github.com/nvilloria/gtapshapeagg) we provide
 routines that split the national land rents of the standard GTAP
-database using the subnational data explained above, and also allows
-for custom aggregation to different sectors and regions in a similar
+database using the sub-national data explained above. It also allows
+for custom aggregations to different sectors and regions in a similar
 fashion to
 [FlexAgg2](https://www.gtap.agecon.purdue.edu/databases/flexagg2.asp).
 
@@ -136,17 +137,54 @@ fashion to
 
 ## Data Preprocessing:
 
-Detailed description of the procedures used to process the different
-datasets needed to obtain the land use and land cover needed in the
-GTAP-AEZ framework is provided in the following vignettes:
+Detailed descriptions of the procedures used to process the different
+land use and land cover datasets and generate the necessary inputs 
+for the GTAP-AEZ framework are provided in the following vignettes:
 
 
 ### Building the shapefile with 18 AEZs:
-
+Executing the following code will open the vignette which describes how we  
+created the 18 Agro-Ecological Zones (AEZ) shapefile included in this package.
 ```{r v1, eval=FALSE}
 vignette('create.18.aez.shapefile.html')
 ```
+
+### Processing raster data on global land cover circa 2000:
 (Micah)
+```{r v1, eval=FALSE}
+vignette('land.cover.html')
+```
+
+### Downloading and processing data from FAOSTAT:
+(Micah)
+```{r v1, eval=FALSE}
+vignette('faostat.data.html')
+```
+
+### Updating land cover to specified year using FAOSTAT data:
+(Micah)
+```{r v1, eval=FALSE}
+vignette('Country_level_landcover_ts.html')
+```
+
+### Processing crop and livestock production rasters:
+(Micah)
+[Monfreda, C., N. Ramankutty, and J. A. Foley (2008)](https://doi.org/10.1029/2007GB002947) 
+[Robinson et al. (2014)](https://doi.org/10.1371/journal.pone.0096084)
+```{r v1, eval=FALSE}
+vignette('land.use.html')
+```
+[CROPGRIDS](https://doi.org/10.1038/s41597-024-03247-7)
+```{r v1, eval=FALSE}
+vignette('CROPGRIDS.convert.to.dataframes.html')
+```
+
+### Pre-processing forest rents
+(Micah)
+```{r v1, eval=FALSE}
+vignette('preprocessing.of.forest.rents.html')
+```
+
 
 ## Authors
 

@@ -57,12 +57,12 @@ We modify the base urban cover raster in two ways to ensure it is compatible wit
     urban_rast <- terra::classify(urban_rast, cbind(NA, 0))
 ```
 
-Second, we reproject the raster so it has the same Coordinate Reference System (EPSG 4326) and resolution (5 arc-minutes) as the other data. To do this, we use the \link[gtapshape]{make.global.raster} and \link[gtapshape]{apply_globa_raster_properties} functions.to make an empty raster with the target CRS and resolution. 
+Second, we reproject the raster so it has the same Coordinate Reference System (EPSG 4326) and resolution (5 arc-minutes) as the other data. To do this, we use the \link[gtapshape]{make_global_raster} and \link[gtapshape]{apply_globa_raster_properties} functions.to make an empty raster with the target CRS and resolution. 
 ```{r, eval = FALSE}
-  #Create a new global raster using the "make.global.raster" function with the
+  #Create a new global raster using the "make_global_raster" function with the
   #target CRS and resolution. We will use it to create a new urban land cover
   #raster with the same resolution and crs (projection).
-    global_rast <- make.global.raster()
+    global_rast <- make_global_raster()
     #Project the urban cover raster into the new CRS and resample to correct resolution
     urban_rast <- apply_global_raster_properties(urban_rast, global_rast)
     #Save resulting output as .tif
@@ -81,7 +81,7 @@ The potential vegetation data are from [Ramankutty and Foley (1999)](https://doi
 For our analyses, we collapse the original 13 classes into 4 categories: "Forests", "Shrubland", "Savanna + Grassland", and "Other Lands" as in [Baldoz (2017)](https://gtap.agecon.purdue.edu/resources/res_display.asp?RecordID=5424).  
 ```{r, eval = FALSE}
 #Load in the Potential Vegetation Data from Ramankutty and Foley
-  pot_veg_rast <- terra::rast("glpotveg_5min_orig.asc")
+  pot_veg_rast <- terra::rast("./raw_data/Potential veg_Ramankutty and Foley/glpotveg_5min_orig.asc")
 
 #Now we need to reclassify them into four categories as in Baldoz (2009)
   rcl_mat <- matrix(c(0, 8, 1,
@@ -99,7 +99,7 @@ Next, we save each of these four potential vegetation classes as individual rast
 ```{r, eval = FALSE}
   #First create a global raster with the desired CRS and resolution to ensure
   #the potential vegetation rasters will conform with other raster data. 
-    global_rast <- make.global.raster()
+    global_rast <- make_global_raster()
   
   #Create a forest potential veg raster
     rcl_mat <- matrix(c(0, 1, 1,
@@ -154,11 +154,11 @@ Next, we save each of these four potential vegetation classes as individual rast
 ## **Cropland and pastureland**
 The cropland and pastureland data are described in the paper by [Ramankutty et al. (2008)](https://doi.org/10.1029/2007GB002952), titled "Farming the planet: 1. Geographic distribution of global agricultural lands in the year 2000." The cropland and pastureland raster data are categorical in nature, with cell values indicating whether the fraction of cell area categorized as cropland or pastureland at a 5 minute resolution. The two rasters used in this vignette, one for cropland and the other for pastureland, were downloaded from [http://www.earthstat.org/cropland-pasture-area-2000/](http://www.earthstat.org/cropland-pasture-area-2000/). 
 
-First, we load in the cropland and pastureland rasters. We then use the \link[gtapshape]{make.global.raster} and \link[gtapshape]{apply_global_raster_properties} to ensure the resulting data have the target CRS (EPSG 4326) and resolution. 
+First, we load in the cropland and pastureland rasters. We then use the \link[gtapshape]{make_global_raster} and \link[gtapshape]{apply_global_raster_properties} to ensure the resulting data have the target CRS (EPSG 4326) and resolution. 
 ```{r, eval = FALSE}
  #Cropland and pasture coverage
     #First create a global raster with the desired CRS and resolution
-      global_rast <- make.global.raster()
+      global_rast <- make_global_raster()
 
     #Load cropland raster
       cropland_rast <- terra::rast("./raw_data/CroplandPastureArea2000_Geotiff/Cropland2000_5m.tif")

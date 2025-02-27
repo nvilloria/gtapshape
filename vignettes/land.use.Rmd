@@ -36,7 +36,7 @@ First, we make a list of the rasters containing crop production from [Monfreda, 
 Next, we load in each crop production raster, format it, and save it in compressed file format (.rda). The formatting for the crop production rasters includes several steps:
 
 1. Assign the crop names to the raster data.
-2. Check raster data has the desired Coordinate Reference System (CRS), resolution, and extent. Note, the crop production rasters serve as the standard for all other spatial data in our analyses. By this, we mean that they have the desired Coordinate Reference System (EPSG 4326), spatial resolution (5 arc-minutes), and are of global extent. We use the functions \link[gtapshape]{apply_global_raster_properties} and \link[gtapshape]{make.global.raster} to ensure this is the case. The \link[gtapshape]{make.global.raster} function creates an empty raster with the desired CRS, resolution, and extent. The \link[gtapshape]{apply_global_raster_properties} function transforms other rasters to ensure they have the desired CRS, resolution, and extent.
+2. Check raster data has the desired Coordinate Reference System (CRS), resolution, and extent. Note, the crop production rasters serve as the standard for all other spatial data in our analyses. By this, we mean that they have the desired Coordinate Reference System (EPSG 4326), spatial resolution (5 arc-minutes), and are of global extent. We use the functions \link[gtapshape]{apply_global_raster_properties} and \link[gtapshape]{make_global_raster} to ensure this is the case. The \link[gtapshape]{make_global_raster} function creates an empty raster with the desired CRS, resolution, and extent. The \link[gtapshape]{apply_global_raster_properties} function transforms other rasters to ensure they have the desired CRS, resolution, and extent.
 3. Convert the raster to a dataframe and keep only positive values.
 4. Round up the latitude and longitude coordinates in the resulting dataframe to six digits. This uses the \link[gtapshape]{round_up_coordinates} function.
 5. Save the dataframe as a .rda compressed file within the *gtapshape* package data.
@@ -47,7 +47,7 @@ Next, we load in each crop production raster, format it, and save it in compress
 ## First create an empty raster used to ensure that all the rasters have
 ## the same resolution, extent, and geographic coordinate system
 ## before converting them to dataframes:
-gr <- make.global.raster()
+gr <- make_global_raster()
 
 ## 
 lapply( monfreda.file.names, function(.r){

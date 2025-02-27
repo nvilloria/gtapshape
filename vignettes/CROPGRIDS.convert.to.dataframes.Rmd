@@ -16,7 +16,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-"CROPGRIDS is a comprehensive global, geo-referenced dataset providing area information for 173 crops circa the year 2020, at a resolution of 0.05˚ (~5.6 km at the equator). It represents a major update of the [Monfreda, C., N. Ramankutty, and J. A. Foley (2008)](https://doi.org/10.1029/2007GB002947) dataset (hereafter MRF), the most widely used geospatial dataset previously available, covering 175 crops with reference year 2000 at 10 km spatial resolution. CROPGRIDS builds on information originally provided in MRF and expands it using 28 selected published gridded datasets, providing more recent crop information at regional, national, and global levels, largely covering the period 2015 – 2020. By combining the gridded information and the 2020 national-level statistics from FAOSTAT, CROPGRIDS reports the 2020 updated maps of harvested and crop (physical) area for 173 crops. The new CROPGRIDS data represent a useful input into modelling studies and sustainability analyses including in support of the 2030 Sustainable Development Agenda." (https://figshare.com/articles/dataset/CROPGRIDS/22491997)
+"CROPGRIDS is a comprehensive global, geo-referenced dataset providing area information for 173 crops circa the year 2020, at a resolution of 0.05˚ (~5.6 km at the equator). It represents a major update of the [Monfreda, C., N. Ramankutty, and J. A. Foley (2008)](https://doi.org/10.1029/2007GB002947) dataset (hereafter MRF), the most widely used geospatial dataset previously available, covering 175 crops with reference year 2000 at 10 km spatial resolution. [CROPGRIDS](https://doi.org/10.1038/s41597-024-03247-7) builds on information originally provided in MRF and expands it using 28 selected published gridded datasets, providing more recent crop information at regional, national, and global levels, largely covering the period 2015 – 2020. By combining the gridded information and the 2020 national-level statistics from FAOSTAT, CROPGRIDS reports the 2020 updated maps of harvested and crop (physical) area for 173 crops. The new CROPGRIDS data represent a useful input into modelling studies and sustainability analyses including in support of the 2030 Sustainable Development Agenda." (https://figshare.com/articles/dataset/CROPGRIDS/22491997)
 
 ```{r, eval = FALSE}
 #Load in one crop to check .nc file types are effectively loaded by terra package.
@@ -44,7 +44,7 @@ library(gtapshape)
   CROPGRIDS.file.list
   
   #Make a global raster with the intended CRS, resolution, and extent
-  gr <- make.global.raster()
+  gr <- make_global_raster()
 
   #Use lapply to work through all of them
   lapply( CROPGRIDS.file.list, function(.r){
