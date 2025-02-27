@@ -15,7 +15,8 @@ A data frame with 5 rows and 5 variables:
 }
 }
 \source{
-The step-by-step procedures to create this dataset can be found in the Country_level_landcover_ts vignette.
+The step-by-step procedures to create this dataset can be found in
+\code{vignette("Country_level_landcover_ts.Rmd", package = "gtapshape")}.
 }
 \usage{
 iso.land.cover.2011.2022
@@ -24,8 +25,9 @@ iso.land.cover.2011.2022
 A dataframe containing annual cropland and pastures reported by
 FAOSTAT, and estimated annual forests, grasslands, shrublands, and
 other obtained by sharing out unclassified lands in faostat using
-the data on land cover for 2000. The code which creates this dataframe and
-a description of the underlying spatial data is available in the
+the data on land cover for 2000. The code which creates this dataframe is
+found in \code{vignette("Country_level_landcover_ts.Rmd", package = "gtapshape")}
+and a description of the underlying spatial data is available in the
 \code{vignette("land.cover", package = "gtapshape")}.
 }
 \keyword{datasets}
