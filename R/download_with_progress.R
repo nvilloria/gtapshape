@@ -5,6 +5,6 @@
 #'
 #' @seealso \link{getrawdata} for details on actions taken when the package is loaded.
 download_with_progress <- function(url, destfile) {
-    response <- GET(url, write_disk(destfile, overwrite = TRUE), progress())
+    response <- httr::GET(url, write_disk(destfile, overwrite = TRUE), progress())
     return(response$status_code)
 }

@@ -23,7 +23,14 @@
 #'
 #' @export
 getrawdata <- function(url) {
-  cat("Building the database from GIS layers requires downloading a very large compressed file of ~8GB and unzipping it to ~28GB. Tis may take in excess of an hour, and it is probably unpractical with a slow internet connection. The file has the underlying rasters and shape files used to split national land markets. These data are necessary only if there is a need to change a GIS layer. Otherwise, these data are not needed; In due tiem we will reference the vignettes here.\n")
+  cat("Building the database from GIS layers requires downloading a very large 
+    compressed file of ~8GB and unzipping it to ~28GB. This may take in excess
+    of an hour, and it is probably unpractical with a slow internet connection.
+    The file has the underlying rasters and shape files used to split national
+    land markets. These data are necessary only if there is a need to change a
+    GIS layer. Otherwise, these data are not needed. Please refer to the 
+    package vignettes for documentation of how the underlying rasters and shapefiles
+    were processed. \n")
 
   user_choice <- readline(prompt = "Do you want to download the data? (yes/no): ")
 
