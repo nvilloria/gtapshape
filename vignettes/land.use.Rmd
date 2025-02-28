@@ -18,6 +18,14 @@ knitr::opts_chunk$set(
 
 This vignette will go over how we generate land use data in the GTAP Land Use and Land Cover datasets used in the *gtapshape* package. The data are created using publicly available raster data depicting global crop yields and harvested area for 172 crops and 4 livestock species. In each sub-section below, we detail how the underlying raster data was pre-processed. The raster data used in each sub-section are downloaded when the \link[gtapshape]{getrawdata} function is executed. Note, some of the pre-processing described here mirrors the processes described by [Baldos (2017)](https://doi.org/10.21642/GTAP.RM30) in "Development of GTAP version 9 Land Use and Land Cover database for years 2004, 2007 and 2011."	
 
+```{r, eval = FALSE}
+  #Executing the following function will verify if the raw_data folder
+  #containing the rasters necessary for this vignette has already
+  #been downloaded. If it is not present, it will execute the "getrawdata"
+  #command to begin downloading the folder.
+  setup_gtapshape()
+```
+
 ## Crop production 
 
 First, we make a list of the rasters containing crop production from [Monfreda, C., N. Ramankutty, and J. A. Foley (2008)](https://doi.org/10.1029/2007GB002947). We use the "Production" rasters which indicate the average total crop production in metric tons on the land-area of a grid cell during the years 1997-2003.

@@ -11,50 +11,53 @@ vignette: >
 
 This vignette walks through the creation of the raster data depicting 18 Agro-Ecological Zones (AEZ) included in this package. To define the 18 AEZs, we follow the procedure used to create version 11 of the GTAP-AEZ Land Use and Land Cover database described in [Baldoz and Corong (2025)](https://www.gtap.agecon.purdue.edu/resources/res_display.asp?RecordID=7407). We use publicly available spatial data on the length of the growing period (LGP) and the thermal climate. Both of these datasets are available as rasters at the [GAEZ data viewer](https://gaez.fao.org/pages/data-viewer). We use the LGP and thermal zone data from 1981 to 2010 produced with the CRUTS32 Climate Model to create the 18 AEZ map in our package. The LGP raster we use contains the total number of growing period days, and the Thermal Zones raster from the Climate Classification sub-theme to determine thermal climates. Both of these rasters will be downloaded when the \link[gtapshape]{getrawdata} function is executed. Note, the same procedure we describe below could be used to create maps using more recent data.
 
-```{r load, eval = FALSE}
+```{r, eval = FALSE}
 #Load in required packages 
 require(pacman)
 pacman::p_load(
   terra,
   sf,
-  dplyr)
+  dplyr)  
+
+#Verify that 'raw_data' folder containing the necessary spatial files has been downloaded
+  #Executing the following function will verify if the raw_data folder
+  #containing the rasters necessary for this vignette has already
+  #been downloaded. If it is not present, it will execute the "getrawdata"
+  #command to begin downloading the folder.
+  setup_gtapshape()
 ```
 
 ## Length of growing period data
 
 ```{r, eval = FALSE}
-#Load in length of growing season data
-    lgd <- terra::rast("./raw_data/Total number of growing period days_1981 to 2010/lgd_CRUTS32_Hist_8110.tif")
-    #Check RCS - WGS1984, EPSG 4326
-    crs(lgd)  
-    #Check resolution - It's 0.083 degrees which is equivalent to 5 arc minutes
-    res(lgd) 
-    #Check unique values
-    unique(lgd)
-    plot(lgd)
-```
+  #Load in length of growing season data
+      lgd <- terra::rast("./raw_data/Total number of growing period days_1981 to 2010/lgd_CRUTS32_Hist_8110.tif")
+      #Check RCS - WGS1984, EPSG 4326
+      crs(lgd)  
+      #Check resolution - It's 0.083 degrees which is equivalent to 5 arc minutes
+      res(lgd) 
+      #Check unique values
+      unique(lgd)
+      plot(lgd)
 
+  #Recode the lgd raster so there are 36 categories defined by 10 degree intervals
+    lgd_int_low <- c(-1, seq(from = 9, to = 349, by = 10))
+    lgd_int_high <- c(seq(from = 9, to = 349, by = 10), 366)
+    lgd_int_values <- c(seq(from = 1, to = 36, by = 1))
+    lgd_int_df <- data.frame(lgd_int_low, lgd_int_high, lgd_int_values)
+    lgd_mat <- data.matrix(lgd_int_df)
+    lgd_36cat <- classify(lgd, lgd_mat)  
+    unique(lgd_36cat)
+    #Plot to check
+    plot(lgd_36cat)
+    #Check projection - WGS1984 - EPSG 4326 
+    crs(lgd_36cat)  
+    #Check resolution - 0.83 degrees = 5 arc minutes
+    res(lgd_36cat) 
 
-
-```{r, eval = FALSE} 
-    #Recode so there are 36 categories defined by 10 degree intervals
-      lgd_int_low <- c(-1, seq(from = 9, to = 349, by = 10))
-      lgd_int_high <- c(seq(from = 9, to = 349, by = 10), 366)
-      lgd_int_values <- c(seq(from = 1, to = 36, by = 1))
-      lgd_int_df <- data.frame(lgd_int_low, lgd_int_high, lgd_int_values)
-      lgd_mat <- data.matrix(lgd_int_df)
-      lgd_36cat <- classify(lgd, lgd_mat)  
-      unique(lgd_36cat)
-      #Plot to check
-      plot(lgd_36cat)
-      #Check projection - WGS1984 - EPSG 4326 
-      crs(lgd_36cat)  
-      #Check resolution - 0.83 degrees = 5 arc minutes
-      res(lgd_36cat) 
-
-      #Clean up the environment
-      rm(lgd, lgd_int_df, lgd_int_low, lgd_int_high, lgd_int_values)
-      gc()
+  #Clean up the environment
+    rm(lgd, lgd_int_df, lgd_int_low, lgd_int_high, lgd_int_values)
+    gc()
 ```
 
 ## Thermal zone data

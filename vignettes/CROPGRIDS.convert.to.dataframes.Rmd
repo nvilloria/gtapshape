@@ -19,17 +19,27 @@ knitr::opts_chunk$set(
 "CROPGRIDS is a comprehensive global, geo-referenced dataset providing area information for 173 crops circa the year 2020, at a resolution of 0.05˚ (~5.6 km at the equator). It represents a major update of the [Monfreda, C., N. Ramankutty, and J. A. Foley (2008)](https://doi.org/10.1029/2007GB002947) dataset (hereafter MRF), the most widely used geospatial dataset previously available, covering 175 crops with reference year 2000 at 10 km spatial resolution. [CROPGRIDS](https://doi.org/10.1038/s41597-024-03247-7) builds on information originally provided in MRF and expands it using 28 selected published gridded datasets, providing more recent crop information at regional, national, and global levels, largely covering the period 2015 – 2020. By combining the gridded information and the 2020 national-level statistics from FAOSTAT, CROPGRIDS reports the 2020 updated maps of harvested and crop (physical) area for 173 crops. The new CROPGRIDS data represent a useful input into modelling studies and sustainability analyses including in support of the 2030 Sustainable Development Agenda." (https://figshare.com/articles/dataset/CROPGRIDS/22491997)
 
 ```{r, eval = FALSE}
+  #Executing the following function will verify if the raw_data folder
+  #containing the rasters necessary for this vignette has already
+  #been downloaded. If it is not present, it will execute the "getrawdata"
+  #command to begin downloading the folder.
+  setup_gtapshape()
+```
+
+There are multiple variables stored within the CROPGRIDS data: harvested area, crop area, qual, set. We want harvested area.The next code block provides an example of plotting just the harvested area data from CROPGRIDS for a single crop, abaca.
+
+```{r, eval = FALSE}
 #Load in one crop to check .nc file types are effectively loaded by terra package.
   abaca_2020 <- terra::rast("./raw_data/CROPGRIDSv1.08_NC_maps/CROPGRIDSv1.08_abaca.nc")
   abaca_2020
-```
-There are multiple variables stored within the SpatRaster: harvested area, crop area, qual, set. We want harvested area. Note, the save command at the end of the following code block is commented out. It must be uncommented in order to overwrite the existing CROGRIDS .rda files included in the package. 
-
-```{r, eval = FALSE}
+  
 #plot just the harvested area variable
   abaca_2020[names(abaca_2020)[2]]
   terra::plot(abaca_2020[[2]])
 ```
+
+Now, we will process all 173 crops present in the CROPGRIDS dataset. NOTE, the save command at the end of the following code block is commented out. It must be uncommented in order to overwrite the existing CROGRIDS .rda files included in the package. 
+
 ```{r, eval = FALSE}
 #Load in 'gtapshape' commands
 library(gtapshape)
