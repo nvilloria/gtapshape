@@ -99,7 +99,8 @@ Next, we load each of the rasters, process them, and save them as compressed .rd
 4. Transform raster to ensure it has the correct CRS and extent using the \link[gtapshape]{apply_global_raster_properties} function.
 5. Convert the raster to a dataframe, extract species names to use for filenames, and keep only positive values.
 6. Round up the latitude and longitude coordinates in the resulting dataframe to six digits. This uses the \link[gtapshape]{round_up_coordinates} function.
-7. Save the dataframe as a .rda compressed file within the *gtapshape* package data.
+7. Save the dataframe as a .rda compressed file within the *gtapshape* package data. NOTE, the command to save the files is currently commented out to prevent accidentally overwriting the existing data included in the package. To overwrite the existing data, uncomment out the `save(list=filename,file= file.path(supplementary.data.path, paste(filename,".rda",sep="")), compress = "xz", compression_level = 9)` command.
+
 
 ```{r, eval = FALSE}
   lapply( livestock_rast_file_names, function(.r){
@@ -134,8 +135,11 @@ Next, we load each of the rasters, process them, and save them as compressed .rd
     filename <- species_names
     assign(filename,rdf1)
     supplementary.data.path <- system.file("fao_lstck_2005", package = "gtapshape")
-    save(list=filename,file= file.path(supplementary.data.path, paste(filename,".rda",sep="")), compress = "xz",
-         compression_level = 9)
+    # #The following 3 lines must be uncommented in order to overwrite the existing data
+    # #included in the package. 
+    # save(list=filename,file= file.path(supplementary.data.path, paste(filename,".rda",sep="")),
+    #      compress = "xz",
+    #      compression_level = 9)
 }
 )
 ```  

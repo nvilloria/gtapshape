@@ -13,7 +13,7 @@ require(dplyr)
 require(HARr)
 ```
 
-
+This vignette covers how the national timber land rents included in the package are created. The original 'forestdata.har' data included in the *gtapshape* package contain the forest rental rates included in the [GTAP Land Use Data Base, Release 2.1, July 9, 2009](https://www.gtap.agecon.purdue.edu/resources/res_display.asp?RecordID=1900). We aggregate these data to the national level in this vignette so we can then split them according to the user's chosen subnational boundaries. Note, we comment out the `usethis::use_data(timber.rents.by.iso.2000, overwrite = TRUE)` command at the end of the following code block to prevent accidentally overwriting the existing data included in the package. This command must be uncommented if you wish to overwrite the existing file.
 
 ```{r, eval = FALSE}
 ## Read the data on forestry provided by the GTAP center:
@@ -51,7 +51,7 @@ timber.rents.by.iso.2000 <- left_join(
            ) %>%
     dplyr::rename(iso3=ctry)
 
-
-##usethis::use_data(timber.rents.by.iso.2000, overwrite = TRUE)
+# #Note, the following line must be uncommented to overwrite the existing file included with the package
+#usethis::use_data(timber.rents.by.iso.2000, overwrite = TRUE)
 ## usethis::use_r("timber.rents.by.iso.2000.R")
 ```

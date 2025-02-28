@@ -138,5 +138,6 @@ pacman::p_load(
                   subnat_name = paste0("AEZ", subnat_num)) %>%
     dplyr::select(subnat_name, subnat_num, geometry)
 #Save to the gtapshape package data
-  usethis::use_data(aez18, overwrite = TRUE)
+  ##Uncomment the next line to overwrite the existing aez18 file included with the package
+  #usethis::use_data(aez18, overwrite = TRUE)
 ```

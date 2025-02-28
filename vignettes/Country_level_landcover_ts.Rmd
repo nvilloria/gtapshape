@@ -185,7 +185,8 @@ iso.land.cover.2011.2022$unit <- "ha"
 
 The dataset with update land covers by country is saved in the `gtapshape` package for lazy loading:
 ```{r, eval=FALSE}
-usethis::use_data(iso.land.cover.2011.2022, overwrite = TRUE)
+##Uncomment the next line to overwrite the existing is.land.cover.2011.2022 object included in the package
+##usethis::use_data(iso.land.cover.2011.2022, overwrite = TRUE)
 ##usethis::use_r("iso.land.cover.2011.2022.R")
 ```
 Finally, a note about country coverage: The gridded land cover data for 2000 covers 185 countries while FAOSTAT's annual country-level data covers 236 countries. There are 171 countries with data in both datasets, which are the ones for which this update work. The countries for which we cannot assign land cover data are small countries mostly captured by the aggregated GTAP regions `X??`:

@@ -106,7 +106,7 @@ producer_prices <- producer_prices %>%
 
 ## Crop value of production 
 
-We combine the producer prices with the data on crop production to generate value of production data. When a country is missing a price for a given crop, we use the world price instead. The world price is created by taking an average of all non-missing prices for a given year. The value of output variable is created by multiplying the price in USD/ton by the quantity of output in tons, and then dividing by 1000. The resulting values indicate the value of production in thousands of USD. Last, we use the \link[usethis]{use_data} function to save the dataset in the *gtapshape* package and create an accompanying description file. 
+We combine the producer prices with the data on crop production to generate value of production data. When a country is missing a price for a given crop, we use the world price instead. The world price is created by taking an average of all non-missing prices for a given year. The value of output variable is created by multiplying the price in USD/ton by the quantity of output in tons, and then dividing by 1000. The resulting values indicate the value of production in thousands of USD. Last, we use the \link[usethis]{use_data} function to save the dataset in the *gtapshape* package and create an accompanying description file. Note, the `usethis::use_data(iso.crop.outputvalue.2011.2022, overwrite = TRUE)` command in the following code block must be uncommented to overwrite the existing file included in the package.
 
 ```{r, eval = FALSE}
 iso.crop.outputvalue.2011.2022 <- left_join(iso.crop.production.2011.2022 %>%
@@ -128,14 +128,14 @@ iso.crop.outputvalue.2011.2022 <- left_join(iso.crop.production.2011.2022 %>%
            "item_code_fao",
            "unit",
            "value")
-
-usethis::use_data(iso.crop.outputvalue.2011.2022, overwrite = TRUE)
+# #Uncomment the following line to overwrite the existing iso.crop.outputvalue.2011.2022 included with the package.
+# usethis::use_data(iso.crop.outputvalue.2011.2022, overwrite = TRUE)
 ##usethis::use_r("iso.crop.outputvalue.2011.2022.R")
 ```
 
 ## Livestock production - Standing animals (head), aggregated to GTAP sectors
 
-The livestock data from FAOSTAT require cleaning as well. First, we need to drop data that represents aggregate quantities across species. Then, we create a mapping from the species in the FAO data to the GTAP livestock categories and aggregate the FAOSTAT data to these categories. Last, we use the \link[usethis]{use_data} function to save the dataset in the *gtapshape* package and create an accompanying description file. 
+The livestock data from FAOSTAT require cleaning as well. First, we need to drop data that represents aggregate quantities across species. Then, we create a mapping from the species in the FAO data to the GTAP livestock categories and aggregate the FAOSTAT data to these categories. Last, we use the \link[usethis]{use_data} function to save the dataset in the *gtapshape* package and create an accompanying description file. Note, the `usethis::use_data(iso.gsc3lstk.heads.2011.2022, overwrite = TRUE)` command in the following code block must be uncommented to overwrite the existing file included in the package.
 
 ```{r, eval = FALSE}
 ## Number of livestock animals data - just need ruminants (ctl, rmk, wol GTAP categories)
@@ -168,8 +168,8 @@ iso.gsc3lstk.heads.2011.2022 <- full_join(fao_livestock_numanimals,
     group_by(iso3,year,gsc3) %>%
     summarise(value = sum(value, na.rm = TRUE)/1000) %>%
     mutate(unit="1000heads")
-
-usethis::use_data(iso.gsc3lstk.heads.2011.2022, overwrite = TRUE)
+# # The following line needs to be uncommented to overwrite the existing object included in the package
+# usethis::use_data(iso.gsc3lstk.heads.2011.2022, overwrite = TRUE)
 ## usethis::use_r("iso.gsc3lstk.heads.2011.2022.R")
 ```
 
@@ -232,13 +232,13 @@ iso.ctl.outputvalue.2011.2022 <- fao_livestock_numanimals %>%
 ```
 
 ### Join crop and livestock value of production data
-Now we join the crop and livestock value of production data so the resulting dataframe has data for all three GTAP categories (ctl, rmk, and wol). Last, we use the \link[usethis]{use_data} function to save the dataset in the *gtapshape* package and create an accompanying description file. 
+Now we join the crop and livestock value of production data so the resulting dataframe has data for all three GTAP categories (ctl, rmk, and wol). Last, we use the \link[usethis]{use_data} function to save the dataset in the *gtapshape* package and create an accompanying description file. Note, the `usethis::use_data(iso.gsc3lstk.outputvalue.2011.2022, overwrite = TRUE)` command in the following code block must be uncommented to overwrite the existing file included in the package.
 
 ```{r, eval = FALSE}
 iso.gsc3lstk.outputvalue.2011.2022 <- rbind(
     iso.rmk.and.wol.outputvalue.2011.2022,
     iso.ctl.outputvalue.2011.2022)
-
-usethis::use_data(iso.gsc3lstk.outputvalue.2011.2022, overwrite = TRUE)
+# # The following line needs to be uncommented to overwrite the existing object included in the package
+# usethis::use_data(iso.gsc3lstk.outputvalue.2011.2022, overwrite = TRUE)
 ## usethis::use_r("iso.gsc3lstk.outputvalue.2011.2022.R")
 ```

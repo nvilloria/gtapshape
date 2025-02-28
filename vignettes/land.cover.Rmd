@@ -293,7 +293,7 @@ Last, we transform the area rasters into dataframes and output them as compresse
 2. Ensure they have the correct CRS and extent using the \link[gtapshape]{apply_global_raster_properties} function.
 3. Convert the raster to a dataframe and keep only positive zero values.
 4. Round up the latitude and longitude coordinates in the resulting dataframe to six digits. This uses the \link[gtapshape]{round_up_coordinates} function.
-5. Save the dataframe as a .rda compressed file within the *gtapshape* package data.
+5. Save the dataframe as a .rda compressed file within the *gtapshape* package data. NOTE, the command to save the files is currently commented out to prevent accidentally overwriting the existing data included in the package. To overwrite the existing data, uncomment out the `save(list=filename, file= file.path(supplementary.data.path, paste(filename,".rda",sep="")), compress = "xz", compression_level = 9)` command.
 
 ```{r, eval = FALSE}
 lapply( baseyr_lc_ha_file_names, function(.r){
@@ -314,8 +314,11 @@ lapply( baseyr_lc_ha_file_names, function(.r){
 
     assign(filename,r1)
     supplementary.data.path <- system.file("land_cover_2000", package = "gtapshape")
-    save(list=filename, file= file.path(supplementary.data.path, paste(filename,".rda",sep="")), compress = "xz",
-         compression_level = 9)
+    # #The following 3 lines must be uncommented in order to overwrite the existing data
+    # #included in the package. 
+    # save(list=filename, file= file.path(supplementary.data.path, paste(filename,".rda",sep="")),
+    #      compress = "xz",
+    #      compression_level = 9)
 }
 )
 ```
