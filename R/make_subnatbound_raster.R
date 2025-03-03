@@ -39,9 +39,8 @@ make_subnatbound_raster <- function(subnat_bound_file='aez18'){
     ## Define the levels for the raster
     subnatbounds.set <- c(subnat_bound_vect$subnat_name)
     subnat_bound_cats <- data.frame(ID=1:length(subnatbounds.set), subnatbound=subnatbounds.set)
-
+    ## Rasterize the subnational boundaries spatial vector and assign its levels
     subnat_bound_rast <- terra::rasterize(subnat_bound_vect, gr, 'subnat_num')
-    ## Replace NA values with "7" for the rest of the world
     levels(subnat_bound_rast) <- subnat_bound_cats
     subnat_bound_rast <- apply_global_raster_properties(
         input.raster = subnat_bound_rast, global.raster = gr)
