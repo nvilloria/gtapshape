@@ -1,0 +1,42 @@
+---
+title: "Create GADM country raster"
+author: "Micah Cameron-Harp"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Create GADM country raster}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+This vignette documents how the 'gadm_rast.tif' file included in the 'inst/GADM'
+folder of the *gtapshape* package is created. The 'gadm_rast.tif' file is a raster
+which depicts countries on a global scale using version 4.1 of the GADM (Global 
+Administrative Areas) data (included in the 'raw_data' folder downloaded by 
+\link[gtapshape]{setup_gtapshape}). The raw v4.1 GADM data is a global shapefile 
+of country boundaries available [here](https://gadm.org/download_world.html#google_vignette). 
+
+```{r, eval = FALSE}
+## Read in the GADM shapefile
+gadm_sf <- sf::st_read("./raw_data/gadm_410-levels/gadm_410-levels.gpkg",
+                       layer = 'ADM_0')
+
+## Rename and select columns
+gadm_sf[,"GADM"] <- gadm_sf$GID_0
+gadm_sf <- subset(gadm_sf, select = -c(COUNTRY, GID_0))
+
+## Turn into Spatial Vector using terra package
+gadm_vect <- terra::vect(gadm_sf)
+
+## Rasterize the GADM spatial vector and assign its levels
+  ## First make a global raster to use as a template
+  gr <- make.global.raster()
+  ## Rasterize 
+  gadm_rast <- terra::rasterize(gadm_vect, gr, 'GADM')
+  ## Apply global properties so it has the correct extent, resolution, etc.
+  gadm_rast <- apply_global_raster_properties(
+    input.raster = gadm_rast, global.raster = gr)
+
+## The 'gadm_rast' object produced with this code is equivalent to the 'gadm_rast.tif'
+## file included in the 'inst' folder of the package.
+```
