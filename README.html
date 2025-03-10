@@ -627,14 +627,14 @@ split national land rents into subnational land rents. The function
 takes four inputs: * An R special features file with the subnational
 boundaries (SF files for the 18 standard agroecological zones used in
 the GTAP-AEZ model and the <a href="https://en.wikipedia.org/wiki/List_of_terrestrial_ecoregions_(WWF)">14
-WWF biomes</a> are included in the package), * The yeare for which the
+WWF biomes</a> are included in the package), * The year for which the
 FAO data on production, prices and area harvested should be processed
 (2011-2022 are included in the package). * The source of the gridded
-data on global crop produuction (either <a href="https://agupubs.onlinelibrary.wiley.com/doi/full/10.1029/2007GB002947">Monfreda
+data on global crop production (either <a href="https://agupubs.onlinelibrary.wiley.com/doi/full/10.1029/2007GB002947">Monfreda
 et al.</a> or <a href="https://www.nature.com/articles/s41597-024-03247-7">CROPGRIDS</a>,
-both provided in the package). * The name of the har file with the
-physical data on land use and land cover needed by the GTAP AEZ
-mode.</p>
+both provided in the package). * The name of the har file that will be
+generated with the physical data on land use and land cover needed by
+the GTAP AEZ mode.</p>
 <p>The processed data are stored in a <a href="https://www.copsmodels.com/webhelp/rungtap/index.html?hc_harfiles.htm">har</a>
 file with eight headers:</p>
 <ul>
@@ -662,10 +662,11 @@ Cropland, Pastureland, Builtupland, Otherland)</li>
 <p>Finally, <code>build.dbase.from.sf</code> writes a GTAP Aggregation
 Template text file based on the GTAP Database V11c, that can be used to
 aggregate the GTAP database.</p>
-<p>The function defaults to the data split into 18 AEZs with production,
-area, and prices for year 2017, using the Monfreda et al. data on global
-gridded produuction, and produces three data files: ‘gtaplulc.har’,
-‘gtaplulc-sets.har’, and ‘gtaplulc-map.har’:</p>
+<p>The function defaults to splitting the data into 18 AEZs based on
+production, area, and price data for year 2017, using the <a href="https://doi.org/10.1029/2007GB002947">Monfreda et al. (2008)</a>
+data on global gridded production, and produces three data files with
+the default names: ‘gtaplulc.har’, ‘gtaplulc-sets.har’, and
+‘gtaplulc-map.har’:</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="fu">library</span>(gtapshape)</span>
 <span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a><span class="do">## Build the land use and land cover headers and sets needed to split</span></span>
 <span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a><span class="do">## subnational land rents into 18 AEZS:</span></span>
@@ -675,7 +676,7 @@ to year 2022, using the more recent data on global gridded crop
 production and area from CROPGRIDS (the resulting files are saved as
 “gtaplulc-cropgrid-2022.har”, “gtaplulc-cropgrid-2022-sets.har”, and
 “gtaplulc-cropgrid-2022-map.txt”):</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="fu">system.time</span>(biome14 <span class="ot">&lt;-</span> <span class="fu">build.dbase.from.sf</span>(<span class="at">subnat_bound_file=</span><span class="st">&quot;aez18&quot;</span>,</span>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="fu">system.time</span>(aez18_cropgrid_2022 <span class="ot">&lt;-</span> <span class="fu">build.dbase.from.sf</span>(<span class="at">subnat_bound_file=</span><span class="st">&quot;aez18&quot;</span>,</span>
 <span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>                                           <span class="at">crop_rasters =</span> <span class="st">&quot;cropgrids&quot;</span>,</span>
 <span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>                                           <span class="at">year=</span><span class="dv">2022</span>,</span>
 <span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>                                           <span class="at">file=</span><span class="st">&quot;gtaplulc-cropgrid-2022.har&quot;</span>))</span></code></pre></div>
@@ -684,20 +685,86 @@ subnational bounds, such as the 14 biomes defined by the WWF:</p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="fu">system.time</span>(biome14 <span class="ot">&lt;-</span> <span class="fu">build.dbase.from.sf</span>(<span class="at">subnat_bound_file=</span><span class="st">&quot;biomes14&quot;</span>,</span>
 <span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>                                           <span class="at">file=</span><span class="st">&quot;gtaplulc-biome14-2017.har&quot;</span>))</span></code></pre></div>
 <p>The user has flexibility in changing these defaults. Users with
-knowledge of R can adapt the functions and workflow to their needs.</p>
+knowledge of R can adapt the functions and workflow to their needs.
+Please refer to the following vignette for a more in-depth explanation
+of the functions built into the <code>build.dbase.from.sf</code>
+command:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="fu">vignette</span>(<span class="st">&#39;Country_level_landcover_ts.html&#39;</span>)</span></code></pre></div>
 <p>In the companion package <a href="https://github.com/nvilloria/gtapshapeagg"><code>gtapshapeagg</code></a>
 we provide routines that split the national land rents of the standard
-GTAP database using the subnational data explained above, and also
-allows for custom aggregation to different sectors and regions in a
+GTAP database using the sub-national data explained above. It also
+allows for custom aggregations to different sectors and regions in a
 similar fashion to <a href="https://www.gtap.agecon.purdue.edu/databases/flexagg2.asp">FlexAgg2</a>.</p>
 <h2 id="data-preprocessing">Data Preprocessing:</h2>
-<p>Detailed description of the procedures used to process the different
-datasets needed to obtain the land use and land cover needed in the
-GTAP-AEZ framework is provided in the following vignettes:</p>
+<p>Detailed descriptions of the procedures used to process the different
+land use and land cover datasets and generate the necessary inputs for
+the GTAP-AEZ framework are provided in the following vignettes. Please
+note, the vignettes need to performed in order due to the dependence on
+certain files.</p>
+<h3 id="creating-global-administrative-areas-county-raster">Creating
+Global Administrative Areas County Raster</h3>
+<p>Executing the following code will open the vignette which documents
+how the ‘gadm_rast.tif’ file included in the ‘inst/GADM’ folder of the
+<em>gtapshape</em> package is created. The ‘gadm_rast.tif’ file is a
+raster which depicts countries on a global scale using version 4.1 of
+the GADM (Global Administrative Areas) data (included in the ‘raw_data’
+folder downloaded by ). The raw v4.1 GADM data is a global shapefile of
+country boundaries available <a href="https://gadm.org/download_world.html#google_vignette">here</a>.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="fu">vignette</span>(<span class="st">&#39;GADM.country.raster.html&#39;</span>)</span></code></pre></div>
 <h3 id="building-the-shapefile-with-18-aezs">Building the shapefile with
 18 AEZs:</h3>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="fu">vignette</span>(<span class="st">&#39;create.18.aez.shapefile.html&#39;</span>)</span></code></pre></div>
-<p>(Micah)</p>
+<p>Executing the following code will open the vignette which describes
+how we created the 18 Agro-Ecological Zones (AEZ) shapefile included in
+this package. We follow the procedure used to create version 11 of the
+GTAP-AEZ Land Use and Land Cover database described in <a href="https://www.gtap.agecon.purdue.edu/resources/res_display.asp?RecordID=7407">Baldoz
+and Corong (2025)</a>.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="fu">vignette</span>(<span class="st">&#39;create.18.aez.shapefile.html&#39;</span>)</span></code></pre></div>
+<h3 id="processing-raster-data-on-global-land-cover-circa-2000">Processing
+raster data on global land cover circa 2000:</h3>
+<p>The following code will open the vignette describing how we generate
+data on the 7 land cover types present in the GTAP Land Use and Land
+Cover datasets used in the <em>gtapshape</em> package. The data are
+created using publicly available raster data depicting the distribution
+of cropland and pastureland, potential vegetation classes, and urban
+areas.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="fu">vignette</span>(<span class="st">&#39;land.cover.html&#39;</span>)</span></code></pre></div>
+<h3 id="downloading-and-processing-data-from-faostat">Downloading and
+processing data from FAOSTAT:</h3>
+<p>The vignette in the following code block uses the function from the
+<em>FAOSTAT</em> package to download the raw data on agricultural
+production and harvested area for years 2010 through 2022.</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="fu">vignette</span>(<span class="st">&#39;faostat.data.html&#39;</span>)</span></code></pre></div>
+<h3 id="updating-land-cover-to-specified-year-using-faostat-data">Updating
+land cover to specified year using FAOSTAT data:</h3>
+<p>This vignette explains how the gridded data on land cover for year
+2000 (explained ) is used to estimate the shares of land covers other
+the FAOSTAT values for croplands and pastures. The procedures in this
+vignette allow use to update the land cover values for a given year of
+FAOSTAT data.</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="fu">vignette</span>(<span class="st">&#39;Country_level_landcover_ts.html&#39;</span>)</span></code></pre></div>
+<h3 id="processing-crop-and-livestock-production-rasters">Processing
+crop and livestock production rasters:</h3>
+<p>The two vignettes in the following code block describe how we
+generate land use data in the GTAP Land Use and Land Cover datasets used
+in the <em>gtapshape</em> package. The data are created using publicly
+available raster data depicting global crop yields and harvested area
+for 172 crops and 4 livestock species. The first vignette includes code
+for processing the crop data representing production circa the year 2000
+(from <a href="https://doi.org/10.1029/2007GB002947">Monfreda, C., N.
+Ramankutty, and J. A. Foley (2008)</a>) and livestock production for the
+year 2005 (from <a href="https://doi.org/10.1371/journal.pone.0096084">Robinson et
+al. (2014)</a>). The second vignette goes over the processing of crop
+area data depicting production in the year 2020 (from <a href="https://doi.org/10.1038/s41597-024-03247-7">CROPGRIDS</a>).</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a><span class="co">#Crop production in 2000 and livestock production in 2005 vignette</span></span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a><span class="fu">vignette</span>(<span class="st">&#39;land.use.html&#39;</span>)</span>
+<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a><span class="co">#Crop production in 2020 vignette</span></span>
+<span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a><span class="fu">vignette</span>(<span class="st">&#39;CROPGRIDS.convert.to.dataframes.html&#39;</span>)</span></code></pre></div>
+<h3 id="pre-processing-forest-rents">Pre-processing forest rents</h3>
+<p>The vignette called by the following code details how the national
+timber land rents included in the package are created. The raw data used
+in this vignette contain the forest rental rates included in the <a href="https://www.gtap.agecon.purdue.edu/resources/res_display.asp?RecordID=1900">GTAP
+Land Use Data Base, Release 2.1, July 9, 2009</a>.</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a><span class="fu">vignette</span>(<span class="st">&#39;preprocessing.of.forest.rents.html&#39;</span>)</span></code></pre></div>
 <h2 id="authors">Authors</h2>
 <ul>
 <li><strong>Micah Cameron-Harp</strong></li>
