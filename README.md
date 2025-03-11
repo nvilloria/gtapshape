@@ -113,7 +113,7 @@ Please refer to the following vignette for a more in-depth explanation
 of the functions built into the `build.dbase.from.sf` command:
 
 ``` r
-vignette('Country_level_landcover_ts.html')
+vignette('Country_level_landcover_ts', package = 'gtapshape')
 ```
 
 In the companion package
@@ -144,7 +144,7 @@ boundaries available
 [here](https://gadm.org/download_world.html#google_vignette).
 
 ``` r
-vignette('GADM.country.raster.html')
+vignette('GADM.country.raster', package = 'gtapshape')
 ```
 
 ### Building the shapefile with 18 AEZs:
@@ -157,7 +157,7 @@ Corong
 (2025)](https://www.gtap.agecon.purdue.edu/resources/res_display.asp?RecordID=7407).
 
 ``` r
-vignette('create.18.aez.shapefile.html')
+vignette('create.18.aez.shapefile', package = 'gtapshape')
 ```
 
 ### Processing raster data on global land cover circa 2000:
@@ -169,7 +169,7 @@ using publicly available raster data depicting the distribution of
 cropland and pastureland, potential vegetation classes, and urban areas.
 
 ``` r
-vignette('land.cover.html')
+vignette('land.cover', package = 'gtapshape')
 ```
 
 ### Downloading and processing data from FAOSTAT:
@@ -179,7 +179,7 @@ The vignette in the following code block uses the function from the
 and harvested area for years 2010 through 2022.
 
 ``` r
-vignette('faostat.data.html')
+vignette('faostat.data', package = 'gtapshape')
 ```
 
 ### Updating land cover to specified year using FAOSTAT data:
@@ -191,7 +191,7 @@ vignette allow use to update the land cover values for a given year of
 FAOSTAT data.
 
 ``` r
-vignette('Country_level_landcover_ts.html')
+vignette('Country_level_landcover_ts', package = 'gtapshape')
 ```
 
 ### Processing crop and livestock production rasters:
@@ -212,9 +212,9 @@ in the year 2020 (from
 
 ``` r
 #Crop production in 2000 and livestock production in 2005 vignette
-vignette('land.use.html')
+vignette('land.use', package = 'gtapshape')
 #Crop production in 2020 vignette
-vignette('CROPGRIDS.convert.to.dataframes.html')
+vignette('CROPGRIDS.convert.to.dataframes', package = 'gtapshape')
 ```
 
 ### Pre-processing forest rents
@@ -226,7 +226,7 @@ Land Use Data Base, Release 2.1, July 9,
 2009](https://www.gtap.agecon.purdue.edu/resources/res_display.asp?RecordID=1900).
 
 ``` r
-vignette('preprocessing.of.forest.rents.html')
+vignette('preprocessing.of.forest.rents', package = 'gtapshape')
 ```
 
 ## Authors
