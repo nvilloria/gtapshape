@@ -42,23 +42,18 @@ order.gsc3.by.iso <- function(gsc3.by.iso, gtap_basedatasets_file, subnat_bound_
     hnames <- names(gsc3.by.iso)
   tohar <- lapply(seq_along(gsc3.by.iso), function (i) {
       x <- gsc3.by.iso[[i]]
-      x$reg <- as.ordered(x$reg)
-      levels(x$reg) <- reg_order$reg
-      x$subnatbound <- as.ordered(x$subnatbound)
-      levels(x$subnatbound) <- subnatbound_order$subnatbound
-      #Now assign the other levels based on
-      curname <- names(gsc3.by.iso)[i]
-      if (curname == "QCR8" | curname == "VCR8" | curname =="HARV") {
-        x$gsc3 <- as.ordered(x$gsc3)
-        levels(x$gsc3) <- subset(gsc3_order, gsc3 %in% unique(x$gsc3))$gsc3
-      }
-      else if (curname == "QLV3" | curname =="VLV3") {
-        x$gsc3 <- as.ordered(x$gsc3)
-        levels(x$gsc3) <- subset(gsc3_order, gsc3 %in% unique(x$gsc3))$gsc3
-      } else {
-        x$gsc3 <- as.ordered(x$gsc3)
-        levels(x$gsc3) <- subset(gsc3_order, gsc3 %in% unique(x$gsc3))$gsc3
-      }
+      #Assign region levels
+      x$reg <- factor(x$reg, 
+                      levels = reg_order$reg,
+                      labels = reg_order$reg)
+      #Assign subnational bound levels
+      x$subnatbound <- factor(x$subnatbound, 
+                              levels = subnatbound_order$subnatbound,
+                              labels = subnatbound_order$subnatbound)
+      #Now assign the commodity and other levels 
+      x$gsc3 <- factor(x$gsc3, 
+                       levels = subset(gsc3_order, gsc3 %in% unique(x$gsc3))$gsc3,
+                       labels = subset(gsc3_order, gsc3 %in% unique(x$gsc3))$gsc3)
       return(x)
     }
   )
