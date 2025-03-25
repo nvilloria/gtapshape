@@ -4,7 +4,9 @@
 \alias{getrawdata}
 \title{Downloads GIS layers and FAO data}
 \usage{
-getrawdata(url)
+getrawdata(
+  url = "https://www.gtap.agecon.purdue.edu/uploads/temp/gtapshape-raw-data.zip"
+)
 }
 \arguments{
 \item{url}{url from where to download the zipped data.}

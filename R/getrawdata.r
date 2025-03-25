@@ -22,7 +22,7 @@
 #' @seealso \link{.onAttach} for details on actions taken when the package is loaded.
 #'
 #' @export
-getrawdata <- function(url) {
+getrawdata <- function(url='https://www.gtap.agecon.purdue.edu/uploads/temp/gtapshape-raw-data.zip') {
   cat("Building the database from GIS layers requires downloading a very large
     compressed file (~3.5 GB zipped, 16.6 GB unzipped). This may take in excess
     of an hour, and it is probably unpractical with a slow internet connection.
@@ -39,7 +39,7 @@ getrawdata <- function(url) {
     return(invisible(NULL))
   }
 
-  ## url <- "https://www.gtap.agecon.purdue.edu/uploads/temp/FlexSpatialAggTest.zip"
+  ## url <- "https://www.gtap.agecon.purdue.edu/uploads/temp/FlexSpatialAggTest.zip"w
   ## url <- "https://www.gtap.agecon.purdue.edu/uploads/temp/FlexSpatialAgg.zip"
   zip_file <- "raw_data.zip"
 
