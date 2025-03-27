@@ -689,7 +689,7 @@ knowledge of R can adapt the functions and workflow to their needs.
 Please refer to the following vignette for a more in-depth explanation
 of the functions built into the <code>build.dbase.from.sf</code>
 command:</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="fu">vignette</span>(<span class="st">&#39;Country_level_landcover_ts.html&#39;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="fu">vignette</span>(<span class="st">&#39;Country_level_landcover_ts&#39;</span>, <span class="at">package =</span> <span class="st">&#39;gtapshape&#39;</span>)</span></code></pre></div>
 <p>In the companion package <a href="https://github.com/nvilloria/gtapshapeagg"><code>gtapshapeagg</code></a>
 we provide routines that split the national land rents of the standard
 GTAP database using the sub-national data explained above. It also
@@ -710,7 +710,7 @@ raster which depicts countries on a global scale using version 4.1 of
 the GADM (Global Administrative Areas) data (included in the ‘raw_data’
 folder downloaded by ). The raw v4.1 GADM data is a global shapefile of
 country boundaries available <a href="https://gadm.org/download_world.html#google_vignette">here</a>.</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="fu">vignette</span>(<span class="st">&#39;GADM.country.raster.html&#39;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="fu">vignette</span>(<span class="st">&#39;GADM.country.raster&#39;</span>, <span class="at">package =</span> <span class="st">&#39;gtapshape&#39;</span>)</span></code></pre></div>
 <h3 id="building-the-shapefile-with-18-aezs">Building the shapefile with
 18 AEZs:</h3>
 <p>Executing the following code will open the vignette which describes
@@ -718,7 +718,7 @@ how we created the 18 Agro-Ecological Zones (AEZ) shapefile included in
 this package. We follow the procedure used to create version 11 of the
 GTAP-AEZ Land Use and Land Cover database described in <a href="https://www.gtap.agecon.purdue.edu/resources/res_display.asp?RecordID=7407">Baldoz
 and Corong (2025)</a>.</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="fu">vignette</span>(<span class="st">&#39;create.18.aez.shapefile.html&#39;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="fu">vignette</span>(<span class="st">&#39;create.18.aez.shapefile&#39;</span>, <span class="at">package =</span> <span class="st">&#39;gtapshape&#39;</span>)</span></code></pre></div>
 <h3 id="processing-raster-data-on-global-land-cover-circa-2000">Processing
 raster data on global land cover circa 2000:</h3>
 <p>The following code will open the vignette describing how we generate
@@ -727,13 +727,13 @@ Cover datasets used in the <em>gtapshape</em> package. The data are
 created using publicly available raster data depicting the distribution
 of cropland and pastureland, potential vegetation classes, and urban
 areas.</p>
-<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="fu">vignette</span>(<span class="st">&#39;land.cover.html&#39;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="fu">vignette</span>(<span class="st">&#39;land.cover&#39;</span>, <span class="at">package =</span> <span class="st">&#39;gtapshape&#39;</span>)</span></code></pre></div>
 <h3 id="downloading-and-processing-data-from-faostat">Downloading and
 processing data from FAOSTAT:</h3>
 <p>The vignette in the following code block uses the function from the
 <em>FAOSTAT</em> package to download the raw data on agricultural
 production and harvested area for years 2010 through 2022.</p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="fu">vignette</span>(<span class="st">&#39;faostat.data.html&#39;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="fu">vignette</span>(<span class="st">&#39;faostat.data&#39;</span>, <span class="at">package =</span> <span class="st">&#39;gtapshape&#39;</span>)</span></code></pre></div>
 <h3 id="updating-land-cover-to-specified-year-using-faostat-data">Updating
 land cover to specified year using FAOSTAT data:</h3>
 <p>This vignette explains how the gridded data on land cover for year
@@ -741,7 +741,7 @@ land cover to specified year using FAOSTAT data:</h3>
 the FAOSTAT values for croplands and pastures. The procedures in this
 vignette allow use to update the land cover values for a given year of
 FAOSTAT data.</p>
-<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="fu">vignette</span>(<span class="st">&#39;Country_level_landcover_ts.html&#39;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="fu">vignette</span>(<span class="st">&#39;Country_level_landcover_ts&#39;</span>, <span class="at">package =</span> <span class="st">&#39;gtapshape&#39;</span>)</span></code></pre></div>
 <h3 id="processing-crop-and-livestock-production-rasters">Processing
 crop and livestock production rasters:</h3>
 <p>The two vignettes in the following code block describe how we
@@ -756,25 +756,34 @@ year 2005 (from <a href="https://doi.org/10.1371/journal.pone.0096084">Robinson 
 al. (2014)</a>). The second vignette goes over the processing of crop
 area data depicting production in the year 2020 (from <a href="https://doi.org/10.1038/s41597-024-03247-7">CROPGRIDS</a>).</p>
 <div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a><span class="co">#Crop production in 2000 and livestock production in 2005 vignette</span></span>
-<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a><span class="fu">vignette</span>(<span class="st">&#39;land.use.html&#39;</span>)</span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a><span class="fu">vignette</span>(<span class="st">&#39;land.use&#39;</span>, <span class="at">package =</span> <span class="st">&#39;gtapshape&#39;</span>)</span>
 <span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a><span class="co">#Crop production in 2020 vignette</span></span>
-<span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a><span class="fu">vignette</span>(<span class="st">&#39;CROPGRIDS.convert.to.dataframes.html&#39;</span>)</span></code></pre></div>
+<span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a><span class="fu">vignette</span>(<span class="st">&#39;CROPGRIDS.convert.to.dataframes&#39;</span>, <span class="at">package =</span> <span class="st">&#39;gtapshape&#39;</span>)</span></code></pre></div>
 <h3 id="pre-processing-forest-rents">Pre-processing forest rents</h3>
 <p>The vignette called by the following code details how the national
 timber land rents included in the package are created. The raw data used
 in this vignette contain the forest rental rates included in the <a href="https://www.gtap.agecon.purdue.edu/resources/res_display.asp?RecordID=1900">GTAP
 Land Use Data Base, Release 2.1, July 9, 2009</a>.</p>
-<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a><span class="fu">vignette</span>(<span class="st">&#39;preprocessing.of.forest.rents.html&#39;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a><span class="fu">vignette</span>(<span class="st">&#39;preprocessing.of.forest.rents&#39;</span>, <span class="at">package =</span> <span class="st">&#39;gtapshape&#39;</span>)</span></code></pre></div>
 <h2 id="authors">Authors</h2>
 <ul>
-<li><strong>Micah Cameron-Harp</strong></li>
-<li><strong>Nelson B. Villoria</strong></li>
+<li><strong>Micah Cameron-Harp (Kansas State University)</strong></li>
+<li><strong>Nelson B. Villoria (Kansas State University)</strong></li>
+<li><strong>Jayson Beckman (USDA Economic Research
+Service)</strong></li>
 </ul>
 <h2 id="acknowledgments">Acknowledgments</h2>
 <ul>
 <li>Thanks to the <a href="https://www.gtap.agecon.purdue.edu/">GTAP</a>
 Center for developing and providing open source and free access to the
-the Agro-Ecological Zones data and modeling framework.</li>
+the Agro-Ecological Zones data and modeling framework. Cameron-Harp and
+Villoriaauthors acknowledge funding from the USDA Economic Research
+Service Cooperative agreement # 58-3000-2-0087 and from USDA National
+Institute of Food and Agriculture (NIFA) under Hatch project number
+S1072 and competitive grant number 2022-10683. The findings and
+conclusions in this publication are those of the author(s) and should
+not be construed to represent any official USDA or U.S. Government
+determination or policy.</li>
 </ul>
 <h2 id="contact">Contact</h2>
 <p>For questions or feedback, please contact <a href="mailto:mcameronharp@ksu.edu">Micah Cameron-Harp</a> or <a href="mailto:nvilloriap@ksu.edu">Nelson B. Villoria</a>.</p>
