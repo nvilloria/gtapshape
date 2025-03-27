@@ -241,8 +241,8 @@ vignette('preprocessing.of.forest.rents', package = 'gtapshape')
 - Thanks to the [GTAP](https://www.gtap.agecon.purdue.edu/) Center for
   developing and providing open source and free access to the the
   Agro-Ecological Zones data and modeling framework. Cameron-Harp and
-  Villoriaauthors acknowledge funding from the USDA Economic Research
-  Service Cooperative agreement \# 58-3000-2-0087 and from USDA National
+  Villoria acknowledge funding from the USDA Economic Research Service
+  Cooperative agreement \# 58-3000-2-0087 and from USDA National
   Institute of Food and Agriculture (NIFA) under Hatch project number
   S1072 and competitive grant number 2022-10683. The findings and
   conclusions in this publication are those of the author(s) and should
