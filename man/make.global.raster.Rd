@@ -6,6 +6,9 @@
 \usage{
 make.global.raster()
 }
+\value{
+A raster.
+}
 \description{
 This empty raster with has a set of properties that are imposed on
 all the rasters in the package in order to ensure that they align
