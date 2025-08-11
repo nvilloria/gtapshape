@@ -25,6 +25,8 @@ install.packages("Rtools")
 install.packages("devtools")
 ## Install gtapshapeagg from GitHub
 devtools::install_github("nvilloria/gtapshape", build_vignettes = TRUE)
+## Load gtapshape (required in each new session)
+library(gtapshape)
 ```
 
 ## Usage
@@ -81,10 +83,12 @@ production, and produces three data files with the default names:
 ‘gtaplulc.har’, ‘gtaplulc-sets.har’, and ‘gtaplulc-map.har’:
 
 ``` r
-library(gtapshape)
 ## Build the land use and land cover headers and sets needed to split
 ## subnational land rents into 18 AEZS:
-aez18 <- build.dbase.from.sf()
+aez18 <- build.dbase.from.sf(subnat_bound_file="aez18",
+                                year="2017",
+                                crop_rasters = "monfreda",
+                                file = "gtaplulc.har")
 ```
 
 The following call to the function updates the GTAP AEZ 18 database to
