@@ -26,6 +26,13 @@ fao.to.cpc <- fao.to.cpc %>%
 
 fao.to.cpc <- dplyr::left_join(fao.to.cpc, crop_fao_item_codes, by = c('item'))
 
+## Make new entry for cotton lint
+  ## First is the cottonseed oil
+  cottonlint <- data.frame(crop = "cotton", item = "Cotton lint, ginned", item_code_fao = 767, item_code_cpc = "01921.02")
+
+  ## Add the new rows using rbind()
+  fao.to.cpc <- rbind(fao.to.cpc, cottonlint)
+  
 ## Replace missing values with 0191 - Forage products
 fao.to.cpc <- fao.to.cpc %>%
     mutate(item_code_cpc = ifelse(
