@@ -4,7 +4,6 @@
 # Overview
 
 <!-- badges: start -->
-
 <!-- badges: end -->
 
 **gtapshape** is an R package designed for the flexible aggregation of
@@ -21,7 +20,8 @@ You can install the latest version of `gtapshape` from
 [GitHub](https://github.com/) with:
 
 ``` r
-## Install devtools if you don't already have it
+## Install RTools and devtools packages if you don't already have them
+install.packages("Rtools")
 install.packages("devtools")
 ## Install gtapshapeagg from GitHub
 devtools::install_github("nvilloria/gtapshape", build_vignettes = TRUE)
