@@ -50,7 +50,7 @@
 11 STRINGS LENGTH 12 header "H2" longname "Set TRAD_COMM traded commodities";
 GrainsCrops ! Grains and Crops
 MeatLstk    ! Livestock and Meat Products
-Forestry    ! Forestry
+FRS         ! Forestry (Do not change, it is needed in the GTAP-AEZ model) 
 Extraction  ! Mining and Extraction
 ProcFood    ! Processed Food
 TextWapp    ! Textiles and Clothing
@@ -82,7 +82,7 @@ MeatLstk    ! ctl Bovine cattle, sheep and goats, horses
 MeatLstk    ! oap Animal products nec
 MeatLstk    ! rmk Raw milk
 MeatLstk    ! wol Wool, silk-worm cocoons
-Forestry    ! frs Forestry
+FRS         ! frs Forestry (Do not change, it is needed in the GTAP-AEZ model) 
 Extraction  ! fsh Fishing
 Extraction  ! coa Coal
 Extraction  ! oil Oil
