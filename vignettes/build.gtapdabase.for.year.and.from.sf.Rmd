@@ -141,7 +141,7 @@ the target sectors:
 ```{r, eval = FALSE}
 
 ## Add concordances to map FAOSTAST crops into CPC codes (aggregation
-## to GSC3 sectors occurs after sharing out the national anual FAOSTAT
+## to GSC3 sectors occurs after sharing out the national annual FAOSTAT
 ## data):
 subnatbound.use.list[['crops']] <- merge(subnatbound.use.list[['crops']],
                                          unique(crop.concordance[, c("use", "item_code_cpc")]),
