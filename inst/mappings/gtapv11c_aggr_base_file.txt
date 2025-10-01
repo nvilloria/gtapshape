@@ -47,9 +47,10 @@
 
 !NV, 7/11/2024: Changed from ACOM to H2 for compatibility with version 6:
 
-10 STRINGS LENGTH 12 header "H2" longname "Set TRAD_COMM traded commodities";
+11 STRINGS LENGTH 12 header "H2" longname "Set TRAD_COMM traded commodities";
 GrainsCrops ! Grains and Crops
 MeatLstk    ! Livestock and Meat Products
+Forestry    ! Forestry
 Extraction  ! Mining and Extraction
 ProcFood    ! Processed Food
 TextWapp    ! Textiles and Clothing
@@ -81,7 +82,7 @@ MeatLstk    ! ctl Bovine cattle, sheep and goats, horses
 MeatLstk    ! oap Animal products nec
 MeatLstk    ! rmk Raw milk
 MeatLstk    ! wol Wool, silk-worm cocoons
-Extraction  ! frs Forestry
+Forestry    ! frs Forestry
 Extraction  ! fsh Fishing
 Extraction  ! coa Coal
 Extraction  ! oil Oil
