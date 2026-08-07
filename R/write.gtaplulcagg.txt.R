@@ -5,10 +5,29 @@
 #'     "create.18.aez.shapefile" vignette. The user can also specify "biomes14"
 #'     to lazyload and use the shapefile of the 14 World Wildlife Fund Biomes 
 #'     included with the package. 
-#' @param base_aggr_file Text file containing how commodities will are mapped to
-#'    larger categories, how regions will be aggregated, etc. NOTE - This file
-#'    will be overwritten when this function runs.
-#' @param textfilename Name of the output aggregation file. Defaults to 'gtaplulcagg.txt'.
+#' @param base_aggr_file Aggregation template holding the mapping of commodities
+#'    to larger categories, of regions to aggregates, and so on. Defaults to the
+#'    GTAP v11c template distributed with the package. It is copied to a
+#'    temporary file before editing, so it is read and never modified.
+#' @param textfilename Name or path of the output aggregation file. Defaults to
+#'    'gtaplulcagg.txt' in the working directory.
+#'
+#' @details
+#' The template supplies the region and commodity aggregation; this function
+#' only appends the endowment headers, sized and named from the subnational
+#' boundaries. Those are `H6`/AEND, `ASEN`, `DEND`, `MSEN`, `ETRE`, `ESMS` and
+#' `SLUG`.
+#'
+#' The shipped template is not neutral: it already encodes an aggregation to ten
+#' regions and eleven commodities, and its `DREG` and `DCOM` sections are sized
+#' to the 160 regions and 65 commodities of GTAP v11c. Edit `H1`, `H2`, `DREG`
+#' and `DCOM` by hand to get the aggregation you actually want.
+#'
+#' @return No return value. Writes `textfilename`.
+#'
+#' @seealso [build.dbase.from.sf()], which calls this.
+#'     `gtapshapeagg::createdat()` consumes the result.
+#'
 #' @export
 write.gtaplulcagg.txt <- function(subnat_bound_file="aez18",
                                   base_aggr_file =
@@ -131,7 +150,10 @@ write.gtaplulcagg.txt <- function(subnat_bound_file="aez18",
     write.table(set_SLUG_vals[[i]], file=tempaggfile, quote = FALSE, row.names=FALSE, col.names=FALSE, append = TRUE)
   }
 
-  #Rename the file
-  file.rename(tempaggfile,
-              file.path(getwd(),textfilename))
+  ## Move the finished file into place. textfilename may be a bare name, taken
+  ## as relative to the working directory, or a path.
+  outpath <- if (dirname(textfilename) == ".")
+      file.path(getwd(), textfilename) else textfilename
+  if (!dir.exists(dirname(outpath))) dir.create(dirname(outpath), recursive = TRUE)
+  file.rename(tempaggfile, outpath)
 }

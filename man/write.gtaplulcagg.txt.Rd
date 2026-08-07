@@ -18,12 +18,32 @@ boundaries. Defaults to the 18 Agro-ecological Zones created in the
 to lazyload and use the shapefile of the 14 World Wildlife Fund Biomes
 included with the package.}
 
-\item{base_aggr_file}{Text file containing how commodities will are mapped to
-larger categories, how regions will be aggregated, etc. NOTE - This file
-will be overwritten when this function runs.}
+\item{base_aggr_file}{Aggregation template holding the mapping of commodities
+to larger categories, of regions to aggregates, and so on. Defaults to the
+GTAP v11c template distributed with the package. It is copied to a
+temporary file before editing, so it is read and never modified.}
 
-\item{textfilename}{Name of the output aggregation file. Defaults to 'gtaplulcagg.txt'.}
+\item{textfilename}{Name or path of the output aggregation file. Defaults to
+'gtaplulcagg.txt' in the working directory.}
+}
+\value{
+No return value. Writes \code{textfilename}.
 }
 \description{
 Create aggregation textfile based on subnatbound choice
+}
+\details{
+The template supplies the region and commodity aggregation; this function
+only appends the endowment headers, sized and named from the subnational
+boundaries. Those are \code{H6}/AEND, \code{ASEN}, \code{DEND}, \code{MSEN}, \code{ETRE}, \code{ESMS} and
+\code{SLUG}.
+
+The shipped template is not neutral: it already encodes an aggregation to ten
+regions and eleven commodities, and its \code{DREG} and \code{DCOM} sections are sized
+to the 160 regions and 65 commodities of GTAP v11c. Edit \code{H1}, \code{H2}, \code{DREG}
+and \code{DCOM} by hand to get the aggregation you actually want.
+}
+\seealso{
+\code{\link[=build.dbase.from.sf]{build.dbase.from.sf()}}, which calls this.
+\code{gtapshapeagg::createdat()} consumes the result.
 }

@@ -11,18 +11,102 @@
 #' @param year Base year for the database. The FAOSTAT database
 #'     distributed with the package is preprocessed and available for
 #'     2011-2022
-#' @param crop_rasters Either `monfreda` (default) or `cropgrids` (included).
+#' @param crop_rasters Source of the gridded crop production data. Either
+#'     `"monfreda"`, the default, from
+#'     \href{https://doi.org/10.1029/2007GB002947}{Monfreda et al. (2008)}, or
+#'     `"cropgrids"` from \href{https://doi.org/10.1038/s41597-024-03247-7}{Tang
+#'     et al. (2024)}. Both are distributed with the package.
+#' @param grid Optional gridded dataframe from
+#'     [make_subnatbound_gridded_dataframe()]. `NULL`, the default, builds it
+#'     from `subnat_bound_file`, which takes a minute or two because it
+#'     rasterizes GADM against the boundary file.
+#'
+#'     Supply it when another function needs the same grid, so it is built once
+#'     rather than twice. `gtapluco2::build.co2dbase.from.sf()` is the usual
+#'     case. When supplied, its subnational boundaries are checked against
+#'     `subnat_bound_file`, which still determines the order of the SUBN set.
+#' @param dir Directory the output files are written to, relative to the working
+#'     directory. Defaults to `"."`. Created if it does not exist. Point it at
+#'     the same directory `gtapshapeagg::splitlr()` will use, so one
+#'     configuration keeps its files together.
 #' @param file Name of the har file with the aggregated physical
-#'     data. Should have an extension. Defaults to "gtaplulc.har"
+#'     data. A basename, not a path -- use `dir` for the location. Should have
+#'     an extension. Defaults to "gtaplulc.har". The names of the sets file and
+#'     the aggregation template are derived from its stem.
+#'
+#' @details
+#' This builds the *disaggregate* database: every GTAP region, split across the
+#' subnational boundaries you supply. It does not aggregate regions or
+#' commodities. That is `gtapshapeagg::createdat()`, driven by the aggregation
+#' template written here once you have edited it.
+#'
+#' National totals come from the FAOSTAT data distributed with the package, for
+#' the `year` requested. The gridded data decides only how those totals are
+#' distributed across subnational boundaries within each country.
+#'
+#' @return Invisibly, a named list of the data frames written, one per header.
+#'     Three files are written to `dir`:
+#' \describe{
+#'   \item{`file`}{Physical land use and land cover, defaulting to
+#'     `gtaplulc.har`. Eight headers: QCR8, VCR8, HARV, QLV3, VLV3, LAND, RTMB.}
+#'   \item{`<stem>-sets.<ext>`}{Sets: REG, SUBN, CRP8, CRP9, LCOV. Needed to
+#'     read the data file.}
+#'   \item{`<stem>-map.txt`}{A GTAP aggregation template with the subnational
+#'     boundaries filled in. Edit the region and commodity sections by hand,
+#'     then pass it to `gtapshapeagg::createdat()`.}
+#' }
+#'
+#' @seealso
+#' [make_subnatbound_gridded_dataframe()] builds the `grid`.
+#' `gtapshapeagg::splitlr()` takes the data and sets files and splits national
+#' land rents across the subnational boundaries.
+#' `gtapshapeagg::createdat()` then aggregates to the target regions and
+#' commodities using the map file.
+#' `gtapluco2::build.co2dbase.from.sf()` produces matching carbon stocks.
 #'
 #' @export
+#'
+#' @examples
+#' \dontrun{
+#' ## Defaults: 18 AEZs, 2017, Monfreda, written to the working directory.
+#' build.dbase.from.sf()
+#'
+#' ## Into a directory of its own, sharing one grid with the carbon database:
+#' g <- make_subnatbound_gridded_dataframe(subnat_bound_file = "aez18")
+#' build.dbase.from.sf(subnat_bound_file = "aez18", year = "2017",
+#'                     grid = g, dir = "AEZ18v11c")
+#' gtapluco2::build.co2dbase.from.sf(subnat_bound_file = "aez18",
+#'                                   grid = g, dir = "AEZ18v11c")
+#'
+#' ## The 14 WWF biomes instead, with CROPGRIDS:
+#' build.dbase.from.sf(subnat_bound_file = "biomes14", crop_rasters = "cropgrids",
+#'                     dir = "biomes14v11c", file = "gtaplulc.har")
+#' }
 build.dbase.from.sf <- function(
                                 subnat_bound_file="aez18",
                                 year="2017",
                                 crop_rasters = "monfreda",
+                                grid = NULL,
+                                dir = ".",
                                 file = "gtaplulc.har"){
-    ## Make a gridded dataframe from the SF file with subnational boundaries:
-    g <- make_subnatbound_gridded_dataframe(subnat_bound_file=subnat_bound_file)
+
+    if (!dir.exists(dir)) dir.create(dir, recursive = TRUE)
+
+    ## Make a gridded dataframe from the SF file with subnational boundaries,
+    ## unless the caller already has one. subnat_bound_file still fixes the
+    ## order of the SUBN set, so a grid built from other boundaries would give
+    ## data and sets that disagree with nothing to signal it.
+    if (is.null(grid)) {
+        g <- make_subnatbound_gridded_dataframe(subnat_bound_file=subnat_bound_file)
+    } else {
+        g <- grid
+        subnat_bound.sf <- read.subnat.bound.sf(subnat_bound_file)
+        extra <- setdiff(unique(g$subnatbound), tolower(subnat_bound.sf$subnat_name))
+        if (length(extra))
+            stop("`grid` holds subnational boundaries that are not in ",
+                 "`subnat_bound_file`: ", paste(utils::head(extra, 5), collapse = ", "),
+                 ". Both must describe the same boundaries.")
+    }
 
     ## Subnational bound shares of ag. production or and land cover used to share:
 
@@ -157,27 +241,25 @@ build.dbase.from.sf <- function(
                                      subnat_bound_file=subnat_bound_file
                                      )
 
-    write.gtaplulc.har(gsc3.by.iso=gsc3.by.iso, file = file)
-
-    ## Name file with the sets suffix:
+    ## All three outputs go to `dir`. The sets file and the aggregation template
+    ## take their names from the stem of `file`.
     data.file.name <- strsplit(file, "\\.")[[1]]
     set.file.name <- paste0(data.file.name[1], "-sets.", data.file.name[2])
+    map.file.name <- paste0(data.file.name[1], "-map.txt")
 
-    ## Write sets:
+    write.gtaplulc.har(gsc3.by.iso=gsc3.by.iso, file = file.path(dir, file))
+
     write.gtaplulcsets.har(gtap_basedatasets_file =
                                system.file("har", "gsdgset11cMV6.har", package = "gtapshape"),
                            subnat_bound_file = subnat_bound_file,
-                           file = set.file.name)
-
-    ## Name file with aggregation template:
-    map.file.name <- paste0(data.file.name[1], "-map.txt")
+                           file = file.path(dir, set.file.name))
 
     write.gtaplulcagg.txt(
         subnat_bound_file= subnat_bound_file,
         base_aggr_file = system.file("mappings",
                                      "gtapv11c_aggr_base_file.txt",
                                      package = "gtapshape"),
-        textfilename = map.file.name)
+        textfilename = file.path(dir, map.file.name))
 
-    return(gsc3.by.iso)
+    invisible(gsc3.by.iso)
 }

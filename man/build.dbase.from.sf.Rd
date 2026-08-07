@@ -8,6 +8,8 @@ build.dbase.from.sf(
   subnat_bound_file = "aez18",
   year = "2017",
   crop_rasters = "monfreda",
+  grid = NULL,
+  dir = ".",
   file = "gtaplulc.har"
 )
 }
@@ -25,11 +27,81 @@ is provided in \code{vignette("create.18.aez.shapefile", package = "gtapshape")}
 distributed with the package is preprocessed and available for
 2011-2022}
 
-\item{crop_rasters}{Either \code{monfreda} (default) or \code{cropgrids} (included).}
+\item{crop_rasters}{Source of the gridded crop production data. Either
+\code{"monfreda"}, the default, from
+\href{https://doi.org/10.1029/2007GB002947}{Monfreda et al. (2008)}, or
+\code{"cropgrids"} from \href{https://doi.org/10.1038/s41597-024-03247-7}{Tang
+et al. (2024)}. Both are distributed with the package.}
+
+\item{grid}{Optional gridded dataframe from
+\code{\link[=make_subnatbound_gridded_dataframe]{make_subnatbound_gridded_dataframe()}}. \code{NULL}, the default, builds it
+from \code{subnat_bound_file}, which takes a minute or two because it
+rasterizes GADM against the boundary file.
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{Supply it when another function needs the same grid, so it is built once
+rather than twice. `gtapluco2::build.co2dbase.from.sf()` is the usual
+case. When supplied, its subnational boundaries are checked against
+`subnat_bound_file`, which still determines the order of the SUBN set.
+}\if{html}{\out{</div>}}}
+
+\item{dir}{Directory the output files are written to, relative to the working
+directory. Defaults to \code{"."}. Created if it does not exist. Point it at
+the same directory \code{gtapshapeagg::splitlr()} will use, so one
+configuration keeps its files together.}
 
 \item{file}{Name of the har file with the aggregated physical
-data. Should have an extension. Defaults to "gtaplulc.har"}
+data. A basename, not a path -- use \code{dir} for the location. Should have
+an extension. Defaults to "gtaplulc.har". The names of the sets file and
+the aggregation template are derived from its stem.}
+}
+\value{
+Invisibly, a named list of the data frames written, one per header.
+Three files are written to \code{dir}:
+\describe{
+\item{\code{file}}{Physical land use and land cover, defaulting to
+\code{gtaplulc.har}. Eight headers: QCR8, VCR8, HARV, QLV3, VLV3, LAND, RTMB.}
+\item{\verb{<stem>-sets.<ext>}}{Sets: REG, SUBN, CRP8, CRP9, LCOV. Needed to
+read the data file.}
+\item{\verb{<stem>-map.txt}}{A GTAP aggregation template with the subnational
+boundaries filled in. Edit the region and commodity sections by hand,
+then pass it to \code{gtapshapeagg::createdat()}.}
+}
 }
 \description{
 Builds a land use GTAP-compatible land cover database from gridded and national data
+}
+\details{
+This builds the \emph{disaggregate} database: every GTAP region, split across the
+subnational boundaries you supply. It does not aggregate regions or
+commodities. That is \code{gtapshapeagg::createdat()}, driven by the aggregation
+template written here once you have edited it.
+
+National totals come from the FAOSTAT data distributed with the package, for
+the \code{year} requested. The gridded data decides only how those totals are
+distributed across subnational boundaries within each country.
+}
+\examples{
+\dontrun{
+## Defaults: 18 AEZs, 2017, Monfreda, written to the working directory.
+build.dbase.from.sf()
+
+## Into a directory of its own, sharing one grid with the carbon database:
+g <- make_subnatbound_gridded_dataframe(subnat_bound_file = "aez18")
+build.dbase.from.sf(subnat_bound_file = "aez18", year = "2017",
+                    grid = g, dir = "AEZ18v11c")
+gtapluco2::build.co2dbase.from.sf(subnat_bound_file = "aez18",
+                                  grid = g, dir = "AEZ18v11c")
+
+## The 14 WWF biomes instead, with CROPGRIDS:
+build.dbase.from.sf(subnat_bound_file = "biomes14", crop_rasters = "cropgrids",
+                    dir = "biomes14v11c", file = "gtaplulc.har")
+}
+}
+\seealso{
+\code{\link[=make_subnatbound_gridded_dataframe]{make_subnatbound_gridded_dataframe()}} builds the \code{grid}.
+\code{gtapshapeagg::splitlr()} takes the data and sets files and splits national
+land rents across the subnational boundaries.
+\code{gtapshapeagg::createdat()} then aggregates to the target regions and
+commodities using the map file.
+\code{gtapluco2::build.co2dbase.from.sf()} produces matching carbon stocks.
 }
